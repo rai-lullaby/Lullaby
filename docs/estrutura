@@ -1,0 +1,92 @@
+# 📁 Estrutura de Pastas do Projeto
+
+```
+agenda-creche/
+│
+├── .github/
+│   ├── workflows/
+│   │   └── ci.yml
+│   └── PULL_REQUEST_TEMPLATE.md
+│
+├── docs/
+│   ├── arquitetura/
+│   │   ├── diagrama-er.md
+│   │   ├── fluxo-sistema.md
+│   │   └── visao-geral.md
+│   │
+│   ├── regras-de-negocio.md
+│   ├── requisitos-funcionais.md
+│   ├── requisitos-nao-funcionais.md
+│   └── api.md
+│
+├── database/
+│   ├── migrations/
+│   │   ├── 001_create_tables.sql
+│   │   ├── 002_create_constraints.sql
+│   │   ├── 003_create_views.sql
+│   │   └── 004_seed.sql
+│   │
+│   └── diagrams/
+│       └── agenda-creche.drawio
+│
+├── src/
+│   ├── config/
+│   │   ├── database.js
+│   │   ├── auth.js
+│   │   └── env.js
+│   │
+│   ├── modules/
+│   │   ├── usuarios/
+│   │   │   ├── usuario.controller.js
+│   │   │   ├── usuario.service.js
+│   │   │   ├── usuario.repository.js
+│   │   │   └── usuario.routes.js
+│   │   │
+│   │   ├── criancas/
+│   │   │   ├── crianca.controller.js
+│   │   │   ├── crianca.service.js
+│   │   │   ├── crianca.repository.js
+│   │   │   └── crianca.routes.js
+│   │   │
+│   │   ├── turmas/
+│   │   │   ├── turma.controller.js
+│   │   │   ├── turma.service.js
+│   │   │   ├── turma.repository.js
+│   │   │   └── turma.routes.js
+│   │   │
+│   │   ├── agenda/
+│   │   │   ├── agenda.controller.js
+│   │   │   ├── agenda.service.js
+│   │   │   ├── agenda.repository.js
+│   │   │   └── agenda.routes.js
+│   │   │
+│   │   └── responsaveis/
+│   │       ├── responsavel.controller.js
+│   │       ├── responsavel.service.js
+│   │       ├── responsavel.repository.js
+│   │       └── responsavel.routes.js
+│   │
+│   ├── shared/
+│   │   ├── errors/
+│   │   │   └── AppError.js
+│   │   ├── middlewares/
+│   │   │   ├── auth.middleware.js
+│   │   │   └── role.middleware.js
+│   │   └── utils/
+│   │       └── date.utils.js
+│   │
+│   ├── app.js
+│   └── server.js
+│
+├── tests/
+│   ├── unit/
+│   └── integration/
+│
+├── .env.example
+├── .gitignore
+├── docker-compose.yml
+├── Dockerfile
+├── package.json
+└── README.md
+```
+
