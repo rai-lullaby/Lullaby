@@ -1,0 +1,143 @@
+# 📅 Views – Agenda Diária (PostgreSQL)
+
+## 1️⃣ View: Agenda diária completa da criança
+
+👉 Mostra **todos os eventos do dia**, com criança, turma e educador.
+
+```sql
+CREATE OR REPLACE VIEW vw_agenda_diaria AS
+SELECT
+    e.id                  AS evento_id,
+    e.data_hora::DATE     AS data_agenda,
+    e.data_hora           AS data_hora_evento,
+    e.tipo                AS tipo_evento,
+    e.descricao,
+
+    c.id                  AS crianca_id,
+    c.nome                AS nome_crianca,
+
+    t.id                  AS turma_id,
+    t.nome                AS nome_turma,
+
+    u.id                  AS educador_id,
+    u.nome                AS nome_educador
+
+FROM eventos_agenda e
+JOIN criancas c       ON c.id = e.crianca_id
+JOIN turmas t         ON t.id = c.turma_id
+JOIN usuarios u       ON u.id = e.educador_id
+WHERE c.ativa = TRUE
+  AND t.ativo = TRUE;
+```
+
+### Uso:
+
+```sql
+SELECT *
+FROM vw_agenda_diaria
+WHERE crianca_id = 1
+  AND data_agenda = CURRENT_DATE
+ORDER BY data_hora_evento;
+```
+
+---
+
+## 2️⃣ View: Agenda diária por responsável
+
+👉 Perfeita para o **app dos pais** 👨‍👩‍👧
+Retorna apenas eventos das crianças vinculadas ao responsável.
+
+```sql
+CREATE OR REPLACE VIEW vw_agenda_diaria_responsavel AS
+SELECT
+    r.id                  AS responsavel_id,
+    r.nome                AS nome_responsavel,
+
+    c.id                  AS crianca_id,
+    c.nome                AS nome_crianca,
+
+    e.data_hora::DATE     AS data_agenda,
+    e.data_hora           AS data_hora_evento,
+    e.tipo                AS tipo_evento,
+    e.descricao,
+
+    u.nome                AS nome_educador
+
+FROM responsaveis r
+JOIN criancas_responsaveis cr ON cr.responsavel_id = r.id
+JOIN criancas c               ON c.id = cr.crianca_id
+JOIN eventos_agenda e         ON e.crianca_id = c.id
+JOIN usuarios u               ON u.id = e.educador_id
+WHERE c.ativa = TRUE;
+```
+
+### Uso:
+
+```sql
+SELECT *
+FROM vw_agenda_diaria_responsavel
+WHERE responsavel_id = 5
+  AND data_agenda = CURRENT_DATE
+ORDER BY nome_crianca, data_hora_evento;
+```
+
+---
+
+## 3️⃣ View: Agenda diária por turma (educador)
+
+👉 Educador vê **toda a turma no dia**, organizado e bonito.
+
+```sql
+CREATE OR REPLACE VIEW vw_agenda_diaria_turma AS
+SELECT
+    t.id                  AS turma_id,
+    t.nome                AS nome_turma,
+
+    c.id                  AS crianca_id,
+    c.nome                AS nome_crianca,
+
+    e.data_hora::DATE     AS data_agenda,
+    e.data_hora           AS data_hora_evento,
+    e.tipo                AS tipo_evento,
+    e.descricao
+
+FROM turmas t
+JOIN criancas c       ON c.turma_id = t.id
+JOIN eventos_agenda e ON e.crianca_id = c.id
+WHERE t.ativo = TRUE
+  AND c.ativa = TRUE;
+```
+
+### Uso:
+
+```sql
+SELECT *
+FROM vw_agenda_diaria_turma
+WHERE turma_id = 2
+  AND data_agenda = CURRENT_DATE
+ORDER BY nome_crianca, data_hora_evento;
+```
+
+---
+
+## 4️⃣ View: Resumo diário da criança (dashboard 🔥)
+
+👉 Uma linha por criança no dia (ótimo pra visão rápida).
+
+```sql
+CREATE OR REPLACE VIEW vw_resumo_diario_crianca AS
+SELECT
+    c.id                      AS crianca_id,
+    c.nome                    AS nome_crianca,
+    e.data_hora::DATE         AS data_agenda,
+
+    COUNT(e.id)               AS total_eventos,
+    BOOL_OR(e.tipo = 'ENTRADA') AS teve_entrada,
+    BOOL_OR(e.tipo = 'SAIDA')   AS teve_saida
+
+FROM criancas c
+LEFT JOIN eventos_agenda e ON e.crianca_id = c.id
+WHERE c.ativa = TRUE
+GROUP BY c.id, c.nome, data_agenda;
+```
+
