@@ -1,11 +1,10 @@
-require('dotenv').config();
-
 const express = require('express');
-
 const app = express();
 
 // Middleware básico
 app.use(express.json());
+
+require('dotenv').config();
 
 // Rota de saúde (teste rápido)
 app.get('/', (req, res) => {
@@ -92,3 +91,4 @@ app.get('/agenda', auth, (req, res) => {
 // porta
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor na porta ${PORT}`));
+
