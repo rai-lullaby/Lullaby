@@ -26,7 +26,7 @@ const user = safeJSONParse(localStorage.getItem('user'));
 // =========================
 // LOG DEBUG
 // =========================
-console.log('📦 Token:', token);
+console.log('📦 Token carregado:', !!token);
 console.log('👤 User:', user);
 
 // =========================
@@ -63,17 +63,27 @@ function logout() {
   window.location.replace('/');
 }
 
-// Executa proteção
+// Executa proteção imediatamente
 if (!protegerPagina()) {
-  throw new Error('Página protegida — execução interrompida');
+  throw new Error('Execução interrompida — página protegida');
 }
 
 // =========================
-// HEADER
+// HEADER — CRECHE + TURMA
 // =========================
-const titulo = el('titulo');
-if (titulo && user?.nome) {
-  titulo.textContent = `Bem-vindo(a), ${user.nome}`;
+const nomeCrecheEl = el('nomeCreche');
+const nomeTurmaEl = el('nomeTurma');
+
+// 🔧 por enquanto mockado (depois vem da API)
+const CRECHE_PADRAO = 'Ambiente Tia Bia';
+const TURMA_PADRAO = 'Turma das Estrelas';
+
+if (nomeCrecheEl) {
+  nomeCrecheEl.textContent = user?.creche?.nome || CRECHE_PADRAO;
+}
+
+if (nomeTurmaEl) {
+  nomeTurmaEl.textContent = user?.turma?.nome || TURMA_PADRAO;
 }
 
 // =========================
@@ -87,7 +97,7 @@ if (logoutBtn) {
 // =========================
 // CONTROLE POR PERFIL
 // =========================
-console.log('🎭 Perfil:', user.perfil);
+console.log('🎭 Perfil do usuário:', user.perfil);
 
 if (user.perfil === 'ADMIN') {
   const admin = el('admin');
