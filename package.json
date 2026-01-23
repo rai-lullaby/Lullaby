@@ -1,6 +1,6 @@
 {
   "name": "lullabyws",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "Backend do Lullaby",
   "main": "server.js",
   "scripts": {
