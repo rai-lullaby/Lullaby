@@ -38,9 +38,9 @@ form.addEventListener('submit', async (e) => {
     mensagem.classList.add('sucesso');
 
     //REDIRECIONAMENTO
-    setTimeout(() => {
-      window.location.href = '/dashboard.html';
-    }, 500);
+    window.location.replace('/dashboard.html');
+
+    console.log('Login OK, dados:', data);
 
 
   } catch (err) {
@@ -48,4 +48,5 @@ form.addEventListener('submit', async (e) => {
     mensagem.classList.add('erro');
   }
 });
+
 
