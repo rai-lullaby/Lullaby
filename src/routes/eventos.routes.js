@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const eventosController = require('../controllers/eventos.controller');
-const auth = require('../middlewares/auth.middleware');
+const auth = require('../middlewares/auth');
 
 // 🔒 todas protegidas
 router.use(auth);
@@ -16,5 +16,6 @@ router.delete('/eventos/:id', eventos.deletarEvento);
 router.get('/eventos', auth, eventosController.listarPorData);
 
 module.exports = router;
+
 
 
