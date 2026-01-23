@@ -12,6 +12,8 @@ const auth = require('./middlewares/auth');
 const authorize = require('./middlewares/authorize');
 const canAccessChild = require('./middlewares/canAccessChild');
 
+const usuariosController = require('./controllers/usuarios.controller');
+
 const app = express();
 app.use(express.json());
 
@@ -97,10 +99,46 @@ app.post('/login', async (req, res) => {
 });
 
 // =========================
-// ROTAS PROTEGIDAS
+// CRUD DE USUÁRIOS (ADMIN)
 // =========================
+app.post(
+  '/usuarios',
+  auth,
+  authorize(['ADMIN']),
+  usuariosController.criarUsuario
+);
 
-// ADMIN + EDUCADOR
+app.get(
+  '/usuarios',
+  auth,
+  authorize(['ADMIN']),
+  usuariosController.listarUsuarios
+);
+
+app.get(
+  '/usuarios/:id',
+  auth,
+  authorize(['ADMIN']),
+  usuariosController.buscarUsuarioPorId
+);
+
+app.put(
+  '/usuarios/:id',
+  auth,
+  authorize(['ADMIN']),
+  usuariosController.atualizarUsuario
+);
+
+app.delete(
+  '/usuarios/:id',
+  auth,
+  authorize(['ADMIN']),
+  usuariosController.deletarUsuario
+);
+
+// =========================
+// AGENDA (ADMIN + EDUCADOR)
+// =========================
 app.get(
   '/agenda',
   auth,
@@ -113,7 +151,26 @@ app.get(
   }
 );
 
-// SOMENTE ADMIN
+// =========================
+// AGENDA POR CRIANÇA
+// =========================
+app.get(
+  '/criancas/:criancaId/agenda',
+  auth,
+  authorize(['ADMIN', 'EDUCADOR', 'RESPONSAVEL']),
+  canAccessChild,
+  (req, res) => {
+    res.json({
+      message: 'Agenda da criança',
+      criancaId: req.params.criancaId,
+      usuario: req.user
+    });
+  }
+);
+
+// =========================
+// ROTA ADMIN (TESTE)
+// =========================
 app.get(
   '/admin',
   auth,
@@ -123,5 +180,11 @@ app.get(
   }
 );
 
-// ===============
+// =========================
+// PORTA (RENDER)
+// =========================
+const PORT = process.env.PORT || 3000;
 
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
