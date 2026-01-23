@@ -1,11 +1,13 @@
-// ======================================================
-// 🧩 HELPERS
-// ======================================================
+/* =====================================================
+ DASHBOARD.JS — LULLABY
+===================================================== */
+
+/* =====================================================
+ HELPERS
+===================================================== */
 function el(id) {
   const element = document.getElementById(id);
-  if (!element) {
-    console.warn(`⚠️ Elemento #${id} não encontrado`);
-  }
+  if (!element) console.warn(`⚠️ Elemento #${id} não encontrado`);
   return element;
 }
 
@@ -17,49 +19,45 @@ function safeJSONParse(value) {
   }
 }
 
-// ======================================================
-// 🔐 STORAGE
-// ======================================================
-const storage = {
-  token: () => localStorage.getItem('token'),
-  user: () => safeJSONParse(localStorage.getItem('user')),
-  clear: () => localStorage.clear()
-};
+function formatDateISO(date) {
+  return date.toISOString().split('T')[0]; // YYYY-MM-DD
+}
 
-const token = storage.token();
-const user = storage.user();
+/* =====================================================
+ STORAGE
+===================================================== */
+const token = localStorage.getItem('token');
+const user = safeJSONParse(localStorage.getItem('user'));
 
 console.log('📦 Token carregado:', !!token);
 console.log('👤 User:', user);
 
-// ======================================================
-// 🔒 AUTENTICAÇÃO
-// ======================================================
-function isTokenValido(token) {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const agora = Math.floor(Date.now() / 1000);
-    return payload.exp > agora;
-  } catch {
-    return false;
-  }
-}
-
+/* =====================================================
+ 🔒 PROTEÇÃO DA PÁGINA
+===================================================== */
 function logout() {
-  console.warn('🚪 Logout executado');
-  storage.clear();
+  console.warn('🚪 Logout');
+  localStorage.clear();
   window.location.replace('/');
 }
 
 function protegerPagina() {
   if (!token || !user) {
-    console.warn('🔒 Não autenticado');
     logout();
     return false;
   }
 
-  if (!isTokenValido(token)) {
-    console.warn('⏰ Token expirado ou inválido');
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const agora = Math.floor(Date.now() / 1000);
+
+    if (payload.exp < agora) {
+      console.warn('⏰ Token expirado');
+      logout();
+      return false;
+    }
+  } catch (err) {
+    console.error('❌ Token inválido', err);
     logout();
     return false;
   }
@@ -67,155 +65,164 @@ function protegerPagina() {
   return true;
 }
 
-// ⛔ trava execução se não autenticado
 if (!protegerPagina()) {
-  throw new Error('Execução interrompida — página protegida');
+  throw new Error('Página protegida');
 }
 
-// ======================================================
-// 🧠 HEADER — CRECHE + TURMA
-// ======================================================
-const nomeCrecheEl = el('nomeCreche');
-const nomeTurmaEl = el('nomeTurma');
-
-// 🔧 mock temporário (API depois)
-const CRECHE_PADRAO = 'Ambiente Tia Bia';
-const TURMA_PADRAO = 'Turma das Estrelas';
-
-if (nomeCrecheEl) {
-  nomeCrecheEl.textContent = user?.creche?.nome || CRECHE_PADRAO;
+/* =====================================================
+ HEADER — CRECHE + TURMA
+===================================================== */
+if (el('nomeCreche')) {
+  el('nomeCreche').textContent =
+    user?.creche?.nome || 'Ambiente Tia Bia';
 }
 
-if (nomeTurmaEl) {
-  nomeTurmaEl.textContent = user?.turma?.nome || TURMA_PADRAO;
+if (el('nomeTurma')) {
+  el('nomeTurma').textContent =
+    user?.turma?.nome || 'Turma';
 }
 
-// ======================================================
-// 🚪 LOGOUT
-// ======================================================
 const logoutBtn = el('logoutBtn');
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', logout);
+if (logoutBtn) logoutBtn.addEventListener('click', logout);
+
+/* =====================================================
+ CONTROLE POR PERFIL
+===================================================== */
+console.log('🎭 Perfil:', user.perfil);
+
+if (user.perfil === 'ADMIN' && el('admin')) {
+  el('admin').hidden = false;
+  carregarDashboardAdmin();
 }
 
-// ======================================================
-// 🎭 CONTROLE POR PERFIL
-// ======================================================
-console.log('🎭 Perfil do usuário:', user.perfil);
-
-const perfilHandlers = {
-  ADMIN: carregarDashboardAdmin,
-  EDUCADOR: carregarAgendaEducador,
-  RESPONSAVEL: carregarAgendaResponsavel
-};
-
-function ativarPerfil(perfil) {
-  const section = el(perfil.toLowerCase());
-  if (section) section.hidden = false;
-
-  const handler = perfilHandlers[perfil];
-  if (handler) handler();
+if (user.perfil === 'EDUCADOR' && el('educador')) {
+  el('educador').hidden = false;
 }
 
-ativarPerfil(user.perfil);
-
-// ======================================================
-// 📊 DASHBOARD ADMIN
-// ======================================================
-async function carregarDashboardAdmin() {
-  console.log('📊 Carregando dashboard ADMIN');
-
-  const totalUsuarios = el('totalUsuarios');
-  const totalCriancas = el('totalCriancas');
-  const totalEventos = el('totalEventos');
-
-  // 🔧 depois ligar com API real
-  if (totalUsuarios) totalUsuarios.textContent = '12';
-  if (totalCriancas) totalCriancas.textContent = '5';
-  if (totalEventos) totalEventos.textContent = '48';
+if (user.perfil === 'RESPONSAVEL' && el('responsavel')) {
+  el('responsavel').hidden = false;
 }
 
-// ======================================================
-// 📅 AGENDA — EDUCADOR
-// ======================================================
-async function carregarAgendaEducador() {
-  console.log('📅 Carregando agenda do EDUCADOR');
-
-  const agenda = el('agendaEducador');
-  if (agenda) {
-    agenda.innerHTML = '<p>Agenda do educador (em construção)</p>';
-  }
+/* =====================================================
+ DASHBOARD ADMIN (mock)
+===================================================== */
+function carregarDashboardAdmin() {
+  el('totalUsuarios') && (el('totalUsuarios').textContent = '12');
+  el('totalCriancas') && (el('totalCriancas').textContent = '5');
+  el('totalEventos') && (el('totalEventos').textContent = '48');
 }
 
-// ======================================================
-// 👶 AGENDA — RESPONSÁVEL
-// ======================================================
-async function carregarAgendaResponsavel() {
-  console.log('👶 Carregando agenda do RESPONSÁVEL');
-
-  const agenda = el('agendaResponsavel');
-  if (agenda) {
-    agenda.innerHTML = '<p>Agenda do responsável (em construção)</p>';
-  }
-}
-
-// ======================================================
-// 📆 INTEGRAÇÃO COM CALENDÁRIO
-// ======================================================
-document.addEventListener('calendar:dateSelected', async (e) => {
-  const { date } = e.detail;
-  console.log('📌 Dashboard recebeu data:', date);
-  await carregarAgendaPorData(date);
-});
-
-// ======================================================
-// 📌 TRATAR FORMATO DA DATA RECEBIDA (API)
-// ======================================================
-function formatDateISO(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-// ======================================================
-// 📡 BUSCAR EVENTOS POR DATA (API)
-// ======================================================
+/* =====================================================
+ AGENDA — API
+===================================================== */
 async function carregarAgendaPorData(date) {
+  const dataISO = formatDateISO(date);
+  console.log('📡 Buscando agenda:', dataISO);
+
   try {
-    const dataObj = date instanceof Date ? date : new Date(date);
-    const dataISO = formatDateISO(dataObj);
-
-    console.log('📡 Buscando eventos para:', dataISO);
-
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token não encontrado');
-
     const res = await fetch(`/api/eventos?data=${dataISO}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
     });
 
-    if (!res.ok) {
-      throw new Error('Erro ao buscar eventos');
-    }
+    if (!res.ok) throw new Error('Erro ao buscar eventos');
 
     const eventos = await res.json();
-    console.log('🗓️ Eventos recebidos:', eventos);
-
     renderAgenda(eventos);
-
   } catch (err) {
-    console.error('❌ Erro ao carregar agenda:', err);
+    console.error('❌ Erro agenda:', err);
+    renderAgenda([]);
   }
 }
 
-// ======================================================
-// 🧩 RENDERIZAÇÃO DA AGENDA
-// ======================================================
-function renderAgenda(eventos = []) {
-  // 🔧 aqui depois você conecta com o HTML real da agenda
-  console.log('🧱 Render agenda:', eventos);
+/* =====================================================
+ RENDER AGENDA (MANHÃ / TARDE)
+===================================================== */
+function renderAgenda(eventos) {
+  const container =
+    el('agendaEducador') || el('agendaResponsavel');
+
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  if (!eventos.length) {
+    container.innerHTML = '<p>📭 Nenhum evento para este dia</p>';
+    return;
+  }
+
+  const manha = [];
+  const tarde = [];
+
+  eventos.forEach(e => {
+    const hora = new Date(e.hora).getHours();
+    hora < 12 ? manha.push(e) : tarde.push(e);
+  });
+
+  if (manha.length) {
+    container.appendChild(criarPeriodo('Manhã', manha));
+  }
+
+  if (tarde.length) {
+    container.appendChild(criarPeriodo('Tarde', tarde));
+  }
 }
 
+function criarPeriodo(titulo, eventos) {
+  const bloco = document.createElement('div');
+
+  const h3 = document.createElement('h3');
+  h3.textContent = titulo;
+  bloco.appendChild(h3);
+
+  eventos.forEach(e => {
+    bloco.appendChild(criarEventoCard(e));
+  });
+
+  return bloco;
+}
+
+function criarEventoCard(evento) {
+  const article = document.createElement('article');
+  article.className = `event ${mapTipo(evento.tipo)}`;
+
+  const horaInicio = new Date(evento.hora).toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  article.innerHTML = `
+    <h4>${evento.tipo}</h4>
+    <span>${horaInicio}</span>
+    <p>${evento.descricao || ''}</p>
+  `;
+
+  return article;
+}
+
+function mapTipo(tipo) {
+  const map = {
+    ALIMENTACAO: 'food',
+    SONO: 'sleep',
+    BRINCADEIRA: 'play',
+    HIGIENE: 'hygiene',
+    APRENDIZADO: 'learn'
+  };
+
+  return map[tipo] || 'play';
+}
+
+/* =====================================================
+ INTEGRAÇÃO COM CALENDÁRIO
+===================================================== */
+document.addEventListener('calendar:dateSelected', e => {
+  const date = e.detail.date;
+  console.log('📅 Data selecionada:', date);
+  carregarAgendaPorData(date);
+});
+
+/* =====================================================
+ INIT — carrega hoje
+===================================================== */
+carregarAgendaPorData(new Date());
