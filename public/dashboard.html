@@ -1,18 +1,28 @@
-<h1 id="titulo"></h1>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lullaby | Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
 
-<section id="admin" hidden>
-  <h2>Visão Geral</h2>
-  <p>Total de usuários, crianças, eventos...</p>
-</section>
+  <h1 id="titulo"></h1>
 
-<section id="educador" hidden>
-  <h2>Agenda das Crianças</h2>
-  <div id="agendaEducador"></div>
-</section>
+  <section id="admin" hidden>
+    <h2>Visão Geral (Admin)</h2>
+  </section>
 
-<section id="responsavel" hidden>
-  <h2>Agenda dos meus filhos</h2>
-  <div id="agendaResponsavel"></div>
-</section>
+  <section id="educador" hidden>
+    <h2>Agenda das Crianças</h2>
+  </section>
 
-<button onclick="logout()">Sair</button>
+  <section id="responsavel" hidden>
+    <h2>Agenda dos meus filhos</h2>
+  </section>
+
+  <button onclick="logout()">Sair</button>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
