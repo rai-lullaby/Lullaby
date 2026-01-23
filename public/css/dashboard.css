@@ -9,7 +9,7 @@
 
 :root {
   /* Backgrounds */
-  --bg-page: #fefdfb;          /* mais claro que #fcfaf7 */
+  --bg-page: #fefdfb;       
   --bg-card: #ffffff;
 
   /* Core */
@@ -162,47 +162,73 @@ section {
 }
 
 /* =========================
- CALENDAR
+ CALENDÁRIO
 ========================= */
-.calendar {
+.calendar-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow-soft);
+  animation: fadeUp .4s ease both;
+}
+
+.calendar-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
-.calendar h2 {
-  font-size: 20px;
+.calendar-header h2 {
+  font-size: 18px;
+  font-weight: 600;
 }
 
-.nav-btn {
-  border: none;
-  background: none;
-  font-size: 20px;
-  cursor: pointer;
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
 }
 
-/* =========================
- WEEK
-========================= */
-.week {
+.calendar-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 6px;
 }
 
-.week div {
-  text-align: center;
-  padding: 8px 0;
+.calendar-day {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 12px;
-  font-size: 13px;
-  color: var(--muted);
-  border: 1px solid transparent;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, transform .2s ease;
 }
 
-.week .active {
+.calendar-day:hover {
+  background: rgba(0,0,0,.04);
+  transform: translateY(-1px);
+}
+
+.calendar-day.today {
+  border: 1px dashed var(--primary);
+}
+
+.calendar-day.active {
   background: var(--primary);
-  color: #fff;
+  color: white;
   font-weight: 600;
+}
+
+.calendar-day.disabled {
+  opacity: .3;
+  pointer-events: none;
 }
 
 /* =========================
@@ -357,3 +383,4 @@ section:hover {
     padding: 24px;
   }
 }
+
