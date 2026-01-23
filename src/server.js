@@ -1,26 +1,8 @@
-const express = require('express');
-const app = express();
-
-// Middleware básico
-app.use(express.json());
-
+// =========================
+// CONFIGURAÇÕES INICIAIS
+// =========================
 require('dotenv').config();
 
-// Rota de saúde (teste rápido)
-app.get('/', (req, res) => {
-  res.status(200).send('API Lullaby online 🚀');
-});
-
-// 🚨 PORTA CERTA PARA O RENDER
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
-
-console.log('JWT carregado?', !!process.env.JWT_SECRET);
-
-require('dotenv').config();
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -29,16 +11,31 @@ const pool = require('./config/db');
 const app = express();
 app.use(express.json());
 
-// health
-app.get('/', (req, res) => res.send('API Lullaby online 🚀'));
+// =========================
+// LOG DE DEBUG (opcional)
+// =========================
+console.log('JWT carregado?', !!process.env.JWT_SECRET);
 
-// LOGIN REAL
+// =========================
+// ROTA DE SAÚDE
+// =========================
+app.get('/', (req, res) => {
+  res.status(200).send('API Lullaby online 🚀');
+});
+
+// =========================
+// LOGIN REAL (JWT + POSTGRES)
+// =========================
 app.post('/login', async (req, res) => {
   const { email, senha } = req.body;
 
+  if (!email || !senha) {
+    return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+  }
+
   try {
     const result = await pool.query(
-      'SELECT * FROM usuarios WHERE email = $1',
+      'SELECT id, nome, email, senha FROM usuarios WHERE email = $1',
       [email]
     );
 
@@ -60,35 +57,54 @@ app.post('/login', async (req, res) => {
     );
 
     res.json({
-      user: { id: user.id, nome: user.nome, email: user.email },
+      user: {
+        id: user.id,
+        nome: user.nome,
+        email: user.email
+      },
       token
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erro interno' });
+    console.error('Erro no login:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
-// middleware de auth
+// =========================
+// MIDDLEWARE DE AUTENTICAÇÃO
+// =========================
 function auth(req, res, next) {
-  const header = req.headers.authorization;
-  if (!header) return res.sendStatus(401);
+  const authHeader = req.headers.authorization;
 
-  const token = header.split(' ')[1];
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Token não informado' });
+  }
+
+  const [, token] = authHeader.split(' ');
+
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
     next();
-  } catch {
-    res.sendStatus(401);
+  } catch (err) {
+    return res.status(401).json({ error: 'Token inválido ou expirado' });
   }
 }
 
-// rota protegida
+// =========================
+// ROTA PROTEGIDA (EXEMPLO)
+// =========================
 app.get('/agenda', auth, (req, res) => {
-  res.json({ message: 'Agenda carregada', user: req.user });
+  res.json({
+    message: 'Agenda carregada com sucesso',
+    user: req.user
+  });
 });
 
-// porta
+// =========================
+// PORTA (RENDER)
+// =========================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor na porta ${PORT}`));
 
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
