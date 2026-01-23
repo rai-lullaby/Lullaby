@@ -24,9 +24,9 @@ exports.listarPorData = async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT * FROM eventos 
-       WHERE data = $1 
-       ORDER BY hora_inicio ASC`,
+      `SELECT * FROM eventos_agenda 
+       WHERE data_hora = $1 
+       ORDER BY data_hora ASC`,
       [data]
     );
 
@@ -60,3 +60,4 @@ exports.deletarEvento = async (req, res) => {
     res.status(400).json({ erro: err.message });
   }
 };
+
