@@ -84,25 +84,14 @@
   <!-- =========================
    CALENDÁRIO
   ========================= -->
-<!-- CALENDÁRIO -->
-<section class="calendar-card">
-  <div class="calendar-header">
-    <button class="nav-btn" id="prevMonth">‹</button>
-    <h2 id="calendarTitle">Janeiro 2026</h2>
-    <button class="nav-btn" id="nextMonth">›</button>
-  </div>
+<section class="calendar">
+  <button id="prevWeek" class="nav-btn">‹</button>
+  <h2 id="calendarTitle">Janeiro 2026</h2>
+  <button id="nextWeek" class="nav-btn">›</button>
+</section>
 
-  <div class="calendar-weekdays">
-    <span>Dom</span>
-    <span>Seg</span>
-    <span>Ter</span>
-    <span>Qua</span>
-    <span>Qui</span>
-    <span>Sex</span>
-    <span>Sáb</span>
-  </div>
-
-  <div class="calendar-days" id="calendarDays">
+<section class="week" id="calendarDays"></section>
+<div class="calendar-days" id="calendarDays">
     <!-- dias gerados via JS -->
   </div>
 </section>
@@ -183,6 +172,7 @@
 <script src="/js/calendario.js"></script>
 </body>
 </html>
+
 
 
 
