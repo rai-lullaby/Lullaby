@@ -27,36 +27,57 @@ app.get('/', (req, res) => {
 // LOGIN REAL (JWT + POSTGRES)
 // =========================
 app.post('/login', async (req, res) => {
-  const { email, senha } = req.body;
-
-  if (!email || !senha) {
-    return res.status(400).json({ error: 'Email e senha são obrigatórios' });
-  }
-
   try {
+    const { email, senha } = req.body;
+
+    // 1️⃣ Validação básica (erro do cliente → 400)
+    if (!email || !senha) {
+      return res.status(400).json({
+        error: 'Email e senha são obrigatórios'
+      });
+    }
+
+    // 2️⃣ Busca usuário no banco
     const result = await pool.query(
       'SELECT id, nome, email, senha FROM usuarios WHERE email = $1',
       [email]
     );
 
+    // 3️⃣ Usuário não encontrado → 401
     if (result.rowCount === 0) {
-      return res.status(401).json({ error: 'Usuário ou senha inválidos' });
+      return res.status(401).json({
+        error: 'Usuário ou senha inválidos'
+      });
     }
 
     const user = result.rows[0];
+
+    // 4️⃣ Verifica senha
     const senhaOk = await bcrypt.compare(senha, user.senha);
 
     if (!senhaOk) {
-      return res.status(401).json({ error: 'Usuário ou senha inválidos' });
+      return res.status(401).json({
+        error: 'Usuário ou senha inválidos'
+      });
     }
 
+    // 5️⃣ Verifica se JWT_SECRET existe (erro de config → 500)
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET não definido');
+      return res.status(500).json({
+        error: 'Erro de configuração do servidor'
+      });
+    }
+
+    // 6️⃣ Gera token
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
     );
 
-    res.json({
+    // 7️⃣ Resposta de sucesso
+    return res.status(200).json({
       user: {
         id: user.id,
         nome: user.nome,
@@ -64,9 +85,13 @@ app.post('/login', async (req, res) => {
       },
       token
     });
+
   } catch (err) {
-    console.error('Erro no login:', err);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    // 8️⃣ Erro REAL de servidor → 500
+    console.error('Erro no POST /login:', err);
+    return res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
   }
 });
 
@@ -108,3 +133,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
