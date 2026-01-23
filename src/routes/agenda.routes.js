@@ -5,6 +5,15 @@ const canAccessChild = require('../middlewares/canAccessChild');
 const agendaController = require('../controllers/agenda.controller');
 
 const router = express.Router();
+// Teste
+router.get(
+  '/agenda',
+  auth,
+  authorize(['ADMIN', 'EDUCADOR']),
+  async (req, res) => {
+    res.json({ message: 'Agenda geral (em construção)' });
+  }
+);
 
 // Criar evento
 router.post(
@@ -41,3 +50,4 @@ router.delete(
 );
 
 module.exports = router;
+
