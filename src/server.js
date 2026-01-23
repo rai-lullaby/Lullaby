@@ -14,6 +14,7 @@ const { version } = require('../package.json');
 const authRoutes = require('./routes/auth.routes');
 const usuariosRoutes = require('./routes/usuarios.routes');
 const agendaRoutes = require('./routes/agenda.routes');
+const eventosRoutes = require('./routes/eventos.routes');
 
 const app = express();
 app.use(express.json());
@@ -29,6 +30,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api', authRoutes);           // /api/login
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api', agendaRoutes);
+app.use('/api', eventosRoutes);
 
 // =========================
 // VERSIONAMENTO DA API
@@ -59,3 +61,4 @@ app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
   console.log(`Versão da aplicação: v${version}`);
 });
+
