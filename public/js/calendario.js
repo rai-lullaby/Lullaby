@@ -1,18 +1,24 @@
 // =========================
-// COMPONENTE CALENDÁRIO — VISÃO SEMANAL
+// 📅 COMPONENTE CALENDÁRIO — VISÃO SEMANAL
 // =========================
 (function () {
+  // =========================
+  // DOM
+  // =========================
   const calendarTitle = document.getElementById('calendarTitle');
   const calendarDays = document.getElementById('calendarDays');
   const prevBtn = document.getElementById('prevWeek');
   const nextBtn = document.getElementById('nextWeek');
 
   if (!calendarTitle || !calendarDays || !prevBtn || !nextBtn) {
-    console.warn('📅 Calendário semanal não encontrado');
+    console.warn('📅 Calendário semanal não encontrado no DOM');
     return;
   }
 
-  let selectedDate = new Date();
+  // =========================
+  // STATE
+  // =========================
+  let selectedDate = new Date(); // sempre Date nativo
 
   // =========================
   // HELPERS
@@ -21,6 +27,7 @@
     const d = new Date(date);
     const day = d.getDay(); // 0 = domingo
     d.setDate(d.getDate() - day);
+    d.setHours(0, 0, 0, 0);
     return d;
   }
 
@@ -32,8 +39,25 @@
     );
   }
 
+  function formatDateISO(date) {
+    return date.toISOString().split('T')[0]; // yyyy-mm-dd
+  }
+
+  function formatMonthTitle(date) {
+    return date.toLocaleDateString('pt-BR', {
+      month: 'long',
+      year: 'numeric'
+    });
+  }
+
+  function formatWeekDay(date) {
+    return date.toLocaleDateString('pt-BR', {
+      weekday: 'short'
+    });
+  }
+
   // =========================
-  // RENDER
+  // RENDER SEMANA
   // =========================
   function renderWeek() {
     calendarDays.innerHTML = '';
@@ -41,11 +65,8 @@
     const weekStart = startOfWeek(selectedDate);
     const today = new Date();
 
-    // Título: Janeiro 2026
-    calendarTitle.textContent = selectedDate.toLocaleDateString('pt-BR', {
-      month: 'long',
-      year: 'numeric'
-    });
+    // 🔤 Título do mês
+    calendarTitle.textContent = formatMonthTitle(selectedDate);
 
     for (let i = 0; i < 7; i++) {
       const day = new Date(weekStart);
@@ -53,37 +74,44 @@
 
       const dayEl = document.createElement('div');
       dayEl.className = 'calendar-day';
-
-      const weekDay = day.toLocaleDateString('pt-BR', { weekday: 'short' });
-      const dayNumber = day.getDate();
+      dayEl.dataset.date = formatDateISO(day);
 
       dayEl.innerHTML = `
-        <span class="week-day">${weekDay}</span>
-        <strong class="day-number">${dayNumber}</strong>
+        <span class="week-day">${formatWeekDay(day)}</span>
+        <span class="day-number">${day.getDate()}</span>
       `;
 
+      // 🟢 Hoje
       if (isSameDay(day, today)) {
         dayEl.classList.add('today');
       }
 
+      // 🔵 Selecionado
       if (isSameDay(day, selectedDate)) {
         dayEl.classList.add('active');
       }
 
+      // 🖱️ Click
       dayEl.addEventListener('click', () => {
         selectedDate = new Date(day);
 
         document
           .querySelectorAll('.calendar-day')
-          .forEach(d => d.classList.remove('active'));
+          .forEach(el => el.classList.remove('active'));
 
         dayEl.classList.add('active');
 
-        console.log('📅 Semana | Dia selecionado:', selectedDate);
+        const selectedISO = formatDateISO(selectedDate);
 
+        console.log('📅 Dia selecionado:', selectedISO);
+
+        // 🔔 Evento global para dashboard.js
         document.dispatchEvent(
           new CustomEvent('calendar:dateSelected', {
-            detail: { date: selectedDate }
+            detail: {
+              date: selectedISO,
+              dateObj: selectedDate
+            }
           })
         );
       });
@@ -109,4 +137,14 @@
   // INIT
   // =========================
   renderWeek();
+
+  // 🔔 Dispara data inicial (útil p/ carregar eventos ao abrir)
+  document.dispatchEvent(
+    new CustomEvent('calendar:dateSelected', {
+      detail: {
+        date: formatDateISO(selectedDate),
+        dateObj: selectedDate
+      }
+    })
+  );
 })();
