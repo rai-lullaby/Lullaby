@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <title>Lullaby | Login</title>
+  <link rel="stylesheet" href="/src/index.css" />
 </head>
+<body>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+  <form id="loginForm">
+    <input id="email" type="email" required />
+    <input id="senha" type="password" required />
+    <button type="submit">Entrar</button>
+    <p id="mensagem"></p>
+  </form>
 
-  <script src="script.js"></script>
+  <script src="/script.js"></script>
 </body>
 </html>
-
-
