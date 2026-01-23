@@ -1,68 +1,86 @@
 // =========================
-// COMPONENTE CALENDÁRIO
+// COMPONENTE CALENDÁRIO — VISÃO SEMANAL
 // =========================
 (function () {
   const calendarTitle = document.getElementById('calendarTitle');
   const calendarDays = document.getElementById('calendarDays');
-  const prevMonthBtn = document.getElementById('prevMonth');
-  const nextMonthBtn = document.getElementById('nextMonth');
+  const prevBtn = document.getElementById('prevWeek');
+  const nextBtn = document.getElementById('nextWeek');
 
-  // Segurança: só executa se o HTML existir
-  if (!calendarTitle || !calendarDays || !prevMonthBtn || !nextMonthBtn) {
-    console.warn('📅 Calendário não encontrado na página');
+  if (!calendarTitle || !calendarDays || !prevBtn || !nextBtn) {
+    console.warn('📅 Calendário semanal não encontrado');
     return;
   }
 
-  let currentDate = new Date();
+  let selectedDate = new Date();
 
-  function renderCalendar(date) {
+  // =========================
+  // HELPERS
+  // =========================
+  function startOfWeek(date) {
+    const d = new Date(date);
+    const day = d.getDay(); // 0 = domingo
+    d.setDate(d.getDate() - day);
+    return d;
+  }
+
+  function isSameDay(a, b) {
+    return (
+      a.getDate() === b.getDate() &&
+      a.getMonth() === b.getMonth() &&
+      a.getFullYear() === b.getFullYear()
+    );
+  }
+
+  // =========================
+  // RENDER
+  // =========================
+  function renderWeek() {
     calendarDays.innerHTML = '';
 
-    const year = date.getFullYear();
-    const month = date.getMonth();
-
-    const firstDay = new Date(year, month, 1).getDay();
-    const lastDate = new Date(year, month + 1, 0).getDate();
-
+    const weekStart = startOfWeek(selectedDate);
     const today = new Date();
 
-    calendarTitle.textContent = date.toLocaleDateString('pt-BR', {
+    // Título: Janeiro 2026
+    calendarTitle.textContent = selectedDate.toLocaleDateString('pt-BR', {
       month: 'long',
       year: 'numeric'
     });
 
-    // Espaços vazios antes do primeiro dia
-    for (let i = 0; i < firstDay; i++) {
-      calendarDays.appendChild(document.createElement('div'));
-    }
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(weekStart);
+      day.setDate(weekStart.getDate() + i);
 
-    // Dias do mês
-    for (let day = 1; day <= lastDate; day++) {
       const dayEl = document.createElement('div');
       dayEl.className = 'calendar-day';
-      dayEl.textContent = day;
 
-      // Hoje
-      if (
-        day === today.getDate() &&
-        month === today.getMonth() &&
-        year === today.getFullYear()
-      ) {
-        dayEl.classList.add('today', 'active');
+      const weekDay = day.toLocaleDateString('pt-BR', { weekday: 'short' });
+      const dayNumber = day.getDate();
+
+      dayEl.innerHTML = `
+        <span class="week-day">${weekDay}</span>
+        <strong class="day-number">${dayNumber}</strong>
+      `;
+
+      if (isSameDay(day, today)) {
+        dayEl.classList.add('today');
+      }
+
+      if (isSameDay(day, selectedDate)) {
+        dayEl.classList.add('active');
       }
 
       dayEl.addEventListener('click', () => {
+        selectedDate = new Date(day);
+
         document
           .querySelectorAll('.calendar-day')
           .forEach(d => d.classList.remove('active'));
 
         dayEl.classList.add('active');
 
-        const selectedDate = new Date(year, month, day);
+        console.log('📅 Semana | Dia selecionado:', selectedDate);
 
-        console.log('📅 Dia selecionado:', selectedDate.toISOString());
-
-        // 🔔 Dispara evento global (dashboard pode escutar)
         document.dispatchEvent(
           new CustomEvent('calendar:dateSelected', {
             detail: { date: selectedDate }
@@ -74,17 +92,21 @@
     }
   }
 
-  // Navegação
-  prevMonthBtn.addEventListener('click', () => {
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    renderCalendar(currentDate);
+  // =========================
+  // NAVEGAÇÃO SEMANAL
+  // =========================
+  prevBtn.addEventListener('click', () => {
+    selectedDate.setDate(selectedDate.getDate() - 7);
+    renderWeek();
   });
 
-  nextMonthBtn.addEventListener('click', () => {
-    currentDate.setMonth(currentDate.getMonth() + 1);
-    renderCalendar(currentDate);
+  nextBtn.addEventListener('click', () => {
+    selectedDate.setDate(selectedDate.getDate() + 7);
+    renderWeek();
   });
 
-  // Inicializa
-  renderCalendar(currentDate);
+  // =========================
+  // INIT
+  // =========================
+  renderWeek();
 })();
