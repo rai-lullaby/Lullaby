@@ -1,6 +1,7 @@
 const user = JSON.parse(localStorage.getItem('user'));
 const token = localStorage.getItem('token');
 
+// 🔒 Protege acesso direto
 if (!user || !token) {
   window.location.href = '/';
 }
@@ -8,19 +9,17 @@ if (!user || !token) {
 document.getElementById('titulo').textContent =
   `Bem-vindo(a), ${user.nome}`;
 
+// Exibe dashboard por perfil
 if (user.perfil === 'ADMIN') {
   document.getElementById('admin').hidden = false;
-  carregarDashboardAdmin();
 }
 
 if (user.perfil === 'EDUCADOR') {
   document.getElementById('educador').hidden = false;
-  carregarAgendaEducador();
 }
 
 if (user.perfil === 'RESPONSAVEL') {
   document.getElementById('responsavel').hidden = false;
-  carregarAgendaResponsavel();
 }
 
 function logout() {
