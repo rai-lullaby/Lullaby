@@ -9,13 +9,6 @@ const path = require('path');
 const { version } = require('../package.json');
 
 // =========================
-// FALLBACK SPA (sempre por último)
-// =========================
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-});
-
-// =========================
 // IMPORTAÇÃO DAS ROTAS
 // =========================
 const authRoutes = require('./routes/auth.routes');
@@ -61,5 +54,14 @@ app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
   console.log(`Versão da aplicação: v${version}`);
 });
+
+
+// =========================
+// FALLBACK SPA (sempre por último)
+// =========================
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
 
 
