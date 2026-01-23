@@ -18,9 +18,16 @@ app.use(express.static(path.join(__dirname, '../public')));
 // =========================
 // ROTAS DA API
 // =========================
-app.use('/api', authRoutes);                 // /api/login
+app.use('/api', authRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api', agendaRoutes);
+
+// =========================
+// Fallback SPA
+// =========================
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 // =========================
 // HEALTH CHECK
@@ -30,16 +37,10 @@ app.get('/api/health', (req, res) => {
 });
 
 // =========================
-// FALLBACK SPA
-// =========================
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-});
-
-// =========================
 // PORTA
 // =========================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
