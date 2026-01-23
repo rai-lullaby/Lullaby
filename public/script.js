@@ -1,11 +1,6 @@
 const form = document.getElementById('loginForm');
 const mensagem = document.getElementById('mensagem');
 
-// Garante que só roda na página de login
-if (!form || !mensagem) {
-  console.warn('Script de login carregado fora da página correta');
-  return;
-}
 
 const API_URL = '/api/login';
 
@@ -48,3 +43,4 @@ form.addEventListener('submit', async (e) => {
     mensagem.classList.add('erro');
   }
 });
+
