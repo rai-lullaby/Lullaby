@@ -84,19 +84,28 @@
   <!-- =========================
    CALENDÁRIO
   ========================= -->
-  <section class="calendar">
-    <button class="nav-btn">‹</button>
-    <h2>Janeiro 2026</h2>
-    <button class="nav-btn">›</button>
-    
-    <div>Dom<br><strong>18</strong></div>
-    <div>Seg<br><strong>19</strong></div>
-    <div>Ter<br><strong>20</strong></div>
-    <div>Qua<br><strong>21</strong></div>
-    <div>Qui<br><strong>22</strong></div>
-    <div class="active">Sex<br><strong>23</strong></div>
-    <div>Sáb<br><strong>24</strong></div>
-  </section>
+<!-- CALENDÁRIO -->
+<section class="calendar-card">
+  <div class="calendar-header">
+    <button class="nav-btn" id="prevMonth">‹</button>
+    <h2 id="calendarTitle">Janeiro 2026</h2>
+    <button class="nav-btn" id="nextMonth">›</button>
+  </div>
+
+  <div class="calendar-weekdays">
+    <span>Dom</span>
+    <span>Seg</span>
+    <span>Ter</span>
+    <span>Qua</span>
+    <span>Qui</span>
+    <span>Sex</span>
+    <span>Sáb</span>
+  </div>
+
+  <div class="calendar-days" id="calendarDays">
+    <!-- dias gerados via JS -->
+  </div>
+</section>
 
   <!-- =========================
    RESUMO DO DIA
@@ -173,6 +182,7 @@
 <script src="/js/dashboard.js"></script>
 </body>
 </html>
+
 
 
 
