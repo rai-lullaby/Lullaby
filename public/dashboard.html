@@ -8,14 +8,17 @@
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- =========================
+ HEADER
+========================= -->
 <header class="header">
   <div class="header-left">
     <div class="logo">👶</div>
-    <div>
-      <h1>🌙 Lullaby</h1>
-      <span>Ambiente Tia Bia</span>
-      <span id="titulo" class="welcome"></span>
+
+    <div class="school-info">
+      <h1 class="app-name">🌙 Lullaby</h1>
+      <span id="nomeCreche" class="school-name">Creche</span>
+      <span id="nomeTurma" class="class-name">Turma</span>
     </div>
   </div>
 
@@ -24,39 +27,58 @@
     <button id="btnCriancas">🧒 Crianças</button>
     <button id="btnRecados">📝 Recados</button>
     <button id="btnGaleria">📷 Galeria</button>
-    <button id="logoutBtn">Sair</button>
   </nav>
-  
+
   <div class="header-right">
-    <div class="notification">🔔 <span>3</span></div>
-    <button onclick="logout()">Sair</button>
+    <div class="notification">
+      🔔 <span class="badge">3</span>
+    </div>
+    <button id="logoutBtn" class="btn-logout">Sair</button>
   </div>
 </header>
 
-<!-- CONTEÚDO -->
+<!-- =========================
+ CONTEÚDO PRINCIPAL
+========================= -->
 <main class="container">
+
+  <!-- ADMIN -->
   <section id="admin" hidden>
     <h2>Visão Geral</h2>
-    <div>
-      <p>Usuários: <span id="totalUsuarios"></span></p>
-      <p>Crianças: <span id="totalCriancas"></span></p>
-      <p>Eventos: <span id="totalEventos"></span></p>
+
+    <div class="stats">
+      <div class="stat">
+        <strong id="totalUsuarios">0</strong>
+        <span>Usuários</span>
+      </div>
+      <div class="stat">
+        <strong id="totalCriancas">0</strong>
+        <span>Crianças</span>
+      </div>
+      <div class="stat">
+        <strong id="totalEventos">0</strong>
+        <span>Eventos</span>
+      </div>
     </div>
   </section>
-  
+
+  <!-- EDUCADOR -->
   <section id="educador" hidden>
     <div id="agendaEducador"></div>
   </section>
-  
+
+  <!-- RESPONSÁVEL -->
   <section id="responsavel" hidden>
     <div id="agendaResponsavel"></div>
   </section>
-  
-  <!-- CALENDÁRIO -->
+
+  <!-- =========================
+   CALENDÁRIO
+  ========================= -->
   <section class="calendar">
-    <button>‹</button>
+    <button class="nav-btn">‹</button>
     <h2>Janeiro 2026</h2>
-    <button>›</button>
+    <button class="nav-btn">›</button>
   </section>
 
   <section class="week">
@@ -69,47 +91,73 @@
     <div>Sáb<br><strong>24</strong></div>
   </section>
 
-  <!-- RESUMO -->
+  <!-- =========================
+   RESUMO DO DIA
+  ========================= -->
   <section class="summary">
-    <div class="card food">🍽️<br><strong>4</strong><span>Refeições</span></div>
-    <div class="card sleep">🌙<br><strong>1</strong><span>Sonecas</span></div>
-    <div class="card play">🎮<br><strong>3</strong><span>Brincadeiras</span></div>
-    <div class="card time">⏰<br><strong>07:30 - 17:00</strong><span>Horário</span></div>
+    <div class="card food">
+      🍽️
+      <strong>4</strong>
+      <span>Refeições</span>
+    </div>
+
+    <div class="card sleep">
+      🌙
+      <strong>1</strong>
+      <span>Sonecas</span>
+    </div>
+
+    <div class="card play">
+      🎮
+      <strong>3</strong>
+      <span>Brincadeiras</span>
+    </div>
+
+    <div class="card time">
+      ⏰
+      <strong>07:30 - 17:00</strong>
+      <span>Horário</span>
+    </div>
   </section>
 
-  <!-- AGENDA -->
+  <!-- =========================
+   AGENDA
+  ========================= -->
   <section class="agenda">
     <h3>Manhã</h3>
 
-    <div class="event play">
+    <article class="event play">
       <h4>Chegada e Acolhimento</h4>
       <span>07:30 → 08:00</span>
       <p>Recepção das crianças com música e brincadeiras livres</p>
-    </div>
+    </article>
 
-    <div class="event food">
+    <article class="event food">
       <h4>Café da Manhã</h4>
       <span>08:00 → 08:30</span>
       <p>Frutas, pães e suco natural</p>
-    </div>
+    </article>
 
-    <div class="event hygiene">
+    <article class="event hygiene">
       <h4>Higiene</h4>
       <span>08:30 → 09:00</span>
       <p>Escovação dos dentes e lavagem das mãos</p>
-    </div>
+    </article>
 
     <h3>Tarde</h3>
 
-    <div class="event play">
+    <article class="event play">
       <h4>Atividades Livres</h4>
       <span>15:30 → 17:00</span>
       <p>Brincadeiras, jogos e preparação para saída</p>
-    </div>
+    </article>
   </section>
 
 </main>
 
+<!-- =========================
+ FOOTER
+========================= -->
 <footer class="footer">
   🌙 Lullaby © 2025 — Ambiente Tia Bia — Cuidando com amor
 </footer>
@@ -117,7 +165,3 @@
 <script src="/js/dashboard.js"></script>
 </body>
 </html>
-
-
-
-
