@@ -173,6 +173,7 @@ section {
   box-shadow: var(--shadow-soft);
   animation: fadeUp .4s ease both;
   font-family: inherit;
+  margin-bottom: 20px;
 }
 
 /* HEADER */
@@ -416,6 +417,7 @@ section:hover {
     padding: 24px;
   }
 }
+
 
 
 
