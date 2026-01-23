@@ -76,7 +76,7 @@ const nomeTurmaEl = el('nomeTurma');
 
 // 🔧 por enquanto mockado (depois vem da API)
 const CRECHE_PADRAO = 'Ambiente Tia Bia';
-const TURMA_PADRAO = 'Turma das Estrelas';
+const TURMA_PADRAO = 'Turma';
 
 if (nomeCrecheEl) {
   nomeCrecheEl.textContent = user?.creche?.nome || CRECHE_PADRAO;
@@ -155,3 +155,16 @@ async function carregarAgendaResponsavel() {
     agenda.innerHTML = '<p>Agenda do responsável (em construção)</p>';
   }
 }
+
+// =========================
+// INTEGRAÇÃO COM CALENDÁRIO
+// =========================
+document.addEventListener('calendar:dateSelected', (e) => {
+  const date = e.detail.date;
+
+  console.log('📌 Dashboard recebeu data:', date);
+
+  // chamar a API:
+  // carregarAgendaPorData(date)
+});
+
