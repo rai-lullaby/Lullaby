@@ -1,7 +1,8 @@
 const form = document.getElementById('loginForm');
 const mensagem = document.getElementById('mensagem');
 
-const API_URL = 'https://lullabyws.onrender.com/login';
+// Usa rota relativa da API
+const API_URL = '/api/login';
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -29,15 +30,15 @@ form.addEventListener('submit', async (e) => {
       return;
     }
 
-    // Salva token no navegador
+    // Salva token e usuário
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
 
     mensagem.textContent = `Bem-vindo(a), ${data.user.nome}!`;
     mensagem.classList.add('sucesso');
 
-    // Exemplo de redirecionamento
-    // window.location.href = 'dashboard.html';
+    // Redirecionar após login
+    // window.location.href = '/dashboard.html';
 
   } catch (err) {
     mensagem.textContent = 'Erro de conexão com o servidor';
