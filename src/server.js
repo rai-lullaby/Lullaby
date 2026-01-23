@@ -44,3 +44,14 @@ app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
 
+// =========================
+// VERSIONAMENTO
+// =========================
+const pkg = require('../package.json');
+app.get('/api/version', (req, res) => {
+  res.json({
+    version: pkg.version
+  });
+});
+
+
