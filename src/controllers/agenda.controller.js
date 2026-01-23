@@ -1,27 +1,71 @@
 const pool = require('../config/db');
 
-// =========================
-// CREATE - Criar evento na agenda
-// =========================
-async function criarEvento(req, res) {
-  try {
-    const { criancaId } = req.params;
-    const { data, descricao } = req.body;
-    const usuarioId = req.user.id;
+/**
+ * LISTAR AGENDA POR CRIANÇA
+ * GET /criancas/:criancaId/agenda
+ */
+async function listarAgendaPorCrianca(req, res) {
+  const { criancaId } = req.params;
 
-    if (!data || !descricao) {
+  try {
+    const result = await pool.query(
+      `
+      SELECT
+        e.id,
+        e.tipo,
+        e.descricao,
+        e.data_hora,
+        u.nome AS educador
+      FROM eventos_agenda e
+      JOIN usuarios u ON u.id = e.educador_id
+      WHERE e.crianca_id = $1
+      ORDER BY e.data_hora DESC
+      `,
+      [Number(criancaId)]
+    );
+
+    return res.status(200).json(result.rows);
+
+  } catch (err) {
+    console.error('Erro listarAgendaPorCrianca:', err);
+    return res.status(500).json({
+      error: 'Erro ao listar agenda'
+    });
+  }
+}
+
+/**
+ * CRIAR EVENTO NA AGENDA
+ * POST /criancas/:criancaId/agenda
+ * (ADMIN ou EDUCADOR)
+ */
+async function criarEventoAgenda(req, res) {
+  const { criancaId } = req.params;
+  const { tipo, descricao, data_hora } = req.body;
+  const educadorId = req.user.id;
+
+  try {
+    if (!tipo || !data_hora) {
       return res.status(400).json({
-        error: 'Data e descrição são obrigatórias'
+        error: 'Tipo e data_hora são obrigatórios'
       });
     }
 
     const result = await pool.query(
       `
-      INSERT INTO agenda (crianca_id, data, descricao, criado_por)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO eventos_agenda
+        (crianca_id, educador_id, tipo, descricao, data_hora)
+      VALUES
+        ($1, $2, $3, $4, $5)
       RETURNING *
       `,
-      [criancaId, data, descricao, usuarioId]
+      [
+        Number(criancaId),
+        educadorId,
+        tipo,
+        descricao || null,
+        data_hora
+      ]
     );
 
     return res.status(201).json({
@@ -30,93 +74,14 @@ async function criarEvento(req, res) {
     });
 
   } catch (err) {
-    console.error('Erro criarEvento:', err);
-    return res.status(500).json({ error: 'Erro ao criar evento' });
+    console.error('Erro criarEventoAgenda:', err);
+    return res.status(500).json({
+      error: 'Erro ao criar evento na agenda'
+    });
   }
 }
 
-// =========================
-// READ - Listar agenda por criança
-// =========================
-async function listarAgendaPorCrianca(req, res) {
-  try {
-    const { criancaId } = req.params;
-
-    const result = await pool.query(
-      `
-      SELECT 
-        a.id,
-        a.data,
-        a.descricao,
-        u.nome AS criado_por
-      FROM agenda a
-      JOIN usuarios u ON u.id = a.criado_por
-      WHERE a.crianca_id = $1
-      ORDER BY a.data DESC
-      `,
-      [criancaId]
-    );
-
-    return res.json(result.rows);
-
-  } catch (err) {
-    console.error('Erro listarAgendaPorCrianca:', err);
-    return res.status(500).json({ error: 'Erro ao listar agenda' });
-  }
-}
-
-// =========================
-// UPDATE - Atualizar evento
-// =========================
-async function atualizarEvento(req, res) {
-  try {
-    const { id } = req.params;
-    const { data, descricao } = req.body;
-
-    await pool.query(
-      `
-      UPDATE agenda
-      SET data = $1,
-          descricao = $2
-      WHERE id = $3
-      `,
-      [data, descricao, id]
-    );
-
-    return res.json({ message: 'Evento atualizado com sucesso' });
-
-  } catch (err) {
-    console.error('Erro atualizarEvento:', err);
-    return res.status(500).json({ error: 'Erro ao atualizar evento' });
-  }
-}
-
-// =========================
-// DELETE - Remover evento
-// =========================
-async function deletarEvento(req, res) {
-  try {
-    const { id } = req.params;
-
-    await pool.query(
-      'DELETE FROM agenda WHERE id = $1',
-      [id]
-    );
-
-    return res.json({ message: 'Evento removido com sucesso' });
-
-  } catch (err) {
-    console.error('Erro deletarEvento:', err);
-    return res.status(500).json({ error: 'Erro ao remover evento' });
-  }
-}
-
-// =========================
-// EXPORTS
-// =========================
 module.exports = {
-  criarEvento,
   listarAgendaPorCrianca,
-  atualizarEvento,
-  deletarEvento
+  criarEventoAgenda
 };
