@@ -7,21 +7,32 @@
 </head>
 <body>
 
-  <h1 id="titulo"></h1>
+  <header>
+    <h1 id="titulo"></h1>
+    <button id="logoutBtn">Sair</button>
+  </header>
 
+  <!-- ADMIN -->
   <section id="admin" hidden>
-    <h2>Visão Geral (Admin)</h2>
+    <h2>📊 Visão Geral (Admin)</h2>
+    <ul>
+      <li>Total de usuários: <strong id="totalUsuarios">–</strong></li>
+      <li>Total de crianças: <strong id="totalCriancas">–</strong></li>
+      <li>Total de eventos: <strong id="totalEventos">–</strong></li>
+    </ul>
   </section>
 
+  <!-- EDUCADOR -->
   <section id="educador" hidden>
-    <h2>Agenda das Crianças</h2>
+    <h2>📅 Agenda das Crianças</h2>
+    <div id="agendaEducador"></div>
   </section>
 
+  <!-- RESPONSÁVEL -->
   <section id="responsavel" hidden>
-    <h2>Agenda dos meus filhos</h2>
+    <h2>👶 Agenda dos meus filhos</h2>
+    <div id="agendaResponsavel"></div>
   </section>
-
-  <button onclick="logout()">Sair</button>
 
   <script src="dashboard.js"></script>
 </body>
