@@ -3,7 +3,21 @@
 // =========================
 require('dotenv').config();
 
+const path = require('path');
 const express = require('express');
+
+const app = express();
+
+// =========================
+// MIDDLEWARES GLOBAIS
+// =========================
+app.use(express.json());
+
+// =========================
+// SERVIR FRONTEND (PUBLIC)
+// =========================
+// Login em: https://seu-dominio.onrender.com/
+app.use(express.static(path.join(__dirname, '../public')));
 
 // =========================
 // IMPORTAÇÃO DAS ROTAS
@@ -12,34 +26,38 @@ const authRoutes = require('./routes/auth.routes');
 const usuariosRoutes = require('./routes/usuarios.routes');
 const agendaRoutes = require('./routes/agenda.routes');
 
-const app = express();
-app.use(express.json());
-
 // =========================
 // LOG DE DEBUG
 // =========================
 console.log('JWT carregado?', !!process.env.JWT_SECRET);
 
 // =========================
-// ROTA DE SAÚDE
+// ROTA DE SAÚDE (API)
 // =========================
-app.get('/', (req, res) => {
-  res.status(200).send('API Lullaby online 🚀');
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'API Lullaby online 🚀' });
 });
 
 // =========================
-// REGISTRO DAS ROTAS
+// REGISTRO DAS ROTAS DA API
 // =========================
 
-// Autenticação
-app.use(authRoutes); 
-// → /login
+// Auth → POST /api/login
+app.use('/api', authRoutes);
 
-// Usuários (CRUD)
-app.use('/usuarios', usuariosRoutes);
+// Usuários → /api/usuarios
+app.use('/api/usuarios', usuariosRoutes);
 
-// Agenda e agenda por criança
-app.use(agendaRoutes);
+// Agenda → /api/agenda | /api/criancas/:id/agenda
+app.use('/api', agendaRoutes);
+
+// =========================
+// FALLBACK PARA FRONTEND
+// =========================
+// Qualquer rota que não seja /api/*
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 // =========================
 // PORTA (RENDER)
