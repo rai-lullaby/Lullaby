@@ -2,18 +2,41 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lullaby | Login</title>
-  <link rel="stylesheet" href="/src/index.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <form id="loginForm">
-    <input id="email" type="email" required />
-    <input id="senha" type="password" required />
-    <button type="submit">Entrar</button>
-    <p id="mensagem"></p>
-  </form>
+  <div class="container">
+    <div class="card">
 
-  <script src="/script.js"></script>
+      <div class="logo">
+        🌙 <span>Lullaby</span>
+      </div>
+
+      <p class="subtitle">Ambiente Tia Bia</p>
+
+      <form>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" placeholder="seu@email.com" />
+        </div>
+
+        <div class="field">
+          <label>Senha</label>
+          <input type="password" placeholder="••••••••" />
+        </div>
+
+        <button type="submit">Entrar</button>
+      </form>
+
+    </div>
+
+    <footer>
+      © Desenvolvido por Raissa | v1.0.0
+    </footer>
+  </div>
+
 </body>
 </html>
