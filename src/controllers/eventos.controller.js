@@ -1,4 +1,6 @@
 const { Evento } = require('../models');
+const db = require('../db');
+
 
 // ➕ Criar evento
 exports.criarEvento = async (req, res) => {
@@ -29,30 +31,46 @@ exports.criarEvento = async (req, res) => {
   }
 };
 
-// 📅 Listar eventos por data
-exports.listarPorData = async (req, res) => {
-  const { data } = req.query;
 
-  if (!data) {
-    return res.status(400).json({ error: 'Data é obrigatória' });
-  }
-
+// 📅 Listar eventos por data - GET /api/eventos?data=YYYY-MM-DD
+async function listarPorData(req, res) {
   try {
-    const result = await pool.query(
-      `
-      SELECT *
+    const { data } = req.query;
+
+    if (!data) {
+      return res.status(400).json({
+        error: 'Parâmetro "data" é obrigatório (YYYY-MM-DD)'
+      });
+    }
+
+    console.log('📅 Buscando eventos da data:', data);
+
+    const query = `
+      SELECT
+        id,
+        crianca_id,
+        educador_id,
+        tipo,
+        descricao,
+        data,
+        hora
       FROM eventos_agenda
       WHERE data = $1
       ORDER BY hora ASC
-      `,
-      [data]
-    );
+    `;
 
-    res.json(result.rows);
+    const { rows } = await db.query(query, [data]);
+
+    res.json(rows);
+
   } catch (err) {
-    console.error('Erro ao buscar eventos:', err);
-    res.status(500).json({ error: 'Erro ao buscar eventos' });
+    console.error('❌ Erro ao buscar eventos:', err);
+    res.status(500).json({ error: 'Erro interno ao buscar eventos' });
   }
+}
+
+module.exports = {
+  listarPorData
 };
 
 // ✏️ Atualizar evento
@@ -78,6 +96,7 @@ exports.deletarEvento = async (req, res) => {
     res.status(400).json({ erro: err.message });
   }
 };
+
 
 
 
