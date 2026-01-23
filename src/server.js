@@ -30,20 +30,20 @@ app.post('/login', async (req, res) => {
   try {
     const { email, senha } = req.body;
 
-    // 1️⃣ Validação básica (erro do cliente → 400)
+    //Validação básica (erro do cliente → 400)
     if (!email || !senha) {
       return res.status(400).json({
         error: 'Email e senha são obrigatórios'
       });
     }
 
-    // 2️⃣ Busca usuário no banco
+    //Busca usuário no banco
     const result = await pool.query(
       'SELECT id, nome, email, senha FROM usuarios WHERE email = $1',
       [email]
     );
 
-    // 3️⃣ Usuário não encontrado → 401
+    //Usuário não encontrado → 401
     if (result.rowCount === 0) {
       return res.status(401).json({
         error: 'Usuário ou senha inválidos'
@@ -52,7 +52,7 @@ app.post('/login', async (req, res) => {
 
     const user = result.rows[0];
 
-    // 4️⃣ Verifica senha
+    //Verifica senha
     const senhaOk = await bcrypt.compare(senha, user.senha);
 
     if (!senhaOk) {
@@ -61,7 +61,7 @@ app.post('/login', async (req, res) => {
       });
     }
 
-    // 5️⃣ Verifica se JWT_SECRET existe (erro de config → 500)
+    //Verifica se JWT_SECRET existe (erro de config → 500)
     if (!process.env.JWT_SECRET) {
       console.error('JWT_SECRET não definido');
       return res.status(500).json({
@@ -69,14 +69,14 @@ app.post('/login', async (req, res) => {
       });
     }
 
-    // 6️⃣ Gera token
+    //Gera token
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
     );
 
-    // 7️⃣ Resposta de sucesso
+    //Resposta de sucesso
     return res.status(200).json({
       user: {
         id: user.id,
@@ -87,7 +87,7 @@ app.post('/login', async (req, res) => {
     });
 
   } catch (err) {
-    // 8️⃣ Erro REAL de servidor → 500
+    //Erro REAL de servidor → 500
     console.error('Erro no POST /login:', err);
     return res.status(500).json({
       error: 'Erro interno do servidor'
@@ -133,4 +133,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
 
