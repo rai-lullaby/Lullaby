@@ -5,7 +5,10 @@ const canAccessChild = require('../middlewares/canAccessChild');
 const agendaController = require('../controllers/agenda.controller');
 
 const router = express.Router();
-// Teste
+
+// =========================
+// AGENDA GERAL (ADMIN / EDUCADOR)
+// =========================
 router.get(
   '/agenda',
   auth,
@@ -15,16 +18,10 @@ router.get(
   }
 );
 
-// Criar evento
-router.post(
-  '/criancas/:criancaId/agenda',
-  auth,
-  authorize(['ADMIN', 'EDUCADOR']),
-  canAccessChild,
-  agendaController.criarEvento
-);
-
-// Listar agenda
+// =========================
+// LISTAR AGENDA POR CRIANÇA
+// GET /criancas/:criancaId/agenda
+// =========================
 router.get(
   '/criancas/:criancaId/agenda',
   auth,
@@ -33,21 +30,42 @@ router.get(
   agendaController.listarAgendaPorCrianca
 );
 
-// Atualizar evento
+// =========================
+// CRIAR EVENTO NA AGENDA
+// POST /criancas/:criancaId/agenda
+// =========================
+router.post(
+  '/criancas/:criancaId/agenda',
+  auth,
+  authorize(['ADMIN', 'EDUCADOR']),
+  canAccessChild,
+  agendaController.criarEventoAgenda
+);
+
+// =========================
+// (FUTURO) ATUALIZAR EVENTO
+// PUT /agenda/:id
+// =========================
 router.put(
   '/agenda/:id',
   auth,
   authorize(['ADMIN', 'EDUCADOR']),
-  agendaController.atualizarEvento
+  async (req, res) => {
+    res.status(501).json({ error: 'Atualização de evento não implementada' });
+  }
 );
 
-// Deletar evento
+// =========================
+// (FUTURO) DELETAR EVENTO
+// DELETE /agenda/:id
+// =========================
 router.delete(
   '/agenda/:id',
   auth,
   authorize(['ADMIN']),
-  agendaController.deletarEvento
+  async (req, res) => {
+    res.status(501).json({ error: 'Remoção de evento não implementada' });
+  }
 );
 
 module.exports = router;
-
