@@ -1,4 +1,4 @@
-const db = require('../db');
+const db = require('../config/db');
 
 // ======================================================
 // ➕ Criar evento
@@ -171,3 +171,4 @@ module.exports = {
   atualizarEvento,
   deletarEvento
 };
+
