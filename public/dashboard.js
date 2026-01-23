@@ -1,13 +1,20 @@
-const user = JSON.parse(localStorage.getItem('user'));
+// =========================
+// RECUPERA DADOS
+// =========================
 const token = localStorage.getItem('token');
+const userRaw = localStorage.getItem('user');
 
-// 🔒 Proteção da página
+// =========================
+// FUNÇÕES DE SEGURANÇA
+// =========================
+function logout() {
+  localStorage.clear();
+  window.location.replace('/');
+}
+
 function protegerPagina() {
-  const token = localStorage.getItem('token');
-  const user = localStorage.getItem('user');
-
-  if (!token || !user) {
-    window.location.replace('/');
+  if (!token || !userRaw) {
+    logout();
     return;
   }
 
@@ -18,52 +25,63 @@ function protegerPagina() {
     if (payload.exp < agora) {
       logout();
     }
-  } catch {
+  } catch (err) {
     logout();
   }
 }
 
-function logout() {
-  localStorage.clear();
-  window.location.replace('/');
-}
-
-// 🔒 executa imediatamente
+// =========================
+// EXECUÇÃO IMEDIATA
+// =========================
 protegerPagina();
 
+// Agora é seguro parsear o user
+const user = JSON.parse(userRaw);
 
-// Header
-document.getElementById('titulo').textContent =
-  `Bem-vindo(a), ${user.nome}`;
-
-// Logout
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  localStorage.clear();
-  window.location.replace('/');
-});
-
-// Controle por perfil
-if (user.perfil === 'ADMIN') {
-  document.getElementById('admin').hidden = false;
-  carregarDashboardAdmin();
-}
-
-if (user.perfil === 'EDUCADOR') {
-  document.getElementById('educador').hidden = false;
-  carregarAgendaEducador();
-}
-
-if (user.perfil === 'RESPONSAVEL') {
-  document.getElementById('responsavel').hidden = false;
-  carregarAgendaResponsavel();
+// =========================
+// HEADER
+// =========================
+const titulo = document.getElementById('titulo');
+if (titulo) {
+  titulo.textContent = `Bem-vindo(a), ${user.nome}`;
 }
 
 // =========================
-// FUNÇÕES (placeholders)
+// LOGOUT
+// =========================
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', logout);
+}
+
+// =========================
+// CONTROLE POR PERFIL
+// =========================
+switch (user.perfil) {
+  case 'ADMIN':
+    document.getElementById('admin').hidden = false;
+    carregarDashboardAdmin();
+    break;
+
+  case 'EDUCADOR':
+    document.getElementById('educador').hidden = false;
+    carregarAgendaEducador();
+    break;
+
+  case 'RESPONSAVEL':
+    document.getElementById('responsavel').hidden = false;
+    carregarAgendaResponsavel();
+    break;
+
+  default:
+    logout();
+}
+
+// =========================
+// FUNÇÕES (PLACEHOLDERS)
 // =========================
 
 async function carregarDashboardAdmin() {
-  // 🔧 depois ligamos com a API
   document.getElementById('totalUsuarios').textContent = '12';
   document.getElementById('totalCriancas').textContent = '5';
   document.getElementById('totalEventos').textContent = '48';
@@ -78,4 +96,3 @@ async function carregarAgendaResponsavel() {
   document.getElementById('agendaResponsavel').innerHTML =
     '<p>Agenda do responsável (em construção)</p>';
 }
-
