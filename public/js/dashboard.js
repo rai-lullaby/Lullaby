@@ -164,20 +164,34 @@ async function carregarAgendaResponsavel() {
 // ======================================================
 document.addEventListener('calendar:dateSelected', async (e) => {
   const { date } = e.detail;
-
   console.log('📌 Dashboard recebeu data:', date);
-
   await carregarAgendaPorData(date);
 });
+
+// ======================================================
+// 📌 TRATAR FORMATO DA DATA RECEBIDA (API)
+// ======================================================
+function formatDateISO(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 // ======================================================
 // 📡 BUSCAR EVENTOS POR DATA (API)
 // ======================================================
 async function carregarAgendaPorData(date) {
   try {
-    console.log('📡 Buscando eventos para:', date);
+    const dataObj = date instanceof Date ? date : new Date(date);
+    const dataISO = formatDateISO(dataObj);
 
-    const res = await fetch(`/api/eventos?data=${date}`, {
+    console.log('📡 Buscando eventos para:', dataISO);
+
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token não encontrado');
+
+    const res = await fetch(`/api/eventos?data=${dataISO}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -188,10 +202,10 @@ async function carregarAgendaPorData(date) {
     }
 
     const eventos = await res.json();
-
     console.log('🗓️ Eventos recebidos:', eventos);
 
     renderAgenda(eventos);
+
   } catch (err) {
     console.error('❌ Erro ao carregar agenda:', err);
   }
@@ -204,3 +218,4 @@ function renderAgenda(eventos = []) {
   // 🔧 aqui depois você conecta com o HTML real da agenda
   console.log('🧱 Render agenda:', eventos);
 }
+
