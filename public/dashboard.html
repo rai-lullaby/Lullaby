@@ -19,12 +19,13 @@
   </div>
 
   <nav class="menu">
-    <a class="active">📅 Agenda</a>
-    <a>🧒 Crianças</a>
-    <a>📝 Recados</a>
-    <a>📷 Galeria</a>
+    <button id="btnAgenda">📅 Agenda</button>
+    <button id="btnCriancas">🧒 Crianças</button>
+    <button id="btnRecados">📝 Recados</button>
+    <button id="btnGaleria">📷 Galeria</button>
+    <button id="logoutBtn">Sair</button>
   </nav>
-
+  
   <div class="header-right">
     <div class="notification">🔔 <span>3</span></div>
     <button onclick="logout()">Sair</button>
@@ -33,7 +34,10 @@
 
 <!-- CONTEÚDO -->
 <main class="container">
-
+  <section id="admin" hidden></section>
+  <section id="educador" hidden></section>
+  <section id="responsavel" hidden></section>
+  
   <!-- CALENDÁRIO -->
   <section class="calendar">
     <button>‹</button>
@@ -99,3 +103,4 @@
 <script src="/js/dashboard.js"></script>
 </body>
 </html>
+
