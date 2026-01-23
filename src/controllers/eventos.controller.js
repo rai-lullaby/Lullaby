@@ -16,17 +16,24 @@ exports.criarEvento = async (req, res) => {
 
 // 📅 Listar eventos por data
 exports.listarPorData = async (req, res) => {
-  const { data, turmaId } = req.query;
+  const { data } = req.query;
+
+  if (!data) {
+    return res.status(400).json({ error: 'Data é obrigatória' });
+  }
 
   try {
-    const eventos = await Evento.findAll({
-      where: { data, turmaId },
-      order: [['horaInicio', 'ASC']]
-    });
+    const result = await pool.query(
+      `SELECT * FROM eventos 
+       WHERE data = $1 
+       ORDER BY hora_inicio ASC`,
+      [data]
+    );
 
-    res.json(eventos);
+    res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ erro: err.message });
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar eventos' });
   }
 };
 
