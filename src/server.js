@@ -4,15 +4,13 @@
 require('dotenv').config();
 
 const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const pool = require('./config/db');
 
-const auth = require('./middlewares/auth');
-const authorize = require('./middlewares/authorize');
-const canAccessChild = require('./middlewares/canAccessChild');
-
-const usuariosController = require('./controllers/usuarios.controller');
+// =========================
+// IMPORTAÇÃO DAS ROTAS
+// =========================
+const authRoutes = require('./routes/auth.routes');
+const usuariosRoutes = require('./routes/usuarios.routes');
+const agendaRoutes = require('./routes/agenda.routes');
 
 const app = express();
 app.use(express.json());
@@ -30,155 +28,18 @@ app.get('/', (req, res) => {
 });
 
 // =========================
-// LOGIN REAL (JWT + POSTGRES)
+// REGISTRO DAS ROTAS
 // =========================
-app.post('/login', async (req, res) => {
-  try {
-    const { email, senha } = req.body;
 
-    if (!email || !senha) {
-      return res.status(400).json({
-        error: 'Email e senha são obrigatórios'
-      });
-    }
+// Autenticação
+app.use(authRoutes); 
+// → /login
 
-    const result = await pool.query(`
-      SELECT 
-        u.id,
-        u.nome,
-        u.email,
-        u.senha,
-        p.nome AS perfil
-      FROM usuarios u
-      JOIN usuarios_perfis up ON up.usuario_id = u.id
-      JOIN perfis p ON p.id = up.perfil_id
-      WHERE u.email = $1
-    `, [email]);
+// Usuários (CRUD)
+app.use('/usuarios', usuariosRoutes);
 
-    if (result.rowCount === 0) {
-      return res.status(401).json({
-        error: 'Usuário ou senha inválidos'
-      });
-    }
-
-    const user = result.rows[0];
-
-    const senhaOk = await bcrypt.compare(senha, user.senha);
-    if (!senhaOk) {
-      return res.status(401).json({
-        error: 'Usuário ou senha inválidos'
-      });
-    }
-
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        perfil: user.perfil
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '30m' }
-    );
-
-    return res.status(200).json({
-      user: {
-        id: user.id,
-        nome: user.nome,
-        email: user.email,
-        perfil: user.perfil
-      },
-      token
-    });
-
-  } catch (err) {
-    console.error('Erro no POST /login:', err);
-    return res.status(500).json({
-      error: 'Erro interno do servidor'
-    });
-  }
-});
-
-// =========================
-// CRUD DE USUÁRIOS (ADMIN)
-// =========================
-app.post(
-  '/usuarios',
-  auth,
-  authorize(['ADMIN']),
-  usuariosController.criarUsuario
-);
-
-app.get(
-  '/usuarios',
-  auth,
-  authorize(['ADMIN']),
-  usuariosController.listarUsuarios
-);
-
-app.get(
-  '/usuarios/:id',
-  auth,
-  authorize(['ADMIN']),
-  usuariosController.buscarUsuarioPorId
-);
-
-app.put(
-  '/usuarios/:id',
-  auth,
-  authorize(['ADMIN']),
-  usuariosController.atualizarUsuario
-);
-
-app.delete(
-  '/usuarios/:id',
-  auth,
-  authorize(['ADMIN']),
-  usuariosController.deletarUsuario
-);
-
-// =========================
-// AGENDA (ADMIN + EDUCADOR)
-// =========================
-app.get(
-  '/agenda',
-  auth,
-  authorize(['ADMIN', 'EDUCADOR']),
-  (req, res) => {
-    res.json({
-      message: 'Agenda carregada com sucesso',
-      user: req.user
-    });
-  }
-);
-
-// =========================
-// AGENDA POR CRIANÇA
-// =========================
-app.get(
-  '/criancas/:criancaId/agenda',
-  auth,
-  authorize(['ADMIN', 'EDUCADOR', 'RESPONSAVEL']),
-  canAccessChild,
-  (req, res) => {
-    res.json({
-      message: 'Agenda da criança',
-      criancaId: req.params.criancaId,
-      usuario: req.user
-    });
-  }
-);
-
-// =========================
-// ROTA ADMIN (TESTE)
-// =========================
-app.get(
-  '/admin',
-  auth,
-  authorize(['ADMIN']),
-  (req, res) => {
-    res.send('Área administrativa');
-  }
-);
+// Agenda e agenda por criança
+app.use(agendaRoutes);
 
 // =========================
 // PORTA (RENDER)
