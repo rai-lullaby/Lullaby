@@ -2,38 +2,100 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lullaby | Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
 </head>
 <body>
 
-  <header>
-    <h1 id="titulo"></h1>
-    <button id="logoutBtn">Sair</button>
-  </header>
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo">👶</div>
+    <div>
+      <h1>🌙 Lullaby</h1>
+      <span>Ambiente Tia Bia</span>
+    </div>
+  </div>
 
-  <!-- ADMIN -->
-  <section id="admin" hidden>
-    <h2>📊 Visão Geral (Admin)</h2>
-    <ul>
-      <li>Total de usuários: <strong id="totalUsuarios">–</strong></li>
-      <li>Total de crianças: <strong id="totalCriancas">–</strong></li>
-      <li>Total de eventos: <strong id="totalEventos">–</strong></li>
-    </ul>
+  <nav class="menu">
+    <a class="active">📅 Agenda</a>
+    <a>🧒 Crianças</a>
+    <a>📝 Recados</a>
+    <a>📷 Galeria</a>
+  </nav>
+
+  <div class="header-right">
+    <div class="notification">🔔 <span>3</span></div>
+    <button onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<!-- CONTEÚDO -->
+<main class="container">
+
+  <!-- CALENDÁRIO -->
+  <section class="calendar">
+    <button>‹</button>
+    <h2>Janeiro 2026</h2>
+    <button>›</button>
   </section>
 
-  <!-- EDUCADOR -->
-  <section id="educador" hidden>
-    <h2>📅 Agenda das Crianças</h2>
-    <div id="agendaEducador"></div>
+  <section class="week">
+    <div>Dom<br><strong>18</strong></div>
+    <div>Seg<br><strong>19</strong></div>
+    <div>Ter<br><strong>20</strong></div>
+    <div>Qua<br><strong>21</strong></div>
+    <div>Qui<br><strong>22</strong></div>
+    <div class="active">Sex<br><strong>23</strong></div>
+    <div>Sáb<br><strong>24</strong></div>
   </section>
 
-  <!-- RESPONSÁVEL -->
-  <section id="responsavel" hidden>
-    <h2>👶 Agenda dos meus filhos</h2>
-    <div id="agendaResponsavel"></div>
+  <!-- RESUMO -->
+  <section class="summary">
+    <div class="card food">🍽️<br><strong>4</strong><span>Refeições</span></div>
+    <div class="card sleep">🌙<br><strong>1</strong><span>Sonecas</span></div>
+    <div class="card play">🎮<br><strong>3</strong><span>Brincadeiras</span></div>
+    <div class="card time">⏰<br><strong>07:30 - 17:00</strong><span>Horário</span></div>
   </section>
 
-  <script src="dashboard.js"></script>
+  <!-- AGENDA -->
+  <section class="agenda">
+    <h3>Manhã</h3>
+
+    <div class="event play">
+      <h4>Chegada e Acolhimento</h4>
+      <span>07:30 → 08:00</span>
+      <p>Recepção das crianças com música e brincadeiras livres</p>
+    </div>
+
+    <div class="event food">
+      <h4>Café da Manhã</h4>
+      <span>08:00 → 08:30</span>
+      <p>Frutas, pães e suco natural</p>
+    </div>
+
+    <div class="event hygiene">
+      <h4>Higiene</h4>
+      <span>08:30 → 09:00</span>
+      <p>Escovação dos dentes e lavagem das mãos</p>
+    </div>
+
+    <h3>Tarde</h3>
+
+    <div class="event play">
+      <h4>Atividades Livres</h4>
+      <span>15:30 → 17:00</span>
+      <p>Brincadeiras, jogos e preparação para saída</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  🌙 Lullaby © 2025 — Ambiente Tia Bia — Cuidando com amor
+</footer>
+
+<script src="/js/dashboard.js"></script>
 </body>
 </html>
