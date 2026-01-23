@@ -37,11 +37,15 @@ form.addEventListener('submit', async (e) => {
     mensagem.textContent = `Bem-vindo(a), ${data.user.nome}!`;
     mensagem.classList.add('sucesso');
 
-    // Redirecionar após login
-    // window.location.href = '/dashboard.html';
+    //REDIRECIONAMENTO
+    setTimeout(() => {
+      window.location.href = '/dashboard.html';
+    }, 500);
+
 
   } catch (err) {
     mensagem.textContent = 'Erro de conexão com o servidor';
     mensagem.classList.add('erro');
   }
 });
+
