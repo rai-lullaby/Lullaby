@@ -1,6 +1,3 @@
-// =========================
-// CONFIGURAÇÕES INICIAIS
-// =========================
 require('dotenv').config();
 
 const express = require('express');
@@ -14,47 +11,35 @@ const app = express();
 app.use(express.json());
 
 // =========================
-// MIDDLEWARES GLOBAIS
-// =========================
-app.use(express.json());
-
-// =========================
-// SERVIR FRONTEND (PUBLIC)
+// SERVE O FRONTEND
 // =========================
 app.use(express.static(path.join(__dirname, '../public')));
 
 // =========================
-// ROTAS DA API (PREFIXO /api)
+// ROTAS DA API
 // =========================
-app.use('/api', authRoutes);          // /api/login
+app.use('/api', authRoutes);                 // /api/login
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api', agendaRoutes);
 
 // =========================
-// FALLBACK (SPA / LOGIN)
+// HEALTH CHECK
+// =========================
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'API Lullaby online 🚀' });
+});
+
+// =========================
+// FALLBACK SPA
 // =========================
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 // =========================
-// PORTA (RENDER)
+// PORTA
 // =========================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
-
-// =========================
-// LOG DE DEBUG
-// =========================
-console.log('JWT carregado?', !!process.env.JWT_SECRET);
-
-// =========================
-// ROTA DE SAÚDE (API)
-// =========================
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'API Lullaby online 🚀' });
-});
-
-
