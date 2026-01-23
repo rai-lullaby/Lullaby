@@ -38,11 +38,11 @@ async function criarEvento(req, res) {
 
     const { rows } = await db.query(query, values);
 
-    res.status(201).json(rows[0]);
+    return res.status(201).json(rows[0]);
 
   } catch (err) {
-    console.error('❌ Erro ao criar evento:', err);
-    res.status(500).json({ error: 'Erro ao criar evento' });
+    console.error('Erro ao criar evento:', err);
+    return res.status(500).json({ error: 'Erro ao criar evento' });
   }
 }
 
@@ -76,11 +76,11 @@ async function listarPorData(req, res) {
 
     const { rows } = await db.query(query, [data]);
 
-    res.json(rows);
+    return res.json(rows);
 
   } catch (err) {
-    console.error('❌ Erro ao buscar eventos:', err);
-    res.status(500).json({ error: 'Erro interno ao buscar eventos' });
+    console.error('Erro ao buscar eventos:', err);
+    return res.status(500).json({ error: 'Erro interno ao buscar eventos' });
   }
 }
 
@@ -123,11 +123,11 @@ async function atualizarEvento(req, res) {
       return res.status(404).json({ error: 'Evento não encontrado' });
     }
 
-    res.json(rows[0]);
+    return res.json(rows[0]);
 
   } catch (err) {
-    console.error('❌ Erro ao atualizar evento:', err);
-    res.status(500).json({ error: 'Erro ao atualizar evento' });
+    console.error('Erro ao atualizar evento:', err);
+    return res.status(500).json({ error: 'Erro ao atualizar evento' });
   }
 }
 
@@ -154,11 +154,11 @@ async function deletarEvento(req, res) {
       return res.status(404).json({ error: 'Evento não encontrado' });
     }
 
-    res.json({ sucesso: true });
+    return res.json({ sucesso: true });
 
   } catch (err) {
-    console.error('❌ Erro ao deletar evento:', err);
-    res.status(500).json({ error: 'Erro ao deletar evento' });
+    console.error('Erro ao deletar evento:', err);
+    return res.status(500).json({ error: 'Erro ao deletar evento' });
   }
 }
 
@@ -171,4 +171,3 @@ module.exports = {
   atualizarEvento,
   deletarEvento
 };
-
