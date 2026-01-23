@@ -8,11 +8,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('./config/db');
 
+const auth = require('./middlewares/auth');
+const authorize = require('./middlewares/authorize');
+
 const app = express();
 app.use(express.json());
 
 // =========================
-// LOG DE DEBUG (opcional)
+// LOG DE DEBUG
 // =========================
 console.log('JWT carregado?', !!process.env.JWT_SECRET);
 
@@ -30,23 +33,25 @@ app.post('/login', async (req, res) => {
   try {
     const { email, senha } = req.body;
 
-    //Validação básica (erro do cliente → 400)
     if (!email || !senha) {
       return res.status(400).json({
         error: 'Email e senha são obrigatórios'
       });
     }
 
-    //Busca usuário no banco
     const result = await pool.query(`
-      SELECT u.id, u.nome, u.email, u.senha, p.nome AS perfil
-        FROM usuarios u
-        JOIN usuarios_perfis up ON up.usuario_id = u.id
-        JOIN perfis p ON p.id = up.perfil_id
-        WHERE u.email = $1`, 
-      [email]);
+      SELECT 
+        u.id,
+        u.nome,
+        u.email,
+        u.senha,
+        p.nome AS perfil
+      FROM usuarios u
+      JOIN usuarios_perfis up ON up.usuario_id = u.id
+      JOIN perfis p ON p.id = up.perfil_id
+      WHERE u.email = $1
+    `, [email]);
 
-    //Usuário não encontrado → 401
     if (result.rowCount === 0) {
       return res.status(401).json({
         error: 'Usuário ou senha inválidos'
@@ -55,31 +60,23 @@ app.post('/login', async (req, res) => {
 
     const user = result.rows[0];
 
-    //Verifica senha
     const senhaOk = await bcrypt.compare(senha, user.senha);
-
     if (!senhaOk) {
       return res.status(401).json({
         error: 'Usuário ou senha inválidos'
       });
     }
 
-    //Verifica se JWT_SECRET existe (erro de config → 500)
-    if (!process.env.JWT_SECRET) {
-      console.error('JWT_SECRET não definido');
-      return res.status(500).json({
-        error: 'Erro de configuração do servidor'
-      });
-    }
-
-    //Gera token
     const token = jwt.sign(
-      { id: user.id, email: user.email, perfil: user.perfil },
+      {
+        id: user.id,
+        email: user.email,
+        perfil: user.perfil
+      },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '30m' }
     );
 
-    //Resposta de sucesso
     return res.status(200).json({
       user: {
         id: user.id,
@@ -91,7 +88,6 @@ app.post('/login', async (req, res) => {
     });
 
   } catch (err) {
-    //Erro REAL de servidor → 500
     console.error('Erro no POST /login:', err);
     return res.status(500).json({
       error: 'Erro interno do servidor'
@@ -100,43 +96,30 @@ app.post('/login', async (req, res) => {
 });
 
 // =========================
-// MIDDLEWARE DE AUTENTICAÇÃO
+// ROTAS PROTEGIDAS
 // =========================
-function auth(req, res, next) {
-  const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
-    return res.status(401).json({ error: 'Token não informado' });
+// ADMIN + EDUCADOR
+app.get(
+  '/agenda',
+  auth,
+  authorize(['ADMIN', 'EDUCADOR']),
+  (req, res) => {
+    res.json({
+      message: 'Agenda carregada com sucesso',
+      user: req.user
+    });
   }
+);
 
-  const [, token] = authHeader.split(' ');
-
-  try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
-  } catch (err) {
-    return res.status(401).json({ error: 'Token inválido ou expirado' });
+// SOMENTE ADMIN
+app.get(
+  '/admin',
+  auth,
+  authorize(['ADMIN']),
+  (req, res) => {
+    res.send('Área administrativa');
   }
-}
+);
 
-// =========================
-// ROTA PROTEGIDA (EXEMPLO)
-// =========================
-app.get('/agenda', auth, (req, res) => {
-  res.json({
-    message: 'Agenda carregada com sucesso',
-    user: req.user
-  });
-});
-
-// =========================
-// PORTA (RENDER)
-// =========================
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
-
-
-
+// ===============
