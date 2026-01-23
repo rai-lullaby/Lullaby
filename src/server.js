@@ -38,10 +38,13 @@ app.post('/login', async (req, res) => {
     }
 
     //Busca usuário no banco
-    const result = await pool.query(
-      'SELECT id, nome, email, senha FROM usuarios WHERE email = $1',
-      [email]
-    );
+    const result = await pool.query(`
+      SELECT u.id, u.nome, u.email, u.senha, p.nome AS perfil
+        FROM usuarios u
+        JOIN usuarios_perfis up ON up.usuario_id = u.id
+        JOIN perfis p ON p.id = up.perfil_id
+        WHERE u.email = $1`, 
+      [email]);
 
     //Usuário não encontrado → 401
     if (result.rowCount === 0) {
@@ -71,9 +74,9 @@ app.post('/login', async (req, res) => {
 
     //Gera token
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      { id: user.id, email: user.email, perfil: user.perfil },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '30m' }
     );
 
     //Resposta de sucesso
@@ -81,7 +84,8 @@ app.post('/login', async (req, res) => {
       user: {
         id: user.id,
         nome: user.nome,
-        email: user.email
+        email: user.email,
+        perfil: user.perfil
       },
       token
     });
@@ -133,5 +137,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
 
 
