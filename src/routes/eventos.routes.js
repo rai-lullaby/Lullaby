@@ -1,21 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const eventosController = require('../controllers/eventos.controller');
+
+const {
+  criarEvento,
+  listarPorData,
+  atualizarEvento,
+  deletarEvento
+} = require('../controllers/eventos.controller');
+
 const auth = require('../middlewares/auth');
 
-// 🔒 todas protegidas
-router.use(auth);
+// ➕ Criar evento
+router.post('/eventos', auth, criarEvento);
 
-router.post('/eventos', eventos.criarEvento);
-router.get('/eventos', eventos.listarPorData);
-router.put('/eventos/:id', eventos.atualizarEvento);
-router.delete('/eventos/:id', eventos.deletarEvento);
+// 📅 Listar eventos por data
+router.get('/eventos', auth, listarPorData);
 
+// ✏️ Atualizar evento
+router.put('/eventos/:id', auth, atualizarEvento);
 
-// GET /api/eventos?data=YYYY-MM-DD
-router.get('/eventos', auth, eventosController.listarPorData);
+// ❌ Deletar evento
+router.delete('/eventos/:id', auth, deletarEvento);
 
 module.exports = router;
-
-
-
