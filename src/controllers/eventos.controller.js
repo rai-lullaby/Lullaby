@@ -24,15 +24,18 @@ exports.listarPorData = async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT * FROM eventos_agenda 
-       WHERE data_hora = $1 
-       ORDER BY data_hora ASC`,
+      `
+      SELECT *
+      FROM eventos_agenda
+      WHERE data = $1
+      ORDER BY hora ASC
+      `,
       [data]
     );
 
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
+    console.error('Erro ao buscar eventos:', err);
     res.status(500).json({ error: 'Erro ao buscar eventos' });
   }
 };
@@ -60,4 +63,5 @@ exports.deletarEvento = async (req, res) => {
     res.status(400).json({ erro: err.message });
   }
 };
+
 
