@@ -1,185 +1,230 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lullaby | Dashboard</title>
-  <link rel="stylesheet" href="/css/dashboard.css" />
-</head>
-<body>
+// =========================
+// HELPERS
+// =========================
+function el(id) {
+  return document.getElementById(id);
+}
 
-<!-- =========================
- HEADER
-========================= -->
-<header class="header">
+function safeJSONParse(value) {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
 
-  <!-- ESQUERDA -->
-  <div class="header-left">
-    <div class="logo">
-      <img src="/img/logo.png"/>
-    </div>
+function formatDateISO(date) {
+  return date.toISOString().split('T')[0];
+}
 
-    <div class="school-info">
-      <div class="school-name" id="nomeCreche">Ambiente Tia Bia</div>
-      <div class="class-name" id="nomeTurma">Maternal</div>
-    </div>
-  </div>
+function formatHour(dateStr) {
+  return new Date(dateStr).toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
 
-  <!-- MENU -->
-  <nav class="menu">
-    <button id="btnAgenda">📅 Agenda</button>
-    <button id="btnCriancas">🧒 Crianças</button>
-    <button id="btnRecados">📝 Recados</button>
-    <button id="btnGaleria">📷 Galeria</button>
-  </nav>
+// =========================
+// STORAGE
+// =========================
+const token = localStorage.getItem('token');
+const user = safeJSONParse(localStorage.getItem('user'));
 
-  <!-- DIREITA -->
-  <div class="header-right">
-    <div class="notification">
-      🔔
-      <span class="badge">3</span>
-    </div>
+console.log('📦 Token:', !!token);
+console.log('👤 User:', user);
 
-    <button id="logoutBtn" class="btn-logout">Sair</button>
-  </div>
+// =========================
+// 🔒 PROTEÇÃO DA PÁGINA
+// =========================
+function protegerPagina() {
+  if (!token || !user) {
+    window.location.replace('/');
+    return false;
+  }
 
-</header>
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const agora = Math.floor(Date.now() / 1000);
 
+    if (payload.exp < agora) {
+      logout();
+      return false;
+    }
+  } catch {
+    logout();
+    return false;
+  }
 
-<!-- =========================
- CONTEÚDO PRINCIPAL
-========================= -->
-<main class="container">
+  return true;
+}
 
-  <!-- ADMIN -->
-  <section id="admin" hidden>
-    <h2>VISÃO GERAL</h2><br>
+function logout() {
+  localStorage.clear();
+  window.location.replace('/');
+}
 
-    <div class="stats">
-      <div class="stat">
-        <strong id="totalUsuarios">0</strong>
-        <span>Usuários</span>
-      </div>
-      <div class="stat">
-        <strong id="totalCriancas">0</strong>
-        <span>Crianças</span>
-      </div>
-      <div class="stat">
-        <strong id="totalEventos">0</strong>
-        <span>Eventos</span>
-      </div>
-    </div>
-  </section>
+if (!protegerPagina()) {
+  throw new Error('Página protegida');
+}
 
-  <!-- EDUCADOR -->
-  <section id="educador" hidden>
-    <div id="agendaEducador"></div>
-  </section>
+// =========================
+// HEADER — CRECHE + TURMA
+// =========================
+if (el('nomeCreche')) {
+  el('nomeCreche').textContent =
+    user?.creche?.nome || 'Ambiente Tia Bia';
+}
 
-  <!-- RESPONSÁVEL -->
-  <section id="responsavel" hidden>
-    <div id="agendaResponsavel"></div>
-  </section>
+if (el('nomeTurma')) {
+  el('nomeTurma').textContent =
+    user?.turma?.nome || 'Maternal';
+}
 
-  <!-- =========================
-   CALENDÁRIO
-  ========================= -->
-  <div class="calendar-card">
-    <div class="calendar-header">
-      <div class="calendar-nav">
-        <button id="prevWeek">‹</button>
-      </div>
-      <h2 id="calendarTitle">Janeiro 2026</h2>
-      <div class="calendar-nav">
-        <button id="nextWeek">›</button>
-      </div>
-    </div>
-  <div class="calendar-days" id="calendarDays"></div>
-  </div>
+const logoutBtn = el('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', logout);
+}
 
-  <!-- =========================
-   RESUMO DO DIA
-  ========================= -->
-  <section class="summary">
-    <h2>RESUMO DO DIA</h2><br>
-    <div class="card food">
-      🍽️
-      <strong>4</strong>
-      <span>Refeições</span>
-    </div>
+// =========================
+// CONTROLE POR PERFIL
+// =========================
+console.log('🎭 Perfil:', user.perfil);
 
-    <div class="card sleep">
-      🌙
-      <strong>1</strong>
-      <span>Sonecas</span>
-    </div>
+if (user.perfil === 'ADMIN') {
+  el('admin').hidden = false;
+  carregarDashboardAdmin();
+}
 
-    <div class="card play">
-      🎮
-      <strong>3</strong>
-      <span>Brincadeiras</span>
-    </div>
+if (user.perfil === 'EDUCADOR') {
+  el('educador').hidden = false;
+}
 
-    <div class="card time">
-      ⏰
-      <strong>07:30 - 17:00</strong>
-      <span>Horário</span>
-    </div>
-  </section>
+if (user.perfil === 'RESPONSAVEL') {
+  el('responsavel').hidden = false;
+}
 
-  <!-- =========================
-   AGENDA
-  ========================= -->
-  <section class="agenda">
-    <h3>Manhã</h3>
+// =========================
+// DASHBOARD ADMIN (mock)
+// =========================
+async function carregarDashboardAdmin() {
+  el('totalUsuarios').textContent = '12';
+  el('totalCriancas').textContent = '5';
+  el('totalEventos').textContent = '48';
+}
 
-    <article class="event play">
-      <h4>Chegada e Acolhimento</h4>
-      <span>07:30 → 08:00</span>
-      <p>Recepção das crianças com música e brincadeiras livres</p>
-    </article>
+// =========================
+// AGENDA — API
+// =========================
+async function carregarAgendaPorData(date) {
+  const dataISO = formatDateISO(date);
 
-    <article class="event food">
-      <h4>Café da Manhã</h4>
-      <span>08:00 → 08:30</span>
-      <p>Frutas, pães e suco natural</p>
-    </article>
+  console.log('📡 Buscando agenda:', dataISO);
 
-    <article class="event hygiene">
-      <h4>Higiene</h4>
-      <span>08:30 → 09:00</span>
-      <p>Escovação dos dentes e lavagem das mãos</p>
-    </article>
+  try {
+    const res = await fetch(`/api/eventos?data=${dataISO}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
 
-    <h3>Tarde</h3>
+    if (!res.ok) {
+      throw new Error('Erro ao buscar eventos');
+    }
 
-    <article class="event play">
-      <h4>Atividades Livres</h4>
-      <span>15:30 → 17:00</span>
-      <p>Brincadeiras, jogos e preparação para saída</p>
-    </article>
-  </section>
+    const eventos = await res.json();
+    renderAgenda(eventos);
 
-</main>
+  } catch (err) {
+    console.error('❌ Erro agenda:', err);
+  }
+}
 
-<!-- =========================
- FOOTER
-========================= -->
-<footer class="footer">
-  🌙 Lullaby © 2025 — Ambiente Tia Bia — Cuidando com amor
-</footer>
+// =========================
+// RENDER AGENDA (MANHÃ / TARDE)
+// =========================
+function renderAgenda(eventos) {
+  const agendaContainer =
+    el('agendaEducador') || el('agendaResponsavel');
 
-<script src="/js/dashboard.js"></script>
-<script src="/js/calendario.js"></script>
-</body>
-</html>
+  if (!agendaContainer) return;
 
+  agendaContainer.innerHTML = '';
 
+  if (!eventos.length) {
+    agendaContainer.innerHTML =
+      '<p>📭 Nenhum evento para este dia</p>';
+    return;
+  }
 
+  const manha = [];
+  const tarde = [];
 
+  eventos.forEach(e => {
+    const hora = new Date(e.hora).getHours();
+    hora < 12 ? manha.push(e) : tarde.push(e);
+  });
 
+  if (manha.length) {
+    agendaContainer.appendChild(
+      criarPeriodo('Manhã', manha)
+    );
+  }
 
+  if (tarde.length) {
+    agendaContainer.appendChild(
+      criarPeriodo('Tarde', tarde)
+    );
+  }
+}
 
+function criarPeriodo(titulo, eventos) {
+  const bloco = document.createElement('div');
 
+  const h3 = document.createElement('h3');
+  h3.textContent = titulo;
+  bloco.appendChild(h3);
 
+  eventos.forEach(e => {
+    bloco.appendChild(criarEventoCard(e));
+  });
 
+  return bloco;
+}
+
+function criarEventoCard(evento) {
+  const article = document.createElement('article');
+  article.className = `event ${evento.tipo}`;
+
+  article.innerHTML = `
+    <h4>${tituloEvento(evento.tipo)}</h4>
+    <span>${formatHour(evento.hora)}</span>
+    <p>${evento.descricao}</p>
+  `;
+
+  return article;
+}
+
+function tituloEvento(tipo) {
+  const map = {
+    food: 'Alimentação',
+    sleep: 'Soneca',
+    play: 'Brincadeiras',
+    hygiene: 'Higiene',
+    learn: 'Aprendizado'
+  };
+
+  return map[tipo] || 'Atividade';
+}
+
+// =========================
+// INTEGRAÇÃO COM CALENDÁRIO
+// =========================
+document.addEventListener('calendar:dateSelected', (e) => {
+  const date = e.detail.date;
+  carregarAgendaPorData(date);
+});
+
+// =========================
+// INIT (hoje)
+// =========================
+carregarAgendaPorData(new Date());
