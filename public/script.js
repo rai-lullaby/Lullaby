@@ -1,7 +1,12 @@
 const form = document.getElementById('loginForm');
 const mensagem = document.getElementById('mensagem');
 
-// Usa rota relativa da API
+// Garante que só roda na página de login
+if (!form || !mensagem) {
+  console.warn('Script de login carregado fora da página correta');
+  return;
+}
+
 const API_URL = '/api/login';
 
 form.addEventListener('submit', async (e) => {
@@ -16,9 +21,7 @@ form.addEventListener('submit', async (e) => {
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, senha })
     });
 
@@ -34,19 +37,14 @@ form.addEventListener('submit', async (e) => {
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
 
-    mensagem.textContent = `Bem-vindo(a), ${data.user.nome}!`;
-    mensagem.classList.add('sucesso');
-
-    //REDIRECIONAMENTO
-    window.location.replace('/dashboard.html');
-
     console.log('Login OK, dados:', data);
 
+    //REDIRECIONAMENTO GARANTIDO
+    window.location.replace('/dashboard.html');
 
   } catch (err) {
+    console.error(err);
     mensagem.textContent = 'Erro de conexão com o servidor';
     mensagem.classList.add('erro');
   }
 });
-
-
