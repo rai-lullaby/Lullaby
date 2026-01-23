@@ -2,15 +2,30 @@ const { Evento } = require('../models');
 
 // ➕ Criar evento
 exports.criarEvento = async (req, res) => {
-  try {
-    const evento = await Evento.create({
-      ...req.body,
-      criadoPor: req.user.id
-    });
+  const {
+    crianca_id,
+    educador_id,
+    tipo,
+    descricao,
+    data,
+    hora
+  } = req.body;
 
-    res.status(201).json(evento);
+  try {
+    const result = await pool.query(
+      `
+      INSERT INTO eventos_agenda
+      (crianca_id, educador_id, tipo, descricao, data, hora)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
+      `,
+      [crianca_id, educador_id, tipo, descricao, data, hora]
+    );
+
+    res.status(201).json(result.rows[0]);
   } catch (err) {
-    res.status(400).json({ erro: err.message });
+    console.error('Erro ao criar evento:', err);
+    res.status(500).json({ error: 'Erro ao criar evento' });
   }
 };
 
@@ -63,5 +78,6 @@ exports.deletarEvento = async (req, res) => {
     res.status(400).json({ erro: err.message });
   }
 };
+
 
 
