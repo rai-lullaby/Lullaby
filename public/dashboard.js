@@ -2,9 +2,35 @@ const user = JSON.parse(localStorage.getItem('user'));
 const token = localStorage.getItem('token');
 
 // 🔒 Proteção da página
-if (!user || !token) {
+function protegerPagina() {
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+
+  if (!token || !user) {
+    window.location.replace('/');
+    return;
+  }
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const agora = Math.floor(Date.now() / 1000);
+
+    if (payload.exp < agora) {
+      logout();
+    }
+  } catch {
+    logout();
+  }
+}
+
+function logout() {
+  localStorage.clear();
   window.location.replace('/');
 }
+
+// 🔒 executa imediatamente
+protegerPagina();
+
 
 // Header
 document.getElementById('titulo').textContent =
@@ -52,3 +78,4 @@ async function carregarAgendaResponsavel() {
   document.getElementById('agendaResponsavel').innerHTML =
     '<p>Agenda do responsável (em construção)</p>';
 }
+
