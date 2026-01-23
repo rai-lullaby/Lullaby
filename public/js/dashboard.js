@@ -1,14 +1,42 @@
-const user = JSON.parse(localStorage.getItem('user'));
+// =========================
+// HELPERS DE SEGURANÇA
+// =========================
+function el(id) {
+  const element = document.getElementById(id);
+  if (!element) {
+    console.warn(`⚠️ Elemento #${id} não encontrado`);
+  }
+  return element;
+}
+
+function safeJSONParse(value) {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
+// =========================
+// STORAGE
+// =========================
 const token = localStorage.getItem('token');
+const user = safeJSONParse(localStorage.getItem('user'));
 
-// 🔒 Proteção da página
+// =========================
+// LOG DEBUG
+// =========================
+console.log('📦 Token:', token);
+console.log('👤 User:', user);
+
+// =========================
+// 🔒 PROTEÇÃO DA PÁGINA
+// =========================
 function protegerPagina() {
-  const token = localStorage.getItem('token');
-  const user = localStorage.getItem('user');
-
   if (!token || !user) {
+    console.warn('🔒 Não autenticado, redirecionando...');
     window.location.replace('/');
-    return;
+    return false;
   }
 
   try {
@@ -16,66 +44,104 @@ function protegerPagina() {
     const agora = Math.floor(Date.now() / 1000);
 
     if (payload.exp < agora) {
+      console.warn('⏰ Token expirado');
       logout();
+      return false;
     }
-  } catch {
+  } catch (err) {
+    console.error('❌ Token inválido', err);
     logout();
+    return false;
   }
+
+  return true;
 }
 
 function logout() {
+  console.warn('🚪 Logout executado');
   localStorage.clear();
   window.location.replace('/');
 }
 
-// 🔒 executa imediatamente
-protegerPagina();
+// Executa proteção
+if (!protegerPagina()) {
+  throw new Error('Página protegida — execução interrompida');
+}
 
+// =========================
+// HEADER
+// =========================
+const titulo = el('titulo');
+if (titulo && user?.nome) {
+  titulo.textContent = `Bem-vindo(a), ${user.nome}`;
+}
 
-// Header
-document.getElementById('titulo').textContent =
-  `Bem-vindo(a), ${user.nome}`;
+// =========================
+// LOGOUT
+// =========================
+const logoutBtn = el('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', logout);
+}
 
-// Logout
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  localStorage.clear();
-  window.location.replace('/');
-});
+// =========================
+// CONTROLE POR PERFIL
+// =========================
+console.log('🎭 Perfil:', user.perfil);
 
-// Controle por perfil
 if (user.perfil === 'ADMIN') {
-  document.getElementById('admin').hidden = false;
-  carregarDashboardAdmin();
+  const admin = el('admin');
+  if (admin) {
+    admin.hidden = false;
+    carregarDashboardAdmin();
+  }
 }
 
 if (user.perfil === 'EDUCADOR') {
-  document.getElementById('educador').hidden = false;
-  carregarAgendaEducador();
+  const educador = el('educador');
+  if (educador) {
+    educador.hidden = false;
+    carregarAgendaEducador();
+  }
 }
 
 if (user.perfil === 'RESPONSAVEL') {
-  document.getElementById('responsavel').hidden = false;
-  carregarAgendaResponsavel();
+  const responsavel = el('responsavel');
+  if (responsavel) {
+    responsavel.hidden = false;
+    carregarAgendaResponsavel();
+  }
 }
 
 // =========================
-// FUNÇÕES (placeholders)
+// FUNÇÕES (PLACEHOLDERS)
 // =========================
-
 async function carregarDashboardAdmin() {
-  // 🔧 depois ligamos com a API
-  document.getElementById('totalUsuarios').textContent = '12';
-  document.getElementById('totalCriancas').textContent = '5';
-  document.getElementById('totalEventos').textContent = '48';
+  console.log('📊 Carregando dashboard ADMIN');
+
+  const totalUsuarios = el('totalUsuarios');
+  const totalCriancas = el('totalCriancas');
+  const totalEventos = el('totalEventos');
+
+  if (totalUsuarios) totalUsuarios.textContent = '12';
+  if (totalCriancas) totalCriancas.textContent = '5';
+  if (totalEventos) totalEventos.textContent = '48';
 }
 
 async function carregarAgendaEducador() {
-  document.getElementById('agendaEducador').innerHTML =
-    '<p>Agenda do educador (em construção)</p>';
+  console.log('📅 Carregando agenda do EDUCADOR');
+
+  const agenda = el('agendaEducador');
+  if (agenda) {
+    agenda.innerHTML = '<p>Agenda do educador (em construção)</p>';
+  }
 }
 
 async function carregarAgendaResponsavel() {
-  document.getElementById('agendaResponsavel').innerHTML =
-    '<p>Agenda do responsável (em construção)</p>';
-}
+  console.log('👶 Carregando agenda do RESPONSÁVEL');
 
+  const agenda = el('agendaResponsavel');
+  if (agenda) {
+    agenda.innerHTML = '<p>Agenda do responsável (em construção)</p>';
+  }
+}
