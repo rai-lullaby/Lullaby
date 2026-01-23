@@ -71,3 +71,17 @@ form.addEventListener('submit', async (e) => {
     mensagem.className = 'mensagem erro';
   }
 });
+
+    // =========================
+    // VERSIONAMENTO
+    // =========================
+    async function carregarVersao() {
+      try {
+        const res = await fetch('/api/version');
+        const data = await res.json();
+        document.getElementById('appVersion').textContent = data.version;
+      } catch {
+          document.getElementById('appVersion').textContent = '1.0.x';
+      }
+    }
+    carregarVersao();
