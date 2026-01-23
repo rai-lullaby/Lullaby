@@ -1,6 +1,6 @@
 {
   "name": "lullabyws",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Backend do Lullaby",
   "main": "server.js",
   "scripts": {
@@ -14,7 +14,9 @@
     "express": "^4.19.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "bcryptjs": "^2.4.3"
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.5"
   },
   "devDependencies": {
     "nodemon": "^3.0.3"
