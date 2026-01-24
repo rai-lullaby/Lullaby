@@ -104,3 +104,31 @@ footer {
     padding: 26px 20px;
   }
 }
+
+.field-password .password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field-password input {
+  width: 100%;
+  padding-right: 42px; /* espaço pro botão */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.toggle-password:hover {
+  opacity: 1;
+}
+
+
