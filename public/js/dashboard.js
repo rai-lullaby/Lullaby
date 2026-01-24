@@ -143,6 +143,61 @@ async function carregarAgendaPorData(date) {
 }
 
 /* =====================================================
+ RESUMO DO DIA — AUTOMÁTICO
+===================================================== */
+function atualizarResumoDoDia(eventos) {
+  const elRefeicoes = el('resumoRefeicoes');
+  const elSono = el('resumoSono');
+  const elBrincadeiras = el('resumoBrincadeiras');
+  const elHorario = el('resumoHorario');
+
+  if (!elRefeicoes || !elSono || !elBrincadeiras || !elHorario) return;
+
+  let refeicoes = 0;
+  let sonecas = 0;
+  let brincadeiras = 0;
+  let horarios = [];
+
+  eventos.forEach(e => {
+    if (!e.hora) return;
+
+    const dataHora = new Date(e.hora);
+    horarios.push(dataHora);
+
+    switch (e.tipo) {
+      case 'ALIMENTACAO':
+        refeicoes++;
+        break;
+      case 'SONO':
+        sonecas++;
+        break;
+      case 'BRINCADEIRA':
+        brincadeiras++;
+        break;
+    }
+  });
+
+  elRefeicoes.textContent = refeicoes;
+  elSono.textContent = sonecas;
+  elBrincadeiras.textContent = brincadeiras;
+
+  if (horarios.length) {
+    const inicio = new Date(Math.min(...horarios));
+    const fim = new Date(Math.max(...horarios));
+
+    const formatar = d =>
+      d.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+    elHorario.textContent = `${formatar(inicio)} - ${formatar(fim)}`;
+  } else {
+    elHorario.textContent = '—';
+  }
+}
+
+/* =====================================================
  RENDER AGENDA (MANHÃ / TARDE)
 ===================================================== */
 function renderAgenda(eventos) {
@@ -232,3 +287,4 @@ document.addEventListener('calendar:dateSelected', e => {
  INIT — carrega hoje
 ===================================================== */
 carregarAgendaPorData(new Date());
+
