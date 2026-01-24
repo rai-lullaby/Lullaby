@@ -268,10 +268,42 @@ section {
 /* =========================
  SUMMARY
 ========================= */
+/* =========================
+ RESUMO DO DIA
+========================= */
 .summary {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: auto 1fr 1fr 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.summary h2 {
+  grid-column: 1 / 2;
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .summary {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .summary h2 {
+    grid-column: 1 / -1;
+    margin-bottom: 8px;
+  }
+}
+
+.summary .card strong {
+  font-size: 26px;
+}
+
+.summary .card span {
+  font-size: 14px;
 }
 
 .card {
@@ -283,6 +315,9 @@ section {
   flex-direction: column;
   gap: 6px;
   animation: fadeUp .4s ease both;
+  min-height: 110px;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .card strong {
@@ -298,6 +333,12 @@ section {
 .sleep { background: var(--sleep); }
 .play { background: var(--play); }
 .time { background: #f4efe9; }
+
+.card.time strong:empty::after {
+  content: '—';
+  color: var(--muted);
+}
+
 
 /* =========================
  AGENDA
@@ -417,6 +458,7 @@ section:hover {
     padding: 24px;
   }
 }
+
 
 
 
