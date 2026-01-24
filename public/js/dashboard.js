@@ -136,64 +136,10 @@ async function carregarAgendaPorData(date) {
 
     const eventos = await res.json();
     renderAgenda(eventos);
+    atualizarResumoDoDia(eventos);
   } catch (err) {
     console.error('❌ Erro agenda:', err);
     renderAgenda([]);
-  }
-}
-
-/* =====================================================
- RESUMO DO DIA — AUTOMÁTICO
-===================================================== */
-function atualizarResumoDoDia(eventos) {
-  const elRefeicoes = el('resumoRefeicoes');
-  const elSono = el('resumoSono');
-  const elBrincadeiras = el('resumoBrincadeiras');
-  const elHorario = el('resumoHorario');
-
-  if (!elRefeicoes || !elSono || !elBrincadeiras || !elHorario) return;
-
-  let refeicoes = 0;
-  let sonecas = 0;
-  let brincadeiras = 0;
-  let horarios = [];
-
-  eventos.forEach(e => {
-    if (!e.hora) return;
-
-    const dataHora = new Date(e.hora);
-    horarios.push(dataHora);
-
-    switch (e.tipo) {
-      case 'ALIMENTACAO':
-        refeicoes++;
-        break;
-      case 'SONO':
-        sonecas++;
-        break;
-      case 'BRINCADEIRA':
-        brincadeiras++;
-        break;
-    }
-  });
-
-  elRefeicoes.textContent = refeicoes;
-  elSono.textContent = sonecas;
-  elBrincadeiras.textContent = brincadeiras;
-
-  if (horarios.length) {
-    const inicio = new Date(Math.min(...horarios));
-    const fim = new Date(Math.max(...horarios));
-
-    const formatar = d =>
-      d.toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-
-    elHorario.textContent = `${formatar(inicio)} - ${formatar(fim)}`;
-  } else {
-    elHorario.textContent = '—';
   }
 }
 
@@ -287,4 +233,49 @@ document.addEventListener('calendar:dateSelected', e => {
  INIT — carrega hoje
 ===================================================== */
 carregarAgendaPorData(new Date());
+
+/* =====================================================
+ RESUMO DO DIA — AUTOMÁTICO
+===================================================== */
+function atualizarResumoDoDia(eventos) {
+  const resumo = {
+    ALIMENTACAO: 0,
+    SONO: 0,
+    BRINCADEIRA: 0
+  };
+
+  let horaInicio = null;
+  let horaFim = null;
+
+  eventos.forEach(e => {
+    if (resumo[e.tipo] !== undefined) {
+      resumo[e.tipo]++;
+    }
+
+    const horaEvento = new Date(e.hora);
+
+    if (!horaInicio || horaEvento < horaInicio) {
+      horaInicio = horaEvento;
+    }
+
+    if (!horaFim || horaEvento > horaFim) {
+      horaFim = horaEvento;
+    }
+  });
+
+  // Atualiza cards
+  el('resumoRefeicoes') && (el('resumoRefeicoes').textContent = resumo.ALIMENTACAO);
+  el('resumoSono') && (el('resumoSono').textContent = resumo.SONO);
+  el('resumoBrincadeiras') && (el('resumoBrincadeiras').textContent = resumo.BRINCADEIRA);
+
+  // Horário
+  const horarioEl = el('resumoHorario');
+  if (horarioEl && horaInicio && horaFim) {
+    const inicio = horaInicio.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const fim = horaFim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    horarioEl.textContent = `${inicio} - ${fim}`;
+  } else if (horarioEl) {
+    horarioEl.textContent = '—';
+  }
+}
 
