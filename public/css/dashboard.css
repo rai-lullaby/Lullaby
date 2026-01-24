@@ -34,15 +34,22 @@ body {
   background: var(--bg-page);
   color: var(--text);
   line-height: 1.4;
+
+  /* espaço para header fixo */
+  padding-top: 64px;
 }
 
 /* =========================
- HEADER
+ HEADER (FIXO)
 ========================= */
 .header {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 10;
+  left: 0;
+  width: 100%;
+  height: 64px;
+
+  z-index: 1000;
 
   display: flex;
   align-items: center;
@@ -132,12 +139,26 @@ body {
   border-radius: 999px;
 }
 
+/* BOTÃO SAIR */
 .btn-logout {
-  background: none;
+  background: linear-gradient(135deg, var(--primary), #ff6b3d);
+  color: #fff;
   border: none;
-  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 999px;
   font-size: 14px;
-  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+.btn-logout:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(255,138,91,.35);
+}
+
+.btn-logout:active {
+  transform: scale(.96);
 }
 
 /* =========================
@@ -150,7 +171,7 @@ body {
 }
 
 /* =========================
- SECTION BASE (BORDAS)
+ SECTION BASE
 ========================= */
 section {
   background: var(--bg-card);
@@ -162,9 +183,8 @@ section {
 }
 
 /* =========================
- CALENDÁRIO 
+ CALENDÁRIO
 ========================= */
-
 .calendar-card {
   background: var(--bg-card);
   border: 1px solid var(--border-soft);
@@ -172,11 +192,9 @@ section {
   padding: 16px;
   box-shadow: var(--shadow-soft);
   animation: fadeUp .4s ease both;
-  font-family: inherit;
   margin-bottom: 20px;
 }
 
-/* HEADER */
 .calendar-header {
   display: flex;
   align-items: center;
@@ -187,11 +205,8 @@ section {
 .calendar-header h2 {
   font-size: 18px;
   font-weight: 600;
-  text-transform: capitalize;
-  margin-bottom: 0;
 }
 
-/* BOTÕES */
 .calendar-nav {
   display: flex;
   gap: 6px;
@@ -215,7 +230,6 @@ section {
   transform: scale(1.05);
 }
 
-/* DIAS */
 .calendar-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -274,42 +288,21 @@ section {
   margin-top: 4px;
 }
 
-/* Dia com evento */
-.calendar-day.has-event::after {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--primary);
-  border-radius: 50%;
-  margin-top: 4px;
-}
-
-/* Quando o dia está ativo + tem evento */
 .calendar-day.active.has-event::after {
   background: white;
 }
 
-
 /* =========================
  SUMMARY
-========================= */
-/* =========================
- RESUMO DO DIA
 ========================= */
 .summary {
   display: grid;
   grid-template-columns: auto 1fr 1fr 1fr 1fr;
   gap: 16px;
-  align-items: stretch;
 }
 
 .summary h2 {
-  grid-column: 1 / 2;
-  display: flex;
-  align-items: center;
   font-size: 20px;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 @media (max-width: 768px) {
@@ -319,111 +312,7 @@ section {
 
   .summary h2 {
     grid-column: 1 / -1;
-    margin-bottom: 8px;
   }
-}
-
-.summary .card strong {
-  font-size: 26px;
-}
-
-.summary .card span {
-  font-size: 14px;
-}
-
-.card {
-  padding: 16px;
-  border-radius: 16px;
-  border: 1px solid var(--border-soft);
-  box-shadow: var(--shadow-soft);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  animation: fadeUp .4s ease both;
-  min-height: 110px;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-.card strong {
-  font-size: 20px;
-}
-
-.card span {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.food { background: var(--food); }
-.sleep { background: var(--sleep); }
-.play { background: var(--play); }
-.time { background: #f4efe9; }
-
-.card.time strong:empty::after {
-  content: '—';
-  color: var(--muted);
-}
-
-
-/* =========================
- AGENDA
-========================= */
-.agenda h3 {
-  margin: 20px 0 12px;
-}
-
-.event {
-  background: var(--bg-card);
-  border: 1px solid var(--border-soft);
-  border-left-width: 6px;
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 14px;
-  box-shadow: var(--shadow-soft);
-  animation: fadeUp .5s ease both;
-}
-
-.event h4 {
-  margin-bottom: 4px;
-}
-
-.event span {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.event p {
-  margin-top: 6px;
-  font-size: 14px;
-}
-
-.event.food { background: var(--food); border-left-color: #ff8a5b; }
-.event.sleep { background: var(--sleep); border-left-color: #7b6cff; }
-.event.play { background: var(--play); border-left-color: #2db7a3; }
-.event.hygiene { background: var(--hygiene); border-left-color: #4dabf7; }
-.event.learn { background: var(--learn); border-left-color: #f2b705; }
-
-/* =========================
- ADMIN STATS
-========================= */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.stat {
-  background: var(--bg-card);
-  border: 1px solid var(--border-soft);
-  border-radius: 14px;
-  padding: 16px;
-  text-align: center;
-  box-shadow: var(--shadow-soft);
-}
-
-.stat strong {
-  font-size: 22px;
-  display: block;
 }
 
 /* =========================
@@ -451,141 +340,33 @@ section {
 }
 
 /* =========================
- HOVER SUAVE
+ MOBILE
 ========================= */
-.card,
-.event,
-section {
-  transition: transform .2s ease, box-shadow .2s ease;
-}
+@media (max-width: 480px) {
+  .header {
+    height: 56px;
+    padding: 10px 14px;
+  }
 
-.card:hover,
-.event:hover,
-section:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 26px rgba(0,0,0,.06);
+  body {
+    padding-top: 56px;
+  }
+
+  .btn-logout {
+    font-size: 13px;
+    padding: 6px 14px;
+  }
 }
 
 /* =========================
  DESKTOP
 ========================= */
 @media (min-width: 768px) {
-
   .menu {
     display: flex;
-  }
-
-  .summary {
-    grid-template-columns: repeat(4, 1fr);
   }
 
   .container {
     padding: 24px;
   }
 }
-
-/* =========================
- ACCORDION
-========================= */
-.accordion {
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-  margin: 16px auto;
-  max-width: 520px;
-  width: 100%;
-}
-
-.accordion-header {
-  width: 100%;
-  background: #fff3ea;
-  border: none;
-  padding: 16px 18px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 14px;
-}
-
-.accordion-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-  padding: 0 18px;
-}
-
-.accordion-content.open {
-  padding: 18px;
-}
-
-.accordion form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.accordion label {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.accordion input,
-.accordion select,
-.accordion textarea {
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  font-size: 14px;
-  width: 100%;
-}
-
-.accordion textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.btn-primary {
-  background: #ff8a5c;
-  color: #fff;
-  border: none;
-  padding: 14px;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 8px;
-}
-
-.arrow {
-  transition: transform 0.3s;
-}
-
-/* Mobile */
-@media (max-width: 480px) {
-  .accordion {
-    margin: 12px;
-  }
-
-  .btn-primary {
-    width: 100%;
-    font-size: 16px;
-    padding: 16px;
-  }
-}
-
-/* Desktop grande */
-@media (min-width: 1024px) {
-  .accordion {
-    max-width: 640px;
-  }
-}
-
-
-
-
-
-
-
