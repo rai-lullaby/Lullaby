@@ -1,3 +1,5 @@
+import { formatDateISO } from './utils/date.js';
+
 /* =====================================================
  DASHBOARD.JS — LULLABY
 ===================================================== */
@@ -19,9 +21,7 @@ function safeJSONParse(value) {
   }
 }
 
-function formatDateISO(date) {
-  return date.toISOString().split('T')[0]; // YYYY-MM-DD
-}
+carregarAgendaPorData(formatDateISO(data));
 
 /* =====================================================
  STORAGE
@@ -226,3 +226,4 @@ document.addEventListener('calendar:dateSelected', e => {
  INIT — carrega hoje
 ===================================================== */
 carregarAgendaPorData(new Date());
+
