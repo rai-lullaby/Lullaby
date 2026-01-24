@@ -125,12 +125,21 @@ async function carregarVersao() {
   console.groupEnd();
 }
 
-toggleSenha.addEventListener('click', () => {
-  const isPassword = senhaInput.type === 'password';
+const senhaInput = document.getElementById('senha');
+const toggleSenha = document.getElementById('toggleSenha');
+const icon = toggleSenha.querySelector('i');
 
-  senhaInput.type = isPassword ? 'text' : 'password';
-  toggleSenha.textContent = isPassword ? '🙈' : '👁️';
+toggleSenha.addEventListener('click', () => {
+  const visivel = senhaInput.type === 'text';
+
+  senhaInput.type = visivel ? 'password' : 'text';
+
+  icon.className = visivel
+    ? 'iconoir-eye'
+    : 'iconoir-eye-off';
 });
 
+
 carregarVersao();
+
 
