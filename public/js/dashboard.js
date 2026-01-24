@@ -1,4 +1,4 @@
-import { formatDateISO } from '/dateUtils.js';
+import { formatDateISO } from './dateUtils.js';
 
 /* =====================================================
  DASHBOARD.JS — LULLABY
@@ -226,5 +226,6 @@ document.addEventListener('calendar:dateSelected', e => {
  INIT — carrega hoje
 ===================================================== */
 carregarAgendaPorData(new Date());
+
 
 
