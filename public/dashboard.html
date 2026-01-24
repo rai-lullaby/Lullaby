@@ -14,36 +14,58 @@
 <!-- =====================================================
  HEADER
 ===================================================== -->
-<header class="header">
+<header class="header" role="banner">
 
-  <!-- ESQUERDA -->
+  <!-- ESQUERDA: Logo + contexto -->
   <div class="header-left">
-    <div class="logo">
+    <a href="/dashboard.html" class="logo" aria-label="Lullaby">
       <img src="/img/logo.png" alt="Lullaby" />
-    </div>
+    </a>
 
     <div class="school-info">
-      <div class="school-name" id="nomeCreche">Creche</div>
-      <div class="class-name" id="nomeTurma">Turma</div>
+      <span class="school-name" id="nomeCreche">Creche</span>
+      <span class="class-name" id="nomeTurma">Turma</span>
     </div>
   </div>
 
-  <!-- MENU -->
-  <nav class="menu">
-    <button id="btnAgenda">📅 Agenda</button>
-    <button id="btnCriancas">🧒 Crianças</button>
-    <button id="btnRecados">📝 Recados</button>
-    <button id="btnGaleria">📷 Galeria</button>
+  <!-- MENU PRINCIPAL (desktop) -->
+  <nav class="menu" aria-label="Menu principal">
+    <button type="button" id="btnAgenda">
+      📅 <span>Agenda</span>
+    </button>
+
+    <button type="button" id="btnCriancas">
+      🧒 <span>Crianças</span>
+    </button>
+
+    <button type="button" id="btnRecados">
+      📝 <span>Recados</span>
+    </button>
+
+    <button type="button" id="btnGaleria">
+      📷 <span>Galeria</span>
+    </button>
   </nav>
 
-  <!-- DIREITA -->
+  <!-- DIREITA: ações -->
   <div class="header-right">
-    <div class="notification">
-      🔔
-      <span class="badge">3</span>
-    </div>
 
-    <button id="logoutBtn" class="btn-logout">Sair</button>
+    <!-- Notificações -->
+    <button class="notification" aria-label="Notificações">
+      🔔
+      <span class="badge" aria-hidden="true">3</span>
+    </button>
+
+    <!-- Logout -->
+    <button
+      type="button"
+      id="btnLogout"
+      class="btn-logout"
+      aria-label="Sair do sistema"
+    >
+      Sair
+    </button>
+
   </div>
 
 </header>
@@ -217,6 +239,7 @@
 
 </body>
 </html>
+
 
 
 
