@@ -1,12 +1,11 @@
+// =====================================================
+// DASHBOARD.JS — LULLABY (REFATORADO)
+// =====================================================
 import { formatDateISO } from './dateUtils.js';
 
-/* =====================================================
- DASHBOARD.JS — LULLABY
-===================================================== */
-
-/* =====================================================
- HELPERS
-===================================================== */
+// =====================================================
+// HELPERS
+// =====================================================
 function el(id) {
   const element = document.getElementById(id);
   if (!element) console.warn(`⚠️ Elemento #${id} não encontrado`);
@@ -21,20 +20,19 @@ function safeJSONParse(value) {
   }
 }
 
-/* =====================================================
- STORAGE
-===================================================== */
+// =====================================================
+// STORAGE
+// =====================================================
 const token = localStorage.getItem('token');
 const user = safeJSONParse(localStorage.getItem('user'));
 
 console.log('📦 Token carregado:', !!token);
 console.log('👤 User:', user);
 
-/* =====================================================
- 🔒 PROTEÇÃO DA PÁGINA
-===================================================== */
+// =====================================================
+// 🔒 AUTENTICAÇÃO
+// =====================================================
 function logout() {
-  console.warn('🚪 Logout');
   localStorage.clear();
   window.location.replace('/');
 }
@@ -50,12 +48,10 @@ function protegerPagina() {
     const agora = Math.floor(Date.now() / 1000);
 
     if (payload.exp < agora) {
-      console.warn('⏰ Token expirado');
       logout();
       return false;
     }
-  } catch (err) {
-    console.error('❌ Token inválido', err);
+  } catch {
     logout();
     return false;
   }
@@ -67,62 +63,55 @@ if (!protegerPagina()) {
   throw new Error('Página protegida');
 }
 
-/* =====================================================
- HEADER — CRECHE + TURMA
-===================================================== */
+// =====================================================
+// HEADER — CRECHE + TURMA
+// =====================================================
 const nomeCrecheEl = el('nomeCreche');
 const nomeTurmaEl = el('nomeTurma');
 
 if (nomeCrecheEl) {
-  nomeCrecheEl.textContent =
-    user?.creche?.nome || 'Ambiente Tia Bia';
+  nomeCrecheEl.textContent = user?.creche?.nome || 'Ambiente Tia Bia';
 }
 
 if (nomeTurmaEl) {
-  nomeTurmaEl.textContent =
-    user?.turma?.nome || 'Turma';
+  nomeTurmaEl.textContent = user?.turma?.nome || 'Turma';
 }
 
 const logoutBtn = el('logoutBtn');
-if (logoutBtn) logoutBtn.addEventListener('click', logout);
+logoutBtn && logoutBtn.addEventListener('click', logout);
 
-/* =====================================================
- CONTROLE POR PERFIL
-===================================================== */
-console.log('🎭 Perfil:', user.perfil);
-
+// =====================================================
+// CONTROLE POR PERFIL
+// =====================================================
 if (user.perfil === 'ADMIN') {
-  const admin = el('admin');
-  if (admin) {
-    admin.hidden = false;
-    carregarDashboardAdmin();
-  }
+  el('admin') && (el('admin').hidden = false);
+  carregarDashboardAdmin();
 }
 
 if (user.perfil === 'EDUCADOR') {
-  const educador = el('educador');
-  if (educador) educador.hidden = false;
+  el('educador') && (el('educador').hidden = false);
 }
 
 if (user.perfil === 'RESPONSAVEL') {
-  const responsavel = el('responsavel');
-  if (responsavel) responsavel.hidden = false;
+  el('responsavel') && (el('responsavel').hidden = false);
 }
 
-/* =====================================================
- DASHBOARD ADMIN (mock)
-===================================================== */
+// =====================================================
+// DASHBOARD ADMIN (mock)
+// =====================================================
 function carregarDashboardAdmin() {
   el('totalUsuarios') && (el('totalUsuarios').textContent = '12');
   el('totalCriancas') && (el('totalCriancas').textContent = '5');
   el('totalEventos') && (el('totalEventos').textContent = '48');
 }
 
-/* =====================================================
- AGENDA — API
-===================================================== */
+// =====================================================
+// AGENDA — API
+// =====================================================
 async function carregarAgendaPorData(date) {
   const dataISO = formatDateISO(date);
+  if (!dataISO) return;
+
   console.log('📡 Buscando agenda:', dataISO);
 
   try {
@@ -135,26 +124,35 @@ async function carregarAgendaPorData(date) {
     if (!res.ok) throw new Error('Erro ao buscar eventos');
 
     const eventos = await res.json();
+
     renderAgenda(eventos);
     atualizarResumoDoDia(eventos);
+
+    // 🔔 avisa calendário para marcar dias
+    document.dispatchEvent(
+      new CustomEvent('calendar:markEvents', {
+        detail: {
+          dates: [...new Set(eventos.map(e => formatDateISO(e.data || e.hora)))]
+        }
+      })
+    );
   } catch (err) {
     console.error('❌ Erro agenda:', err);
     renderAgenda([]);
+    atualizarResumoDoDia([]);
   }
 }
 
-/* =====================================================
- RENDER AGENDA (MANHÃ / TARDE)
-===================================================== */
-function renderAgenda(eventos) {
-  const container =
-    el('agendaEducador') || el('agendaResponsavel');
-
+// =====================================================
+// RENDER AGENDA (MANHÃ / TARDE)
+// =====================================================
+function renderAgenda(eventos = []) {
+  const container = el('agendaEducador') || el('agendaResponsavel');
   if (!container) return;
 
   container.innerHTML = '';
 
-  if (!eventos || !eventos.length) {
+  if (!eventos.length) {
     container.innerHTML = '<p>📭 Nenhum evento para este dia</p>';
     return;
   }
@@ -167,13 +165,8 @@ function renderAgenda(eventos) {
     hora < 12 ? manha.push(e) : tarde.push(e);
   });
 
-  if (manha.length) {
-    container.appendChild(criarPeriodo('Manhã', manha));
-  }
-
-  if (tarde.length) {
-    container.appendChild(criarPeriodo('Tarde', tarde));
-  }
+  manha.length && container.appendChild(criarPeriodo('Manhã', manha));
+  tarde.length && container.appendChild(criarPeriodo('Tarde', tarde));
 }
 
 function criarPeriodo(titulo, eventos) {
@@ -183,9 +176,7 @@ function criarPeriodo(titulo, eventos) {
   h3.textContent = titulo;
   bloco.appendChild(h3);
 
-  eventos.forEach(e => {
-    bloco.appendChild(criarEventoCard(e));
-  });
+  eventos.forEach(e => bloco.appendChild(criarEventoCard(e)));
 
   return bloco;
 }
@@ -220,57 +211,49 @@ function mapTipo(tipo) {
   return map[tipo] || 'play';
 }
 
-/* =====================================================
- INTEGRAÇÃO COM CALENDÁRIO
-===================================================== */
-document.addEventListener('calendar:dateSelected', e => {
-  const date = e.detail.date || e.detail.dateObj;
-  carregarAgendaPorData(date);
-});
-
-/* =====================================================
- RESUMO DO DIA — AUTOMÁTICO
-===================================================== */
-function atualizarResumoDoDia(eventos) {
+// =====================================================
+// RESUMO DO DIA — AUTOMÁTICO
+// =====================================================
+function atualizarResumoDoDia(eventos = []) {
   const resumo = {
     ALIMENTACAO: 0,
     SONO: 0,
     BRINCADEIRA: 0
   };
 
-  let horaInicio = null;
-  let horaFim = null;
+  let inicio = null;
+  let fim = null;
 
   eventos.forEach(e => {
-    if (resumo[e.tipo] !== undefined) {
-      resumo[e.tipo]++;
-    }
+    resumo[e.tipo] !== undefined && resumo[e.tipo]++;
 
-    const horaEvento = new Date(e.hora);
-
-    if (!horaInicio || horaEvento < horaInicio) {
-      horaInicio = horaEvento;
-    }
-
-    if (!horaFim || horaEvento > horaFim) {
-      horaFim = horaEvento;
-    }
+    const h = new Date(e.hora);
+    if (!inicio || h < inicio) inicio = h;
+    if (!fim || h > fim) fim = h;
   });
 
-  // Atualiza cards
   el('resumoRefeicoes') && (el('resumoRefeicoes').textContent = resumo.ALIMENTACAO);
   el('resumoSono') && (el('resumoSono').textContent = resumo.SONO);
   el('resumoBrincadeiras') && (el('resumoBrincadeiras').textContent = resumo.BRINCADEIRA);
 
-  // Horário
   const horarioEl = el('resumoHorario');
-  if (horarioEl && horaInicio && horaFim) {
-    const inicio = horaInicio.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    const fim = horaFim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    horarioEl.textContent = `${inicio} - ${fim}`;
+  if (horarioEl && inicio && fim) {
+    horarioEl.textContent =
+      `${inicio.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} - ` +
+      `${fim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
   } else if (horarioEl) {
     horarioEl.textContent = '—';
   }
 }
 
+// =====================================================
+// INTEGRAÇÃO COM CALENDÁRIO
+// =====================================================
+document.addEventListener('calendar:dateSelected', e => {
+  carregarAgendaPorData(e.detail.date || e.detail.dateObj);
+});
 
+// =====================================================
+// INIT — carrega HOJE
+// =====================================================
+carregarAgendaPorData(new Date());
