@@ -60,8 +60,8 @@ body {
 }
 
 .logo-img {
-  width: 44px;
-  height: 44px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
 }
 
@@ -279,3 +279,4 @@ footer {
     font-size: 22px;
   }
 }
+
