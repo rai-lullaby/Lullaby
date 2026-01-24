@@ -21,8 +21,6 @@ function safeJSONParse(value) {
   }
 }
 
-carregarAgendaPorData(formatDateISO(data));
-
 /* =====================================================
  STORAGE
 ===================================================== */
@@ -72,13 +70,16 @@ if (!protegerPagina()) {
 /* =====================================================
  HEADER — CRECHE + TURMA
 ===================================================== */
-if (el('nomeCreche')) {
-  el('nomeCreche').textContent =
+const nomeCrecheEl = el('nomeCreche');
+const nomeTurmaEl = el('nomeTurma');
+
+if (nomeCrecheEl) {
+  nomeCrecheEl.textContent =
     user?.creche?.nome || 'Ambiente Tia Bia';
 }
 
-if (el('nomeTurma')) {
-  el('nomeTurma').textContent =
+if (nomeTurmaEl) {
+  nomeTurmaEl.textContent =
     user?.turma?.nome || 'Turma';
 }
 
@@ -90,17 +91,22 @@ if (logoutBtn) logoutBtn.addEventListener('click', logout);
 ===================================================== */
 console.log('🎭 Perfil:', user.perfil);
 
-if (user.perfil === 'ADMIN' && el('admin')) {
-  el('admin').hidden = false;
-  carregarDashboardAdmin();
+if (user.perfil === 'ADMIN') {
+  const admin = el('admin');
+  if (admin) {
+    admin.hidden = false;
+    carregarDashboardAdmin();
+  }
 }
 
-if (user.perfil === 'EDUCADOR' && el('educador')) {
-  el('educador').hidden = false;
+if (user.perfil === 'EDUCADOR') {
+  const educador = el('educador');
+  if (educador) educador.hidden = false;
 }
 
-if (user.perfil === 'RESPONSAVEL' && el('responsavel')) {
-  el('responsavel').hidden = false;
+if (user.perfil === 'RESPONSAVEL') {
+  const responsavel = el('responsavel');
+  if (responsavel) responsavel.hidden = false;
 }
 
 /* =====================================================
@@ -147,7 +153,7 @@ function renderAgenda(eventos) {
 
   container.innerHTML = '';
 
-  if (!eventos.length) {
+  if (!eventos || !eventos.length) {
     container.innerHTML = '<p>📭 Nenhum evento para este dia</p>';
     return;
   }
@@ -187,14 +193,14 @@ function criarEventoCard(evento) {
   const article = document.createElement('article');
   article.className = `event ${mapTipo(evento.tipo)}`;
 
-  const horaInicio = new Date(evento.hora).toLocaleTimeString('pt-BR', {
+  const hora = new Date(evento.hora).toLocaleTimeString('pt-BR', {
     hour: '2-digit',
     minute: '2-digit'
   });
 
   article.innerHTML = `
     <h4>${evento.tipo}</h4>
-    <span>${horaInicio}</span>
+    <span>${hora}</span>
     <p>${evento.descricao || ''}</p>
   `;
 
@@ -226,6 +232,3 @@ document.addEventListener('calendar:dateSelected', e => {
  INIT — carrega hoje
 ===================================================== */
 carregarAgendaPorData(new Date());
-
-
-
