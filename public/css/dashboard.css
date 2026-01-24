@@ -484,6 +484,105 @@ section:hover {
   }
 }
 
+/* =========================
+ ACCORDION
+========================= */
+.accordion {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  margin: 16px auto;
+  max-width: 520px;
+  width: 100%;
+}
+
+.accordion-header {
+  width: 100%;
+  background: #fff3ea;
+  border: none;
+  padding: 16px 18px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 14px;
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding: 0 18px;
+}
+
+.accordion-content.open {
+  padding: 18px;
+}
+
+.accordion form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.accordion label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.accordion input,
+.accordion select,
+.accordion textarea {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  width: 100%;
+}
+
+.accordion textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.btn-primary {
+  background: #ff8a5c;
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.arrow {
+  transition: transform 0.3s;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .accordion {
+    margin: 12px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    font-size: 16px;
+    padding: 16px;
+  }
+}
+
+/* Desktop grande */
+@media (min-width: 1024px) {
+  .accordion {
+    max-width: 640px;
+  }
+}
+
 
 
 
