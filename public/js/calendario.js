@@ -20,7 +20,8 @@ import { formatDateISO } from './dateUtils.js';
   // =========================
   // STATE
   // =========================
-  let selectedDate = new Date();
+  let selectedDate = new Date();              // dia selecionado
+  let diasComEventos = new Set();             // YYYY-MM-DD
 
   // =========================
   // HELPERS
@@ -55,6 +56,14 @@ import { formatDateISO } from './dateUtils.js';
   }
 
   // =========================
+  // MARCAR DIAS COM EVENTOS
+  // =========================
+  function marcarDiasComEventos(dates = []) {
+    diasComEventos = new Set(dates);
+    renderWeek();
+  }
+
+  // =========================
   // RENDER SEMANA
   // =========================
   function renderWeek() {
@@ -69,23 +78,33 @@ import { formatDateISO } from './dateUtils.js';
       const day = new Date(weekStart);
       day.setDate(weekStart.getDate() + i);
 
+      const iso = formatDateISO(day);
+
       const dayEl = document.createElement('div');
       dayEl.className = 'calendar-day';
-      dayEl.dataset.date = formatDateISO(day);
+      dayEl.dataset.date = iso;
 
       dayEl.innerHTML = `
         <span class="week-day">${formatWeekDay(day)}</span>
         <span class="day-number">${day.getDate()}</span>
       `;
 
+      // hoje
       if (isSameDay(day, today)) {
         dayEl.classList.add('today');
       }
 
+      // selecionado
       if (isSameDay(day, selectedDate)) {
         dayEl.classList.add('active');
       }
 
+      // tem eventos
+      if (diasComEventos.has(iso)) {
+        dayEl.classList.add('has-event');
+      }
+
+      // clique
       dayEl.addEventListener('click', () => {
         selectedDate = new Date(day);
 
@@ -95,14 +114,10 @@ import { formatDateISO } from './dateUtils.js';
 
         dayEl.classList.add('active');
 
-        const selectedISO = formatDateISO(selectedDate);
-
-        console.log('📅 Dia selecionado:', selectedISO);
-
         document.dispatchEvent(
           new CustomEvent('calendar:dateSelected', {
             detail: {
-              date: selectedISO,
+              date: iso,
               dateObj: selectedDate
             }
           })
@@ -119,11 +134,30 @@ import { formatDateISO } from './dateUtils.js';
   prevBtn.addEventListener('click', () => {
     selectedDate.setDate(selectedDate.getDate() - 7);
     renderWeek();
+
+    document.dispatchEvent(
+      new CustomEvent('calendar:weekChanged', {
+        detail: { date: selectedDate }
+      })
+    );
   });
 
   nextBtn.addEventListener('click', () => {
     selectedDate.setDate(selectedDate.getDate() + 7);
     renderWeek();
+
+    document.dispatchEvent(
+      new CustomEvent('calendar:weekChanged', {
+        detail: { date: selectedDate }
+      })
+    );
+  });
+
+  // =========================
+  // EVENTOS EXTERNOS
+  // =========================
+  document.addEventListener('calendar:markEvents', e => {
+    marcarDiasComEventos(e.detail.dates || []);
   });
 
   // =========================
@@ -131,7 +165,7 @@ import { formatDateISO } from './dateUtils.js';
   // =========================
   renderWeek();
 
-  // 🔔 dispara data inicial
+  // dispara data inicial (dashboard carrega agenda + resumo)
   document.dispatchEvent(
     new CustomEvent('calendar:dateSelected', {
       detail: {
