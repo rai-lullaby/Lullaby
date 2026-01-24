@@ -1,7 +1,7 @@
 // =========================
 // 📅 COMPONENTE CALENDÁRIO — VISÃO SEMANAL
 // =========================
-import { formatDateISO } from './utils/date.js';
+import { formatDateISO } from '/dateUtils.js';
 
 (function () {
   // =========================
@@ -148,5 +148,6 @@ import { formatDateISO } from './utils/date.js';
     })
   );
 })();
+
 
 
