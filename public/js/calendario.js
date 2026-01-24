@@ -1,6 +1,8 @@
 // =========================
 // 📅 COMPONENTE CALENDÁRIO — VISÃO SEMANAL
 // =========================
+import { formatDateISO } from './utils/date.js';
+
 (function () {
   // =========================
   // DOM
@@ -39,19 +41,7 @@
     );
   }
 
-  function formatDateISO(date) {
-    if (!date) return null;
-    // se já for string YYYY-MM-DD, retorna direto
-    if (typeof date === 'string') {
-      return date;
-    }
-    // se for Date
-    if (date instanceof Date) {
-      return date.toISOString().split('T')[0];
-    }
-    // fallback
-    return new Date(date).toISOString().split('T')[0];
-  }
+  const dataFormatada = formatDateISO(dataSelecionada);
 
   function formatMonthTitle(date) {
     return date.toLocaleDateString('pt-BR', {
@@ -158,4 +148,5 @@
     })
   );
 })();
+
 
