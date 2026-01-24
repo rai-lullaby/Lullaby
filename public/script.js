@@ -6,6 +6,7 @@ const mensagem = document.getElementById('mensagem');
 const emailInput = document.getElementById('email');
 const senhaInput = document.getElementById('senha');
 const toggleSenha = document.getElementById('toggleSenha');
+const icon = toggleSenha.querySelector('i');
 
 console.group('🔐 Login Script Init');
 console.log('Form:', form);
@@ -125,9 +126,6 @@ async function carregarVersao() {
   console.groupEnd();
 }
 
-const senhaInput = document.getElementById('senha');
-const toggleSenha = document.getElementById('toggleSenha');
-const icon = toggleSenha.querySelector('i');
 
 toggleSenha.addEventListener('click', () => {
   const visivel = senhaInput.type === 'text';
@@ -141,5 +139,6 @@ toggleSenha.addEventListener('click', () => {
 
 
 carregarVersao();
+
 
 
