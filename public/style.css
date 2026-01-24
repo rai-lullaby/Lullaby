@@ -1,8 +1,11 @@
+/* =========================
+ RESET + BASE
+========================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 body {
@@ -13,13 +16,20 @@ body {
   justify-content: center;
 }
 
+/* =========================
+ CONTAINER
+========================= */
 .container {
   width: 100%;
-  padding: 20px;
+  padding: 16px;
   text-align: center;
 }
 
+/* =========================
+ CARD
+========================= */
 .card {
+  width: 100%;
   max-width: 420px;
   margin: 0 auto;
   background: #ffffff;
@@ -28,6 +38,9 @@ body {
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
+/* =========================
+ LOGO / TITULO
+========================= */
 .logo {
   font-size: 26px;
   font-weight: 700;
@@ -44,6 +57,9 @@ body {
   font-size: 14px;
 }
 
+/* =========================
+ FORM
+========================= */
 form {
   margin-top: 28px;
 }
@@ -60,6 +76,9 @@ label {
   margin-bottom: 6px;
 }
 
+/* =========================
+ INPUTS
+========================= */
 input {
   width: 100%;
   padding: 14px 16px;
@@ -67,13 +86,47 @@ input {
   border: 1px solid #e5e5e5;
   background: #fffaf5;
   font-size: 15px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 input:focus {
   outline: none;
   border-color: #f48c61;
+  box-shadow: 0 0 0 3px rgba(244, 140, 97, 0.15);
 }
 
+/* =========================
+ SENHA COM BOTÃO
+========================= */
+.field-password .password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field-password input {
+  padding-right: 44px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toggle-password:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* =========================
+ BOTÃO
+========================= */
 button {
   width: 100%;
   margin-top: 10px;
@@ -85,50 +138,62 @@ button {
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
+  transition: background 0.3s ease, transform 0.15s ease;
 }
 
 button:hover {
   background: #ec7a4b;
 }
 
+button:active {
+  transform: scale(0.97);
+}
+
+/* =========================
+ MENSAGENS
+========================= */
+.mensagem {
+  margin-top: 14px;
+  font-size: 14px;
+  color: #d9534f;
+}
+
+/* =========================
+ FOOTER
+========================= */
 footer {
   margin-top: 20px;
   font-size: 13px;
   color: #8a8a8a;
 }
 
-/* 📱 Responsivo */
-@media (max-width: 480px) {
+/* =========================
+ MOBILE PEQUENO
+========================= */
+@media (max-width: 360px) {
   .card {
-    padding: 26px 20px;
+    padding: 24px 18px;
+  }
+
+  .logo {
+    font-size: 24px;
   }
 }
 
-.field-password .password-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
+/* =========================
+ TABLET
+========================= */
+@media (min-width: 600px) {
+  .card {
+    padding: 36px 32px;
+  }
 }
 
-.field-password input {
-  width: 100%;
-  padding-right: 42px; /* espaço pro botão */
+/* =========================
+ DESKTOP GRANDE
+========================= */
+@media (min-width: 1024px) {
+  body {
+    background: linear-gradient(135deg, #fffaf5, #fff3ea);
+  }
 }
-
-.toggle-password {
-  position: absolute;
-  right: 10px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
-}
-
-.toggle-password:hover {
-  opacity: 1;
-}
-
-
