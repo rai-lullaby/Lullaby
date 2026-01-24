@@ -1,14 +1,12 @@
+// =========================
+// 📅 COMPONENTE CALENDÁRIO — VISÃO SEMANAL
+// =========================
 import { formatDateISO } from './dateUtils.js';
 
-/* =====================================================
- 📅 COMPONENTE CALENDÁRIO — VISÃO SEMANAL
-===================================================== */
-
 (function () {
-
-  /* =====================================================
-   DOM
-  ===================================================== */
+  // =========================
+  // DOM
+  // =========================
   const calendarTitle = document.getElementById('calendarTitle');
   const calendarDays = document.getElementById('calendarDays');
   const prevBtn = document.getElementById('prevWeek');
@@ -19,14 +17,14 @@ import { formatDateISO } from './dateUtils.js';
     return;
   }
 
-  /* =====================================================
-   STATE
-  ===================================================== */
-  let selectedDate = new Date(); // sempre Date nativo
+  // =========================
+  // STATE
+  // =========================
+  let selectedDate = new Date();
 
-  /* =====================================================
-   HELPERS
-  ===================================================== */
+  // =========================
+  // HELPERS
+  // =========================
   function startOfWeek(date) {
     const d = new Date(date);
     const day = d.getDay(); // 0 = domingo
@@ -56,16 +54,15 @@ import { formatDateISO } from './dateUtils.js';
     });
   }
 
-  /* =====================================================
-   RENDER — SEMANA
-  ===================================================== */
+  // =========================
+  // RENDER SEMANA
+  // =========================
   function renderWeek() {
     calendarDays.innerHTML = '';
 
     const weekStart = startOfWeek(selectedDate);
     const today = new Date();
 
-    // 🗓️ Título (Janeiro 2026)
     calendarTitle.textContent = formatMonthTitle(selectedDate);
 
     for (let i = 0; i < 7; i++) {
@@ -81,17 +78,14 @@ import { formatDateISO } from './dateUtils.js';
         <span class="day-number">${day.getDate()}</span>
       `;
 
-      // 🟢 Hoje
       if (isSameDay(day, today)) {
         dayEl.classList.add('today');
       }
 
-      // 🔵 Selecionado
       if (isSameDay(day, selectedDate)) {
         dayEl.classList.add('active');
       }
 
-      // 🖱️ Clique no dia
       dayEl.addEventListener('click', () => {
         selectedDate = new Date(day);
 
@@ -101,16 +95,15 @@ import { formatDateISO } from './dateUtils.js';
 
         dayEl.classList.add('active');
 
-        const iso = formatDateISO(selectedDate);
+        const selectedISO = formatDateISO(selectedDate);
 
-        console.log('📅 Dia selecionado:', iso);
+        console.log('📅 Dia selecionado:', selectedISO);
 
-        // 🔔 Evento global (dashboard escuta)
         document.dispatchEvent(
           new CustomEvent('calendar:dateSelected', {
             detail: {
-              date: selectedDate,   // Date
-              dateISO: iso          // YYYY-MM-DD
+              date: selectedISO,
+              dateObj: selectedDate
             }
           })
         );
@@ -120,9 +113,9 @@ import { formatDateISO } from './dateUtils.js';
     }
   }
 
-  /* =====================================================
-   NAVEGAÇÃO SEMANAL
-  ===================================================== */
+  // =========================
+  // NAVEGAÇÃO
+  // =========================
   prevBtn.addEventListener('click', () => {
     selectedDate.setDate(selectedDate.getDate() - 7);
     renderWeek();
@@ -133,17 +126,18 @@ import { formatDateISO } from './dateUtils.js';
     renderWeek();
   });
 
-  /* =====================================================
-   INIT
-  ===================================================== */
+  // =========================
+  // INIT
+  // =========================
   renderWeek();
 
-  // 🔔 Dispara data inicial (carregar agenda ao abrir)
+  // 🔔 dispara data inicial
   document.dispatchEvent(
-  new CustomEvent('calendar:dateSelected', {
-    detail: {
-      date: formatDateISO(selectedDate),
-      dateObj: selectedDate
-    }
-  })
-);
+    new CustomEvent('calendar:dateSelected', {
+      detail: {
+        date: formatDateISO(selectedDate),
+        dateObj: selectedDate
+      }
+    })
+  );
+})();
