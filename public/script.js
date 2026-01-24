@@ -5,6 +5,7 @@ const form = document.getElementById('loginForm');
 const mensagem = document.getElementById('mensagem');
 const emailInput = document.getElementById('email');
 const senhaInput = document.getElementById('senha');
+const toggleSenha = document.getElementById('toggleSenha');
 
 console.group('🔐 Login Script Init');
 console.log('Form:', form);
@@ -124,4 +125,12 @@ async function carregarVersao() {
   console.groupEnd();
 }
 
+toggleSenha.addEventListener('click', () => {
+  const isPassword = senhaInput.type === 'password';
+
+  senhaInput.type = isPassword ? 'text' : 'password';
+  toggleSenha.textContent = isPassword ? '🙈' : '👁️';
+});
+
 carregarVersao();
+
