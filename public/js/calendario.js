@@ -140,12 +140,10 @@ import { formatDateISO } from './dateUtils.js';
 
   // 🔔 Dispara data inicial (carregar agenda ao abrir)
   document.dispatchEvent(
-    new CustomEvent('calendar:dateSelected', {
-      detail: {
-        date: selectedDate,
-        dateISO: formatDateISO(selectedDate)
-      }
-    })
-  );
-
-})();
+  new CustomEvent('calendar:dateSelected', {
+    detail: {
+      date: formatDateISO(selectedDate),
+      dateObj: selectedDate
+    }
+  })
+);
