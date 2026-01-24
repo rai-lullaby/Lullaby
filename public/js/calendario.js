@@ -40,7 +40,17 @@
   }
 
   function formatDateISO(date) {
-    return date.toISOString().split('T')[0]; // yyyy-mm-dd
+    if (!date) return null;
+    // se já for string YYYY-MM-DD, retorna direto
+    if (typeof date === 'string') {
+      return date;
+    }
+    // se for Date
+    if (date instanceof Date) {
+      return date.toISOString().split('T')[0];
+    }
+    // fallback
+    return new Date(date).toISOString().split('T')[0];
   }
 
   function formatMonthTitle(date) {
@@ -148,3 +158,4 @@
     })
   );
 })();
+
