@@ -26,15 +26,28 @@
           />
         </div>
 
-        <div class="field">
-          <label for="senha">Senha</label>
-          <input
-            type="password"
-            id="senha"
-            required
-            autocomplete="current-password"
-          />
-        </div>
+        <div class="field field-password">
+  <label for="senha">Senha</label>
+
+  <div class="password-wrapper">
+    <input
+      type="password"
+      id="senha"
+      required
+      autocomplete="current-password"
+    />
+
+    <button
+      type="button"
+      class="toggle-password"
+      aria-label="Mostrar senha"
+      id="toggleSenha"
+    >
+      👁️
+    </button>
+  </div>
+</div>
+
 
         <button type="submit">Entrar</button>
       </form>
@@ -48,6 +61,7 @@
 
 </body>
 </html>
+
 
 
 
