@@ -224,15 +224,9 @@ function mapTipo(tipo) {
  INTEGRAÇÃO COM CALENDÁRIO
 ===================================================== */
 document.addEventListener('calendar:dateSelected', e => {
-  const date = e.detail.date;
-  console.log('📅 Data selecionada:', date);
+  const date = e.detail.date || e.detail.dateObj;
   carregarAgendaPorData(date);
 });
-
-/* =====================================================
- INIT — carrega hoje
-===================================================== */
-carregarAgendaPorData(new Date());
 
 /* =====================================================
  RESUMO DO DIA — AUTOMÁTICO
@@ -278,4 +272,5 @@ function atualizarResumoDoDia(eventos) {
     horarioEl.textContent = '—';
   }
 }
+
 
