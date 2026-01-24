@@ -75,6 +75,51 @@
         <span>Eventos</span>
       </div>
     </div>
+
+    <!-- Accordion Agendar Evento -->
+<div class="accordion">
+  <button class="accordion-header" id="toggleAgenda">
+    📅 Agendar evento para a turma
+    <span class="arrow">⌄</span>
+  </button>
+
+  <div class="accordion-content" id="agendaContent">
+    <form id="formAgendaTurma">
+
+      <label for="educadorId">Educador</label>
+      <select id="educadorId" required>
+        <option value="">Selecione o educador</option>
+      </select>
+
+      <label for="tipoEvento">Tipo do evento</label>
+      <select id="tipoEvento" required>
+        <option value="">Selecione</option>
+        <option value="ENTRADA">Entrada</option>
+        <option value="SAIDA">Saída</option>
+        <option value="ALIMENTACAO">Alimentação</option>
+        <option value="SONO">Sono</option>
+        <option value="ATIVIDADE">Atividade</option>
+        <option value="COMPORTAMENTO">Comportamento</option>
+      </select>
+
+      <label for="descricao">Descrição</label>
+      <textarea
+        id="descricao"
+        placeholder="Ex: Atividade com pintura..."
+        required
+      ></textarea>
+
+      <label for="dataHora">Data e hora</label>
+      <input type="datetime-local" id="dataHora" required />
+
+      <button type="submit" class="btn-primary">
+        Salvar evento
+      </button>
+    </form>
+  </div>
+</div>
+
+    
   </section>
 
   <!-- =========================
@@ -171,6 +216,7 @@
 
 </body>
 </html>
+
 
 
 
