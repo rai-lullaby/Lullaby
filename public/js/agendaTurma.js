@@ -1,12 +1,35 @@
 // =====================================================
-// AGENDA DA TURMA
+// AGENDA DA TURMA — LULLABY
 // =====================================================
 
 document.addEventListener('DOMContentLoaded', () => {
   inicializarAccordion();
   inicializarFormulario();
-  carregarEducadores();
+
+  const user = getUser();
+
+  if (!user) return;
+
+  // 🔐 Apenas ADMIN e EDUCADOR podem carregar educadores
+  if (['ADMIN', 'EDUCADOR'].includes(user.perfil)) {
+    carregarEducadores();
+  }
 });
+
+// =====================================================
+// HELPERS
+// =====================================================
+function getUser() {
+  try {
+    return JSON.parse(localStorage.getItem('user'));
+  } catch {
+    return null;
+  }
+}
+
+function getToken() {
+  return localStorage.getItem('token');
+}
 
 // =====================================================
 // ACCORDION
@@ -32,13 +55,13 @@ function inicializarAccordion() {
 }
 
 // =====================================================
-// CARREGAR EDUCADORES
+// EDUCADORES (ADMIN / EDUCADOR)
 // =====================================================
 async function carregarEducadores() {
   const select = document.getElementById('educadorId');
   if (!select) return;
 
-  const token = localStorage.getItem('token');
+  const token = getToken();
   if (!token) return;
 
   try {
@@ -49,21 +72,23 @@ async function carregarEducadores() {
     });
 
     if (!res.ok) {
-      console.warn('Erro ao buscar educadores');
+      console.warn('⚠️ Não foi possível carregar educadores');
       return;
     }
 
     const educadores = await res.json();
 
-    educadores.forEach(educador => {
+    select.innerHTML = '<option value="">Selecione</option>';
+
+    educadores.forEach(({ id, nome }) => {
       const option = document.createElement('option');
-      option.value = educador.id;
-      option.textContent = educador.nome;
+      option.value = id;
+      option.textContent = nome;
       select.appendChild(option);
     });
 
   } catch (err) {
-    console.error('Erro ao carregar educadores:', err);
+    console.error('❌ Erro ao carregar educadores:', err);
   }
 }
 
@@ -80,8 +105,8 @@ function inicializarFormulario() {
     const payload = montarPayload();
     if (!payload) return;
 
-    await salvarEvento(payload);
-    form.reset();
+    const sucesso = await salvarEvento(payload);
+    if (sucesso) form.reset();
   });
 }
 
@@ -94,13 +119,14 @@ function montarPayload() {
   const descricao = document.getElementById('descricao')?.value;
   const dataHora = document.getElementById('dataHora')?.value;
 
-  if (!educadorId || !tipo || !descricao || !dataHora) {
-    alert('Preencha todos os campos');
+  if (!tipo || !descricao || !dataHora) {
+    alert('Preencha todos os campos obrigatórios');
     return null;
   }
 
+  // 👩‍🏫 Educador é opcional dependendo do perfil
   return {
-    educador_id: Number(educadorId),
+    educador_id: educadorId ? Number(educadorId) : null,
     tipo,
     descricao,
     data_hora: dataHora
@@ -111,10 +137,10 @@ function montarPayload() {
 // SALVAR EVENTO
 // =====================================================
 async function salvarEvento(payload) {
-  const token = localStorage.getItem('token');
+  const token = getToken();
   if (!token) {
     alert('Sessão expirada');
-    return;
+    return false;
   }
 
   try {
@@ -129,13 +155,15 @@ async function salvarEvento(payload) {
 
     if (!res.ok) {
       alert('Erro ao salvar evento');
-      return;
+      return false;
     }
 
     alert('Evento criado com sucesso 🎉');
+    return true;
 
   } catch (err) {
-    console.error('Erro ao salvar evento:', err);
+    console.error('❌ Erro ao salvar evento:', err);
     alert('Erro inesperado');
+    return false;
   }
 }
