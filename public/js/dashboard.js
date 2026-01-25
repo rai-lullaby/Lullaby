@@ -83,18 +83,32 @@ logoutBtn && logoutBtn.addEventListener('click', logout);
 // =====================================================
 // CONTROLE POR PERFIL
 // =====================================================
-if (user.perfil === 'ADMIN') {
-  el('admin') && (el('admin').hidden = false);
-  carregarDashboardAdmin();
+// =====================================================
+// CONTROLE POR PERFIL (REFATORADO)
+// =====================================================
+const perfilHandlers = {
+  ADMIN() {
+    carregarDashboardAdmin();
+  },
+
+  EDUCADOR() {
+    mostrarSecao('educador');
+  },
+
+  RESPONSAVEL() {
+    mostrarSecao('responsavel');
+  }
+};
+
+function mostrarSecao(id) {
+  const section = el(id);
+  if (!section) return;
+  section.hidden = false;
 }
 
-if (user.perfil === 'EDUCADOR') {
-  el('educador') && (el('educador').hidden = false);
-}
+// executa handler do perfil, se existir
+perfilHandlers[user.perfil]?.();
 
-if (user.perfil === 'RESPONSAVEL') {
-  el('responsavel') && (el('responsavel').hidden = false);
-}
 
 // =====================================================
 // DASHBOARD ADMIN (mock)
