@@ -147,7 +147,7 @@ async function carregarAgendaPorData(date) {
 // RENDER AGENDA (MANHÃ / TARDE)
 // =====================================================
 function renderAgenda(eventos = []) {
-  const container = el('agendaEducador') || el('agendaResponsavel');
+  const container = el('agenda');
   if (!container) return;
 
   container.innerHTML = '';
@@ -205,7 +205,8 @@ function mapTipo(tipo) {
     SONO: 'sleep',
     BRINCADEIRA: 'play',
     HIGIENE: 'hygiene',
-    APRENDIZADO: 'learn'
+    ATIVIDADE: 'play',
+    COMPORTAMENTO: 'behavior'
   };
 
   return map[tipo] || 'play';
