@@ -293,6 +293,52 @@ section {
 }
 
 /* =========================
+ AGENDA DO DIA
+========================= */
+.agenda {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.agenda h3 {
+  margin: 12px 0 8px;
+  font-size: 16px;
+  color: var(--primary);
+}
+
+.event {
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-soft);
+}
+
+.event h4 {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.event span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.event p {
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* cores por tipo */
+.event.food { background: var(--food); }
+.event.sleep { background: var(--sleep); }
+.event.play { background: var(--play); }
+.event.hygiene { background: var(--hygiene); }
+.event.learn { background: var(--learn); }
+
+
+/* =========================
  SUMMARY
 ========================= */
 .summary {
