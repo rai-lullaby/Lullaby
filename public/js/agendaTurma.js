@@ -11,10 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!user) return;
 
   // 🔐 Apenas ADMIN e EDUCADOR podem carregar educadores
-  if (['ADMIN', 'EDUCADOR'].includes(user.perfil)) {
+  if (['ADMIN'].includes(user.perfil)) {
     carregarEducadores();
   }
 });
+
 
 // =====================================================
 // HELPERS
