@@ -1,5 +1,5 @@
 // =====================================================
-// DASHBOARD.JS — LULLABY (REFATORADO + SERVICE)
+// DASHBOARD.JS — LULLABY (REFATORADO FINAL)
 // =====================================================
 
 import { carregarHeader } from './layout/header.js';
@@ -9,6 +9,14 @@ import { buscarEventosPorData } from './services/eventService.js';
 // =====================================================
 // 🔐 SESSION
 // =====================================================
+function getUser() {
+  try {
+    return JSON.parse(localStorage.getItem('user'));
+  } catch {
+    return null;
+  }
+}
+
 const user = getUser();
 const token = localStorage.getItem('token');
 
@@ -17,7 +25,7 @@ if (!user || !token) {
 }
 
 // =====================================================
-// 🎨 EVENT CONFIG (FONTE ÚNICA)
+// 🎨 EVENT CONFIG
 // =====================================================
 const EVENT_CONFIG = {
   ENTRADA: { label: 'Entrada', class: 'entry', icon: 'log-in' },
@@ -38,14 +46,6 @@ function el(id) {
   return document.getElementById(id);
 }
 
-function getUser() {
-  try {
-    return JSON.parse(localStorage.getItem('user'));
-  } catch {
-    return null;
-  }
-}
-
 function formatHora(date) {
   return new Date(date).toLocaleTimeString('pt-BR', {
     hour: '2-digit',
@@ -53,9 +53,6 @@ function formatHora(date) {
   });
 }
 
-// =====================================================
-// 🧱 NORMALIZAÇÃO
-// =====================================================
 function normalizarEvento(evento) {
   const tipo = (evento.tipo || '').toUpperCase();
   const cfg = EVENT_CONFIG[tipo] || {
@@ -71,6 +68,41 @@ function normalizarEvento(evento) {
     className: cfg.class,
     icon: cfg.icon
   };
+}
+
+// =====================================================
+// 🧱 MONTA DOM BASE DO DASHBOARD
+// =====================================================
+function montarLayoutDashboard() {
+  const content = el('app-content');
+  if (!content) return;
+
+  content.innerHTML = `
+    <section class="calendar-card">
+      <div class="calendar-header">
+        <button id="prevWeek">‹</button>
+        <h2 id="calendarTitle">Calendário</h2>
+        <button id="nextWeek">›</button>
+      </div>
+      <div id="calendarDays" class="calendar-days"></div>
+    </section>
+
+    <section id="agendaBox">
+      <h2>
+        <i class="iconoir-clock"></i>
+        Agenda do Dia
+      </h2>
+      <section id="agenda" class="agenda"></section>
+    </section>
+
+    <section id="summaryBox">
+      <h2>
+        <i class="iconoir-clipboard"></i>
+        Resumo do Dia
+      </h2>
+      <section class="summary"></section>
+    </section>
+  `;
 }
 
 // =====================================================
@@ -97,7 +129,7 @@ function criarEventoCard(evento) {
 }
 
 // =====================================================
-// 📅 AGENDA (NÃO ADMIN)
+// 📅 AGENDA
 // =====================================================
 function renderAgenda(eventos = []) {
   const container = el('agenda');
@@ -110,27 +142,13 @@ function renderAgenda(eventos = []) {
     return;
   }
 
-  const manha = [];
-  const tarde = [];
-
   eventos.forEach(e => {
-    const h = new Date(e.data_hora).getHours();
-    h < 12 ? manha.push(e) : tarde.push(e);
+    container.appendChild(criarEventoCard(e));
   });
-
-  if (manha.length) container.appendChild(criarPeriodo('Manhã', manha));
-  if (tarde.length) container.appendChild(criarPeriodo('Tarde', tarde));
-}
-
-function criarPeriodo(titulo, eventos) {
-  const bloco = document.createElement('div');
-  bloco.innerHTML = `<h3>${titulo}</h3>`;
-  eventos.forEach(e => bloco.appendChild(criarEventoCard(e)));
-  return bloco;
 }
 
 // =====================================================
-// 📊 RESUMO DO DIA (TODOS)
+// 📊 RESUMO DO DIA
 // =====================================================
 function atualizarResumoDoDia(eventos = []) {
   const container = document.querySelector('.summary');
@@ -187,31 +205,33 @@ async function initDashboard() {
   await carregarHeader(user);
   await carregarFooter();
 
+  montarLayoutDashboard();
+
   const hoje = new Date().toISOString().split('T')[0];
   const eventos = await buscarEventosPorData(hoje);
 
   atualizarResumoDoDia(eventos);
 
-  // ADMIN não vê agenda do dia
   if (user.perfil !== 'ADMIN') {
     renderAgenda(eventos);
   } else {
-    el('agenda')?.remove();
+    el('agendaBox')?.remove();
   }
 
   console.groupEnd();
 }
 
 // =====================================================
-// 🔄 ATUALIZAÇÃO AUTOMÁTICA
+// 🔄 EVENTO GLOBAL (CRIAR EVENTO)
 // =====================================================
 document.addEventListener('evento:criado', e => {
-  console.log('🔁 Evento criado → atualizando dashboard', e.detail);
-
   const dataISO = e.detail.data_hora.split('T')[0];
+
   buscarEventosPorData(dataISO).then(eventos => {
     atualizarResumoDoDia(eventos);
-    if (user.perfil !== 'ADMIN') renderAgenda(eventos);
+    if (user.perfil !== 'ADMIN') {
+      renderAgenda(eventos);
+    }
   });
 });
 
