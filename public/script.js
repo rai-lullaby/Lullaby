@@ -1,57 +1,43 @@
-// =========================
+// ======================================================
+// 🔐 LOGIN SCRIPT
+// ======================================================
+
+// -------------------------
 // DOM
-// =========================
+// -------------------------
 const form = document.getElementById('loginForm');
 const mensagem = document.getElementById('mensagem');
 const emailInput = document.getElementById('email');
 const senhaInput = document.getElementById('senha');
 const toggleSenha = document.getElementById('toggleSenha');
-const icon = toggleSenha.querySelector('i');
+const icon = toggleSenha?.querySelector('i');
 
-console.group('🔐 Login Script Init');
-console.log('Form:', form);
-console.log('Email input:', emailInput);
-console.log('Senha input:', senhaInput);
-console.log('Mensagem:', mensagem);
-console.groupEnd();
-
-// Segurança: evita erro se script carregar fora da página de login
+// Segurança: evita erro fora da página de login
 if (!form || !emailInput || !senhaInput || !mensagem) {
   console.warn('⚠️ Script de login carregado fora da página correta');
 } else {
 
-  // =========================
+  // -------------------------
   // CONFIG
-  // =========================
+  // -------------------------
   const API_URL = '/api/login';
-  console.log('🌐 API_URL configurada:', API_URL);
 
-  // =========================
-  // LOGIN
-  // =========================
+  // -------------------------
+  // SUBMIT LOGIN
+  // -------------------------
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    console.group('➡️ Submit do formulário');
 
     const email = emailInput.value.trim();
     const senha = senhaInput.value;
 
-    console.log('📧 Email digitado:', email);
-    console.log('🔑 Senha digitada:', senha ? '*** preenchida ***' : 'vazia');
-
     // Validação básica
     if (!email || !senha) {
-      console.warn('❌ Validação falhou: campos vazios');
-      mensagem.textContent = 'Informe email e senha';
-      mensagem.className = 'mensagem erro';
-      console.groupEnd();
+      exibirMensagem('Informe email e senha', true);
       return;
     }
 
-    mensagem.textContent = 'Entrando...';
-    mensagem.className = 'mensagem';
-    console.log('⏳ Enviando requisição de login...');
+    exibirMensagem('Entrando...', false);
 
     try {
       const response = await fetch(API_URL, {
@@ -62,83 +48,76 @@ if (!form || !emailInput || !senhaInput || !mensagem) {
         body: JSON.stringify({ email, senha })
       });
 
-      console.log('📡 Resposta recebida:', response.status, response.statusText);
+      let data = {};
+      try {
+        data = await response.json();
+      } catch {
+        // resposta não-JSON
+      }
 
-      const data = await response.json();
-      console.log('📦 Payload da resposta:', data);
-
-      // Erro de autenticação
+      // ❌ Erro de autenticação ou servidor
       if (!response.ok) {
-        console.warn('❌ Login inválido');
-        mensagem.textContent = data.error || 'Erro ao fazer login';
-        mensagem.className = 'mensagem erro';
-        console.groupEnd();
+        exibirMensagem(
+          data?.error || 'Erro interno do servidor',
+          true
+        );
         return;
       }
 
-      // =========================
-      // SUCESSO
-      // =========================
-      console.log('✅ Login bem-sucedido');
-      console.log('👤 Usuário:', data.user);
-      console.log('🪪 Token JWT:', data.token);
+      // ✅ Sucesso
+      if (!data.token || !data.usuario) {
+        exibirMensagem('Resposta inválida do servidor', true);
+        return;
+      }
 
+      // Persistência
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('user', JSON.stringify(data.usuario));
 
-      console.log('💾 Token e usuário salvos no localStorage');
-
-      // Redirecionamento garantido
-      console.log('➡️ Redirecionando para /dashboard.html');
+      // Redirect
       window.location.href = '/dashboard.html';
 
-      console.groupEnd();
-
     } catch (err) {
-      console.error('🔥 Erro inesperado no login:', err);
-      mensagem.textContent = 'Erro de conexão com o servidor';
-      mensagem.className = 'mensagem erro';
-      console.groupEnd();
+      console.error('Erro de rede/login:', err);
+      exibirMensagem('Erro de conexão com o servidor', true);
     }
   });
 }
 
-// =========================
-// VERSIONAMENTO
-// =========================
-async function carregarVersao() {
-  console.group('📦 Versionamento');
-  try {
-    const res = await fetch('/api/version');
-    console.log('Resposta /api/version:', res.status);
+// ======================================================
+// 👁️ TOGGLE VISIBILIDADE DA SENHA
+// ======================================================
+if (toggleSenha && senhaInput && icon) {
+  toggleSenha.addEventListener('click', () => {
+    const visivel = senhaInput.type === 'text';
 
-    const data = await res.json();
-    console.log('Versão recebida:', data.version);
-
-    const el = document.getElementById('appVersion');
-    if (el) el.textContent = data.version;
-
-  } catch (err) {
-    console.warn('⚠️ Não foi possível carregar versão, usando fallback');
-    const el = document.getElementById('appVersion');
-    if (el) el.textContent = '1.0.x';
-  }
-  console.groupEnd();
+    senhaInput.type = visivel ? 'password' : 'text';
+    icon.className = visivel ? 'iconoir-eye' : 'iconoir-eye-off';
+  });
 }
 
+// ======================================================
+// 📦 VERSIONAMENTO
+// ======================================================
+async function carregarVersao() {
+  const el = document.getElementById('appVersion');
+  if (!el) return;
 
-toggleSenha.addEventListener('click', () => {
-  const visivel = senhaInput.type === 'text';
-
-  senhaInput.type = visivel ? 'password' : 'text';
-
-  icon.className = visivel
-    ? 'iconoir-eye'
-    : 'iconoir-eye-off';
-});
-
+  try {
+    const res = await fetch('/api/version');
+    const data = await res.json();
+    el.textContent = data.version || '1.0.x';
+  } catch {
+    el.textContent = '1.0.x';
+  }
+}
 
 carregarVersao();
 
-
-
+// ======================================================
+// 🧩 HELPERS
+// ======================================================
+function exibirMensagem(texto, erro = false) {
+  mensagem.textContent = texto;
+  mensagem.className = erro ? 'mensagem erro' : 'mensagem';
+}
