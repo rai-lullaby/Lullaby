@@ -1,76 +1,54 @@
 // =====================================================
 // DASHBOARD — LULLABY
 // =====================================================
+
+import { buscarEventosPorData } from './services/eventService.js';
+import { EVENT_TYPES } from './config/eventConfig.js';
 import { formatDateISO } from './dateUtils.js';
-import { getEventConfig, EVENT_TYPES } from './config/eventConfig.js';
-import { getEventosPorData } from './services/eventService.js';
 
 console.group('📊 Dashboard Init');
 
 // =====================================================
-// HELPERS
-// =====================================================
-function el(id) {
-  return document.getElementById(id);
-}
-
-function getUser() {
-  try {
-    return JSON.parse(localStorage.getItem('user'));
-  } catch {
-    return null;
-  }
-}
-
-// =====================================================
-// AUTH
+// STORAGE
 // =====================================================
 const token = localStorage.getItem('token');
-const user = getUser();
+const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-if (!token || !user) {
-  console.error('❌ Sessão inválida');
-  window.location.replace('/');
-  throw new Error('Sem sessão');
-}
-
-console.log('🔑 Token OK');
+console.log('🔑 Token OK:', !!token);
 console.log('👤 User:', user);
 
-// =====================================================
-// HEADER
-// =====================================================
-el('nomeCreche') &&
-  (el('nomeCreche').textContent = user?.escola?.nome || 'Ambiente Tia Bia');
-
-el('nomeTurma') &&
-  (el('nomeTurma').textContent = user?.turma?.nome || 'Turma');
-
-el('logoutBtn')?.addEventListener('click', () => {
-  localStorage.clear();
+if (!token || !user) {
   window.location.replace('/');
-});
+  throw new Error('Sessão inválida');
+}
+
+// =====================================================
+// DOM (somente o que existe)
+// =====================================================
+const agendaEl = document.getElementById('agenda');
+const resumoEl = document.querySelector('.summary');
 
 // =====================================================
 // AGENDA
 // =====================================================
-let dataAtual = new Date();
+async function carregarAgenda(date) {
+  const dataISO = formatDateISO(date);
+  if (!dataISO) return;
 
-async function carregarAgenda() {
-  const dataISO = formatDateISO(dataAtual);
   console.group(`📅 Agenda ${dataISO}`);
 
   try {
-    const eventos = await getEventosPorData(dataISO);
+    const eventos = await buscarEventosPorData(dataISO);
+
     console.log('📦 Eventos recebidos:', eventos);
 
     renderAgenda(eventos);
-    atualizarResumo(eventos);
+    renderResumo(eventos);
 
   } catch (err) {
     console.error('❌ Erro agenda:', err);
     renderAgenda([]);
-    atualizarResumo([]);
+    renderResumo([]);
   }
 
   console.groupEnd();
@@ -79,55 +57,45 @@ async function carregarAgenda() {
 // =====================================================
 // RENDER AGENDA
 // =====================================================
-function renderAgenda(eventos) {
-  const container = el('agenda');
-  if (!container) return;
+function renderAgenda(eventos = []) {
+  if (!agendaEl) return;
 
-  container.innerHTML = '';
+  agendaEl.innerHTML = '';
 
   if (!eventos.length) {
-    container.innerHTML = '<p>📭 Nenhum evento para este dia</p>';
+    agendaEl.innerHTML = '<p>📭 Nenhum evento para este dia</p>';
     return;
   }
 
-  eventos.forEach(evento => {
-    container.appendChild(criarEventoCard(evento));
+  eventos.forEach(ev => {
+    agendaEl.appendChild(criarCard(ev));
   });
 }
 
 // =====================================================
 // CARD
 // =====================================================
-function criarEventoCard(evento) {
-  const cfg = getEventConfig(evento.tipo);
+function criarCard(evento) {
+  const cfg = EVENT_TYPES[evento.tipo] || {};
+
+  const hora = new Date(evento.data_hora).toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 
   const card = document.createElement('article');
-  card.className = `agenda-card ${cfg.class}`;
-  card.dataset.id = evento.id;
+  card.className = `agenda-card ${cfg.class || ''}`;
 
   card.innerHTML = `
     <div class="agenda-icon">
-      <i class="iconoir-${cfg.icon}"></i>
+      <i class="iconoir-${cfg.icon || 'calendar'}"></i>
     </div>
     <div class="agenda-content">
-      <h4>${cfg.label}</h4>
-      <span>
-        ${new Date(evento.data_hora).toLocaleTimeString('pt-BR', {
-          hour: '2-digit',
-          minute: '2-digit'
-        })}
-      </span>
-      <p>${evento.descricao}</p>
+      <h4>${cfg.label || evento.tipo}</h4>
+      <span>${hora}</span>
+      <p>${evento.descricao || ''}</p>
     </div>
   `;
-
-  card.addEventListener('click', () => {
-    document.dispatchEvent(
-      new CustomEvent('agenda:editEvent', {
-        detail: evento
-      })
-    );
-  });
 
   return card;
 }
@@ -135,13 +103,13 @@ function criarEventoCard(evento) {
 // =====================================================
 // RESUMO
 // =====================================================
-function atualizarResumo(eventos) {
-  const container = document.querySelector('.summary');
-  if (!container) return;
+function renderResumo(eventos = []) {
+  if (!resumoEl) return;
 
-  container.innerHTML = '';
+  resumoEl.innerHTML = '';
 
   const contagem = {};
+
   eventos.forEach(e => {
     contagem[e.tipo] = (contagem[e.tipo] || 0) + 1;
   });
@@ -156,30 +124,24 @@ function atualizarResumo(eventos) {
       <span>${cfg.label}</span>
     `;
 
-    container.appendChild(card);
+    resumoEl.appendChild(card);
   });
 }
 
 // =====================================================
 // EVENTOS GLOBAIS
 // =====================================================
-document.addEventListener('calendar:dateSelected', e => {
-  dataAtual = new Date(e.detail.date || e.detail.dateObj);
-  carregarAgenda();
+document.addEventListener('calendar:dateSelected', (e) => {
+  carregarAgenda(e.detail.date);
 });
 
-document.addEventListener('agenda:eventCreated', () => {
-  console.log('🔄 Evento criado → recarregar agenda');
-  carregarAgenda();
-});
-
-document.addEventListener('agenda:eventUpdated', () => {
-  console.log('✏️ Evento atualizado → recarregar agenda');
-  carregarAgenda();
+document.addEventListener('evento:turmaCriado', (e) => {
+  console.log('🔄 Atualizando dashboard com novo evento');
+  carregarAgenda(e.detail.data_hora);
 });
 
 // =====================================================
 // INIT
 // =====================================================
-carregarAgenda();
+carregarAgenda(new Date());
 console.groupEnd();
