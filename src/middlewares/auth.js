@@ -6,9 +6,9 @@ const jwt = require('jsonwebtoken');
 function auth(req, res, next) {
   const authHeader = req.headers.authorization;
 
-  // ======================================
+  // --------------------------------------
   // Token não enviado
-  // ======================================
+  // --------------------------------------
   if (!authHeader) {
     return res.status(401).json({
       error: 'Token de autenticação não informado'
@@ -16,13 +16,14 @@ function auth(req, res, next) {
   }
 
   // Esperado: Bearer <token>
-  const [scheme, token] = authHeader.split(' ');
-
-  if (!scheme || !token) {
+  const parts = authHeader.split(' ');
+  if (parts.length !== 2) {
     return res.status(401).json({
       error: 'Formato de token inválido'
     });
   }
+
+  const [scheme, token] = parts;
 
   if (!/^Bearer$/i.test(scheme)) {
     return res.status(401).json({
@@ -30,12 +31,28 @@ function auth(req, res, next) {
     });
   }
 
+  if (!token) {
+    return res.status(401).json({
+      error: 'Token ausente'
+    });
+  }
+
+  // --------------------------------------
+  // Validação de ambiente
+  // --------------------------------------
+  if (!process.env.JWT_SECRET) {
+    console.error('❌ JWT_SECRET não configurado');
+    return res.status(500).json({
+      error: 'Erro de configuração do servidor'
+    });
+  }
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ======================================
-    // Injeta usuário autenticado na request
-    // ======================================
+    // --------------------------------------
+    // Usuário autenticado
+    // --------------------------------------
     req.user = {
       id: decoded.id,
       escola_id: decoded.escola_id,
@@ -56,7 +73,7 @@ function auth(req, res, next) {
     return res.status(401).json({
       error: 'Token inválido'
     });
-  } 
+  }
 }
 
 module.exports = auth;

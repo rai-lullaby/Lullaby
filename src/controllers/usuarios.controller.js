@@ -2,6 +2,19 @@ const bcrypt = require('bcryptjs');
 const pool = require('../config/db');
 
 // ======================================================
+// 🔐 Helpers
+// ======================================================
+function forbid(res) {
+  return res.status(403).json({ error: 'Sem permissão' });
+}
+
+function conflict(res) {
+  return res.status(409).json({
+    error: 'Email ou CPF já cadastrado'
+  });
+}
+
+// ======================================================
 // ➕ Criar usuário
 // POST /usuarios
 // ADMIN
@@ -10,12 +23,12 @@ async function criarUsuario(req, res) {
   const { nome, cpf, email, senha, perfil } = req.body;
   const { escola_id, perfil: perfilLogado } = req.user;
 
-  if (perfilLogado !== 'ADMIN') {
-    return res.status(403).json({ error: 'Sem permissão para criar usuários' });
-  }
+  if (perfilLogado !== 'ADMIN') return forbid(res);
 
   if (!nome || !cpf || !email || !senha || !perfil) {
-    return res.status(400).json({ error: 'Dados obrigatórios faltando' });
+    return res.status(400).json({
+      error: 'Dados obrigatórios faltando'
+    });
   }
 
   const client = await pool.connect();
@@ -23,7 +36,7 @@ async function criarUsuario(req, res) {
   try {
     await client.query('BEGIN');
 
-    const senhaCriptografada = await bcrypt.hash(senha, 10);
+    const senhaHash = await bcrypt.hash(senha, 10);
 
     const { rows } = await client.query(
       `
@@ -36,16 +49,12 @@ async function criarUsuario(req, res) {
         perfil_id
       )
       VALUES (
-        $1,
-        $2,
-        $3,
-        $4,
-        $5,
+        $1, $2, $3, $4, $5,
         (SELECT id FROM perfis WHERE nome = $6)
       )
       RETURNING id, nome, email, cpf
       `,
-      [escola_id, nome, cpf, email, senhaCriptografada, perfil]
+      [escola_id, nome, cpf, email, senhaHash, perfil]
     );
 
     await client.query('COMMIT');
@@ -60,13 +69,11 @@ async function criarUsuario(req, res) {
     await client.query('ROLLBACK');
     console.error('Erro criarUsuario:', err);
 
-    if (err.code === '23505') {
-      return res.status(409).json({
-        error: 'Email ou CPF já cadastrado'
-      });
-    }
+    if (err.code === '23505') return conflict(res);
 
-    return res.status(500).json({ error: 'Erro ao criar usuário' });
+    return res.status(500).json({
+      error: 'Erro ao criar usuário'
+    });
 
   } finally {
     client.release();
@@ -80,10 +87,7 @@ async function criarUsuario(req, res) {
 // ======================================================
 async function listarUsuarios(req, res) {
   const { escola_id, perfil } = req.user;
-
-  if (perfil !== 'ADMIN') {
-    return res.status(403).json({ error: 'Sem permissão' });
-  }
+  if (perfil !== 'ADMIN') return forbid(res);
 
   try {
     const { rows } = await pool.query(
@@ -107,7 +111,9 @@ async function listarUsuarios(req, res) {
 
   } catch (err) {
     console.error('Erro listarUsuarios:', err);
-    return res.status(500).json({ error: 'Erro ao listar usuários' });
+    return res.status(500).json({
+      error: 'Erro ao listar usuários'
+    });
   }
 }
 
@@ -119,10 +125,7 @@ async function listarUsuarios(req, res) {
 async function buscarUsuarioPorId(req, res) {
   const { id } = req.params;
   const { escola_id, perfil } = req.user;
-
-  if (perfil !== 'ADMIN') {
-    return res.status(403).json({ error: 'Sem permissão' });
-  }
+  if (perfil !== 'ADMIN') return forbid(res);
 
   try {
     const { rows } = await pool.query(
@@ -143,14 +146,18 @@ async function buscarUsuarioPorId(req, res) {
     );
 
     if (!rows.length) {
-      return res.status(404).json({ error: 'Usuário não encontrado' });
+      return res.status(404).json({
+        error: 'Usuário não encontrado'
+      });
     }
 
     return res.json(rows[0]);
 
   } catch (err) {
     console.error('Erro buscarUsuarioPorId:', err);
-    return res.status(500).json({ error: 'Erro ao buscar usuário' });
+    return res.status(500).json({
+      error: 'Erro ao buscar usuário'
+    });
   }
 }
 
@@ -164,9 +171,7 @@ async function atualizarUsuario(req, res) {
   const { nome, email, senha, perfil: novoPerfil, ativo } = req.body;
   const { escola_id, perfil } = req.user;
 
-  if (perfil !== 'ADMIN') {
-    return res.status(403).json({ error: 'Sem permissão' });
-  }
+  if (perfil !== 'ADMIN') return forbid(res);
 
   const client = await pool.connect();
 
@@ -174,14 +179,14 @@ async function atualizarUsuario(req, res) {
     await client.query('BEGIN');
 
     if (senha) {
-      const senhaCriptografada = await bcrypt.hash(senha, 10);
+      const senhaHash = await bcrypt.hash(senha, 10);
       await client.query(
         `
         UPDATE usuarios
         SET senha = $1
         WHERE id = $2 AND escola_id = $3
         `,
-        [senhaCriptografada, id, escola_id]
+        [senhaHash, id, escola_id]
       );
     }
 
@@ -211,24 +216,26 @@ async function atualizarUsuario(req, res) {
 
     if (!rowCount) {
       await client.query('ROLLBACK');
-      return res.status(404).json({ error: 'Usuário não encontrado' });
+      return res.status(404).json({
+        error: 'Usuário não encontrado'
+      });
     }
 
     await client.query('COMMIT');
 
-    return res.json({ message: 'Usuário atualizado com sucesso' });
+    return res.json({
+      message: 'Usuário atualizado com sucesso'
+    });
 
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Erro atualizarUsuario:', err);
 
-    if (err.code === '23505') {
-      return res.status(409).json({
-        error: 'Email ou CPF já cadastrado'
-      });
-    }
+    if (err.code === '23505') return conflict(res);
 
-    return res.status(500).json({ error: 'Erro ao atualizar usuário' });
+    return res.status(500).json({
+      error: 'Erro ao atualizar usuário'
+    });
 
   } finally {
     client.release();
@@ -243,10 +250,7 @@ async function atualizarUsuario(req, res) {
 async function deletarUsuario(req, res) {
   const { id } = req.params;
   const { escola_id, perfil } = req.user;
-
-  if (perfil !== 'ADMIN') {
-    return res.status(403).json({ error: 'Sem permissão' });
-  }
+  if (perfil !== 'ADMIN') return forbid(res);
 
   try {
     const { rowCount } = await pool.query(
@@ -259,14 +263,20 @@ async function deletarUsuario(req, res) {
     );
 
     if (!rowCount) {
-      return res.status(404).json({ error: 'Usuário não encontrado' });
+      return res.status(404).json({
+        error: 'Usuário não encontrado'
+      });
     }
 
-    return res.json({ message: 'Usuário desativado com sucesso' });
+    return res.json({
+      message: 'Usuário desativado com sucesso'
+    });
 
   } catch (err) {
     console.error('Erro deletarUsuario:', err);
-    return res.status(500).json({ error: 'Erro ao remover usuário' });
+    return res.status(500).json({
+      error: 'Erro ao remover usuário'
+    });
   }
 }
 
