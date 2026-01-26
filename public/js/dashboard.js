@@ -1,184 +1,85 @@
 // =====================================================
-// DASHBOARD.JS — LULLABY 
+// DASHBOARD — LULLABY
 // =====================================================
 import { formatDateISO } from './dateUtils.js';
+import { getEventConfig, EVENT_TYPES } from './config/eventConfig.js';
+import { getEventosPorData } from './services/eventService.js';
 
 console.group('📊 Dashboard Init');
 
 // =====================================================
-// 🎨 TIPOS DE EVENTO (ICONOIR)
+// HELPERS
 // =====================================================
-const TIPOS_EVENTO = {
-  ENTRADA: {
-    label: 'Entrada',
-    icon: 'log-in',
-    class: 'entry'
-  },
-  SAIDA: {
-    label: 'Saída',
-    icon: 'log-out',
-    class: 'exit'
-  },
-  ALIMENTACAO: {
-    label: 'Alimentação',
-    icon: 'pizza-slice',
-    class: 'food'
-  },
-  SONECA: {
-    label: 'Soneca',
-    icon: 'bed',
-    class: 'sleep'
-  },
-  ATIVIDADE: {
-    label: 'Atividade',
-    icon: 'palette',
-    class: 'activity'
-  },
-  RECADO: {
-    label: 'Recado',
-    icon: 'chat-bubble',
-    class: 'message'
-  },
-  OCORRENCIA: {
-    label: 'Ocorrência',
-    icon: 'warning-triangle',
-    class: 'alert'
-  }
-};
+function el(id) {
+  return document.getElementById(id);
+}
 
-console.log('🎨 Iconoir mapeado:', TIPOS_EVENTO);
-
-// =====================================================
-// 🧩 HELPERS
-// =====================================================
-const el = id => document.getElementById(id);
-
-const safeJSONParse = value => {
+function getUser() {
   try {
-    return JSON.parse(value);
+    return JSON.parse(localStorage.getItem('user'));
   } catch {
     return null;
   }
-};
+}
 
 // =====================================================
-// 💾 STORAGE
+// AUTH
 // =====================================================
 const token = localStorage.getItem('token');
-const user = safeJSONParse(localStorage.getItem('user'));
+const user = getUser();
 
-console.log('🔑 Token:', !!token);
+if (!token || !user) {
+  console.error('❌ Sessão inválida');
+  window.location.replace('/');
+  throw new Error('Sem sessão');
+}
+
+console.log('🔑 Token OK');
 console.log('👤 User:', user);
 
 // =====================================================
-// 🔒 AUTENTICAÇÃO
+// HEADER
 // =====================================================
-function logout() {
+el('nomeCreche') &&
+  (el('nomeCreche').textContent = user?.escola?.nome || 'Ambiente Tia Bia');
+
+el('nomeTurma') &&
+  (el('nomeTurma').textContent = user?.turma?.nome || 'Turma');
+
+el('logoutBtn')?.addEventListener('click', () => {
   localStorage.clear();
   window.location.replace('/');
-}
-
-function protegerPagina() {
-  if (!token || !user) return logout();
-
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    if (payload.exp < Date.now() / 1000) return logout();
-  } catch {
-    return logout();
-  }
-}
-
-protegerPagina();
+});
 
 // =====================================================
-// 🧾 HEADER
+// AGENDA
 // =====================================================
-if (el('nomeCreche')) {
-  el('nomeCreche').textContent = user?.escola?.nome || 'Ambiente Tia Bia';
-}
+let dataAtual = new Date();
 
-if (el('nomeTurma')) {
-  el('nomeTurma').textContent = user?.turma?.nome || 'Turma';
-}
-
-el('logoutBtn')?.addEventListener('click', logout);
-
-// =====================================================
-// 📊 DASHBOARD ADMIN (placeholder)
-// =====================================================
-if (user.perfil === 'ADMIN') {
-  el('totalUsuarios') && (el('totalUsuarios').textContent = '—');
-  el('totalCriancas') && (el('totalCriancas').textContent = '—');
-  el('totalEventos') && (el('totalEventos').textContent = '—');
-}
-
-// =====================================================
-// 📅 AGENDA — API
-// =====================================================
-async function carregarAgendaPorData(date) {
-  const dataISO = formatDateISO(date);
-  if (!dataISO) return;
-
+async function carregarAgenda() {
+  const dataISO = formatDateISO(dataAtual);
   console.group(`📅 Agenda ${dataISO}`);
 
   try {
-    const res = await fetch(`/api/eventos?data=${dataISO}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const eventos = await getEventosPorData(dataISO);
+    console.log('📦 Eventos recebidos:', eventos);
 
-    if (!res.ok) throw new Error('Erro API');
+    renderAgenda(eventos);
+    atualizarResumo(eventos);
 
-    const eventos = await res.json();
-    console.log('🧪 Contrato API:', eventos);
-
-    const normalizados = eventos
-      .map(normalizarEvento)
-      .filter(Boolean);
-
-    renderAgenda(normalizados);
-    atualizarResumoDoDia(normalizados);
-
-    document.dispatchEvent(
-      new CustomEvent('calendar:markEvents', {
-        detail: {
-          dates: [...new Set(
-            normalizados.map(e => formatDateISO(e.data_hora))
-          )]
-        }
-      })
-    );
   } catch (err) {
     console.error('❌ Erro agenda:', err);
     renderAgenda([]);
-    atualizarResumoDoDia([]);
+    atualizarResumo([]);
   }
 
   console.groupEnd();
 }
 
 // =====================================================
-// 🧪 NORMALIZAÇÃO (CONTRATO REAL)
+// RENDER AGENDA
 // =====================================================
-function normalizarEvento(e) {
-  if (!e?.tipo || !e?.data_hora) {
-    console.warn('Evento inválido ignorado:', e);
-    return null;
-  }
-
-  return {
-    id: e.id,
-    tipo: e.tipo,
-    descricao: e.descricao || '',
-    data_hora: e.data_hora,
-    educador_id: e.educador_id || null
-  };
-}
-
-// =====================================================
-// 🗂️ RENDER AGENDA
-// =====================================================
-function renderAgenda(eventos = []) {
+function renderAgenda(eventos) {
   const container = el('agenda');
   if (!container) return;
 
@@ -189,74 +90,63 @@ function renderAgenda(eventos = []) {
     return;
   }
 
-  const periodos = { Manhã: [], Tarde: [] };
-
-  eventos.forEach(e => {
-    const hora = new Date(e.data_hora).getHours();
-    (hora < 12 ? periodos.Manhã : periodos.Tarde).push(e);
-  });
-
-  Object.entries(periodos).forEach(([titulo, lista]) => {
-    if (!lista.length) return;
-
-    const bloco = document.createElement('div');
-    bloco.innerHTML = `<h3>${titulo}</h3>`;
-
-    lista.forEach(ev => {
-      bloco.appendChild(criarEventoCard(ev));
-    });
-
-    container.appendChild(bloco);
+  eventos.forEach(evento => {
+    container.appendChild(criarEventoCard(evento));
   });
 }
 
 // =====================================================
-// 🧾 CARD EVENTO (ICONOIR)
+// CARD
 // =====================================================
 function criarEventoCard(evento) {
-  const cfg = TIPOS_EVENTO[evento.tipo] || {};
-  const hora = new Date(evento.data_hora).toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  const cfg = getEventConfig(evento.tipo);
 
-  const article = document.createElement('article');
-  article.className = `agenda-card ${cfg.class || 'default'}`;
+  const card = document.createElement('article');
+  card.className = `agenda-card ${cfg.class}`;
+  card.dataset.id = evento.id;
 
-  article.innerHTML = `
+  card.innerHTML = `
     <div class="agenda-icon">
-      <i class="iconoir-${cfg.icon || 'calendar'}"></i>
+      <i class="iconoir-${cfg.icon}"></i>
     </div>
     <div class="agenda-content">
-      <h4>${cfg.label || evento.tipo}</h4>
-      <span class="agenda-time">${hora}</span>
+      <h4>${cfg.label}</h4>
+      <span>
+        ${new Date(evento.data_hora).toLocaleTimeString('pt-BR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        })}
+      </span>
       <p>${evento.descricao}</p>
     </div>
   `;
 
-  return article;
+  card.addEventListener('click', () => {
+    document.dispatchEvent(
+      new CustomEvent('agenda:editEvent', {
+        detail: evento
+      })
+    );
+  });
+
+  return card;
 }
 
 // =====================================================
-// 📊 RESUMO DO DIA (ICONOIR)
+// RESUMO
 // =====================================================
-function atualizarResumoDoDia(eventos = []) {
+function atualizarResumo(eventos) {
   const container = document.querySelector('.summary');
   if (!container) return;
 
   container.innerHTML = '';
 
   const contagem = {};
-  let inicio, fim;
-
   eventos.forEach(e => {
     contagem[e.tipo] = (contagem[e.tipo] || 0) + 1;
-    const h = new Date(e.data_hora);
-    if (!inicio || h < inicio) inicio = h;
-    if (!fim || h > fim) fim = h;
   });
 
-  Object.entries(TIPOS_EVENTO).forEach(([tipo, cfg]) => {
+  Object.entries(EVENT_TYPES).forEach(([tipo, cfg]) => {
     const card = document.createElement('div');
     card.className = `card ${cfg.class}`;
 
@@ -268,33 +158,28 @@ function atualizarResumoDoDia(eventos = []) {
 
     container.appendChild(card);
   });
-
-  const horario = document.createElement('div');
-  horario.className = 'card time';
-
-  horario.innerHTML = `
-    <i class="iconoir-clock"></i>
-    <strong>${
-      inicio && fim
-        ? `${inicio.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
-           - ${fim.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`
-        : '—'
-    }</strong>
-    <span>Horário</span>
-  `;
-
-  container.appendChild(horario);
 }
 
 // =====================================================
-// 📆 EVENTO GLOBAL (SEM RELOAD)
+// EVENTOS GLOBAIS
 // =====================================================
 document.addEventListener('calendar:dateSelected', e => {
-  carregarAgendaPorData(e.detail.date || e.detail.dateObj);
+  dataAtual = new Date(e.detail.date || e.detail.dateObj);
+  carregarAgenda();
+});
+
+document.addEventListener('agenda:eventCreated', () => {
+  console.log('🔄 Evento criado → recarregar agenda');
+  carregarAgenda();
+});
+
+document.addEventListener('agenda:eventUpdated', () => {
+  console.log('✏️ Evento atualizado → recarregar agenda');
+  carregarAgenda();
 });
 
 // =====================================================
-// ▶️ INIT
+// INIT
 // =====================================================
-carregarAgendaPorData(new Date());
+carregarAgenda();
 console.groupEnd();
