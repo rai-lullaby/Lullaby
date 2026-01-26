@@ -18,10 +18,14 @@ async function criarUsuario(req, res) {
     return res.status(400).json({ error: 'Dados obrigatórios faltando' });
   }
 
+  const client = await pool.connect();
+
   try {
+    await client.query('BEGIN');
+
     const senhaCriptografada = await bcrypt.hash(senha, 10);
 
-    const { rows } = await pool.query(
+    const { rows } = await client.query(
       `
       INSERT INTO usuarios (
         escola_id,
@@ -44,6 +48,8 @@ async function criarUsuario(req, res) {
       [escola_id, nome, cpf, email, senhaCriptografada, perfil]
     );
 
+    await client.query('COMMIT');
+
     return res.status(201).json({
       message: 'Usuário criado com sucesso',
       user: rows[0],
@@ -51,6 +57,7 @@ async function criarUsuario(req, res) {
     });
 
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('Erro criarUsuario:', err);
 
     if (err.code === '23505') {
@@ -60,6 +67,9 @@ async function criarUsuario(req, res) {
     }
 
     return res.status(500).json({ error: 'Erro ao criar usuário' });
+
+  } finally {
+    client.release();
   }
 }
 
@@ -158,10 +168,14 @@ async function atualizarUsuario(req, res) {
     return res.status(403).json({ error: 'Sem permissão' });
   }
 
+  const client = await pool.connect();
+
   try {
+    await client.query('BEGIN');
+
     if (senha) {
       const senhaCriptografada = await bcrypt.hash(senha, 10);
-      await pool.query(
+      await client.query(
         `
         UPDATE usuarios
         SET senha = $1
@@ -171,7 +185,7 @@ async function atualizarUsuario(req, res) {
       );
     }
 
-    await pool.query(
+    const { rowCount } = await client.query(
       `
       UPDATE usuarios
       SET
@@ -186,18 +200,26 @@ async function atualizarUsuario(req, res) {
         AND escola_id = $6
       `,
       [
-        nome || null,
-        email || null,
+        nome ?? null,
+        email ?? null,
         ativo ?? null,
-        novoPerfil || null,
+        novoPerfil ?? null,
         id,
         escola_id
       ]
     );
 
+    if (!rowCount) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    await client.query('COMMIT');
+
     return res.json({ message: 'Usuário atualizado com sucesso' });
 
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('Erro atualizarUsuario:', err);
 
     if (err.code === '23505') {
@@ -207,6 +229,9 @@ async function atualizarUsuario(req, res) {
     }
 
     return res.status(500).json({ error: 'Erro ao atualizar usuário' });
+
+  } finally {
+    client.release();
   }
 }
 
