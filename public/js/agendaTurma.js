@@ -1,30 +1,38 @@
 // =====================================================
-// AGENDA TURMA — LULLABY (ESTÁVEL)
+// AGENDA TURMA — LULLABY
+// Inicialização controlada externamente
 // =====================================================
 
-console.group('🧩 agendaTurma');
+let inicializado = false;
+
+export function initAgendaTurma() {
+  if (inicializado) {
+    console.warn('⚠️ agendaTurma já inicializada — ignorando');
+    return;
+  }
+
+  console.group('🧩 agendaTurma');
+  inicializado = true;
+
+  const form = document.getElementById('formAgendaTurma');
+
+  if (!form) {
+    console.log('ℹ️ agendaTurma pronta (modo passivo)');
+    console.groupEnd();
+    return;
+  }
+
+  form.addEventListener('submit', onSubmit);
+  console.log('✅ agendaTurma ativa (formulário conectado)');
+  console.groupEnd();
+}
 
 // =====================================================
-// EVENTOS GLOBAIS
+// SUBMIT
 // =====================================================
+async function onSubmit(e) {
+  e.preventDefault();
 
-/**
- * Escuta quando um evento de turma é criado pelo modal
- * Disparado pelo modalEvento.js
- */
-document.addEventListener('evento:turmaCriado', (e) => {
-  console.log('📥 Evento de turma criado:', e.detail);
+  console.log('📝 Submit agendaTurma');
 
-  const { data_hora } = e.detail || {};
-  if (!data_hora) return;
-
-  // Atualiza dashboard e agenda automaticamente
-  document.dispatchEvent(
-    new CustomEvent('calendar:dateSelected', {
-      detail: { date: data_hora }
-    })
-  );
-});
-
-console.log('✅ agendaTurma pronta (modo passivo)');
-console.groupEnd();
+}

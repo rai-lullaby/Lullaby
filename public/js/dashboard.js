@@ -5,6 +5,7 @@
 import { buscarEventosPorData } from './services/eventService.js';
 import { EVENT_TYPES } from './config/eventConfig.js';
 import { formatDateISO } from './dateUtils.js';
+import { initAgendaTurma } from './agendaTurma.js';
 
 console.group('📊 Dashboard Init');
 
@@ -141,7 +142,33 @@ document.addEventListener('evento:turmaCriado', (e) => {
 });
 
 // =====================================================
-// INIT
+// ▶️ INIT — DASHBOARD
 // =====================================================
-carregarAgenda(new Date());
-console.groupEnd();
+(function initDashboard() {
+  console.group('🚀 INIT Dashboard');
+
+  // 1️⃣ Segurança
+  if (!protegerPagina()) {
+    console.error('⛔ Dashboard bloqueado');
+    console.groupEnd();
+    return;
+  }
+
+  console.log('🔐 Sessão válida');
+
+  // 2️⃣ Header / usuário
+  console.log('👤 Usuário carregado:', user);
+
+  // 3️⃣ Módulos
+  console.log('🧩 Inicializando módulos');
+  initAgendaTurma(); // ← agora controlado, nunca duplica
+
+  // 4️⃣ Agenda inicial
+  const hoje = new Date();
+  console.log('📅 Carregando agenda inicial:', hoje);
+  carregarAgenda(hoje);
+
+  console.log('✅ Dashboard pronto');
+  console.groupEnd();
+})();
+

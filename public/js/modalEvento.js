@@ -21,7 +21,7 @@ document.addEventListener('evento:turmaCriado', (e) => {
   // Atualiza dashboard e agenda automaticamente
   document.dispatchEvent(
     new CustomEvent('calendar:dateSelected', {
-      detail: { date: data_hora }
+      detail: { date: payload.data_hora }
     })
   );
 });
