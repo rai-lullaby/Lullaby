@@ -183,6 +183,49 @@ body {
 }
 
 /* =====================================================
+ CALENDÁRIO — SEMANAL (RESPONSÁVEL / EDUCADOR)
+===================================================== */
+
+.calendar-days {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.calendar-day-card {
+  min-width: 120px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border-soft);
+  background: #fff;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.calendar-day-card .weekday {
+  font-size: 13px;
+  color: var(--muted);
+  text-transform: lowercase;
+}
+
+.calendar-day-card .day-number {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.calendar-day-card.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.calendar-day-card.active .weekday {
+  color: #fff;
+}
+
+
+/* =====================================================
  AGENDA
 ===================================================== */
 .agenda {
