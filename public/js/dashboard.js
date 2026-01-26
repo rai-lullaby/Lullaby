@@ -72,6 +72,36 @@ async function initCalendario() {
 }
 
 // =====================================================
+// 🔄 FILTRAR CALENDÁRIO E EVENTOS POR PERFIL
+// =====================================================
+
+function filtrarEventosPorPerfil(eventos = []) {
+  if (!user) return [];
+
+  // ADMIN vê tudo
+  if (user.perfil === 'ADMIN') {
+    return eventos;
+  }
+
+  // EDUCADOR (por enquanto vê tudo da turma)
+  if (user.perfil === 'EDUCADOR') {
+    return eventos;
+  }
+
+  // RESPONSÁVEL → só eventos das suas crianças
+  if (user.perfil === 'RESPONSAVEL') {
+    const idsCriancas = user.criancas || [];
+
+    return eventos.filter(ev =>
+      idsCriancas.includes(ev.crianca_id)
+    );
+  }
+
+  return [];
+}
+
+
+// =====================================================
 // 🧾 AGENDA DO DIA
 // =====================================================
 function renderAgenda(eventos = []) {
@@ -132,6 +162,9 @@ document.addEventListener('calendar:dateSelected', async (e) => {
   renderAgenda(eventos);
   atualizarResumo(eventos);
 });
+
+
+
 
 // =====================================================
 // 🧠 INIT

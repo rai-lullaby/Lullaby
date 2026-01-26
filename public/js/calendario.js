@@ -9,12 +9,12 @@ import { formatDateISO } from './dateUtils.js';
   // DOM
   // =====================================================
   const titleEl = document.getElementById('calendarTitle');
-  const daysEl = document.getElementById('calendarDays');
+  const daysEl  = document.getElementById('calendarDays');
   const prevBtn = document.getElementById('prevWeek');
   const nextBtn = document.getElementById('nextWeek');
 
   if (!titleEl || !daysEl || !prevBtn || !nextBtn) {
-    console.warn('📅 Calendário não inicializado (DOM ausente)');
+    console.warn('📅 Calendário não inicializado: DOM ausente');
     return;
   }
 
@@ -24,9 +24,12 @@ import { formatDateISO } from './dateUtils.js';
   let user = null;
   try {
     user = JSON.parse(localStorage.getItem('user'));
-  } catch {}
+  } catch {
+    user = null;
+  }
 
   const MODE = user?.perfil === 'ADMIN' ? 'month' : 'week';
+  console.log('📅 Calendário modo:', MODE);
 
   // =====================================================
   // STATE
@@ -34,7 +37,7 @@ import { formatDateISO } from './dateUtils.js';
   let selectedDate = new Date();
 
   // =====================================================
-  // HELPERS
+  // HELPERS — DATA
   // =====================================================
   function startOfWeek(date) {
     const d = new Date(date);
@@ -69,13 +72,15 @@ import { formatDateISO } from './dateUtils.js';
     daysEl.innerHTML = '';
     titleEl.textContent = formatTitle(selectedDate);
 
-    MODE === 'month'
-      ? renderMonth()
-      : renderWeek();
+    if (MODE === 'month') {
+      renderMonth();
+    } else {
+      renderWeek();
+    }
   }
 
   // =====================================================
-  // 🟧 SEMANAL — CARDS (RESP / EDUC)  ✔ PRINT
+  // 🟧 SEMANAL — RESPONSÁVEL / EDUCADOR
   // =====================================================
   function renderWeek() {
     const start = startOfWeek(selectedDate);
@@ -83,11 +88,11 @@ import { formatDateISO } from './dateUtils.js';
     for (let i = 0; i < 7; i++) {
       const day = new Date(start);
       day.setDate(start.getDate() + i);
-      daysEl.appendChild(createWeekCard(day));
+      daysEl.appendChild(createWeekDayCard(day));
     }
   }
 
-  function createWeekCard(day) {
+  function createWeekDayCard(day) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'calendar-day-card';
@@ -105,16 +110,14 @@ import { formatDateISO } from './dateUtils.js';
     }
 
     btn.addEventListener('click', () => {
-      selectedDate = new Date(day);
-      render();
-      dispatch();
+      selectDate(day);
     });
 
     return btn;
   }
 
   // =====================================================
-  // 🟦 MENSAL — GRID (ADMIN)
+  // 🟦 MENSAL — ADMIN
   // =====================================================
   function renderMonth() {
     const start = startOfWeek(startOfMonth(selectedDate));
@@ -122,11 +125,11 @@ import { formatDateISO } from './dateUtils.js';
     for (let i = 0; i < 42; i++) {
       const day = new Date(start);
       day.setDate(start.getDate() + i);
-      daysEl.appendChild(createMonthCell(day));
+      daysEl.appendChild(createMonthDayCell(day));
     }
   }
 
-  function createMonthCell(day) {
+  function createMonthDayCell(day) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'calendar-day';
@@ -138,39 +141,50 @@ import { formatDateISO } from './dateUtils.js';
     }
 
     btn.addEventListener('click', () => {
-      selectedDate = new Date(day);
-      render();
-      dispatch();
+      selectDate(day);
     });
 
     return btn;
   }
 
   // =====================================================
-  // NAV
+  // SELEÇÃO DE DATA (CENTRALIZADO)
+  // =====================================================
+  function selectDate(date) {
+    selectedDate = new Date(date);
+    render();
+    dispatchSelectedDate();
+  }
+
+  // =====================================================
+  // NAVIGAÇÃO
   // =====================================================
   prevBtn.addEventListener('click', () => {
-    MODE === 'month'
-      ? selectedDate.setMonth(selectedDate.getMonth() - 1)
-      : selectedDate.setDate(selectedDate.getDate() - 7);
+    if (MODE === 'month') {
+      selectedDate.setMonth(selectedDate.getMonth() - 1);
+    } else {
+      selectedDate.setDate(selectedDate.getDate() - 7);
+    }
 
     render();
-    dispatch();
+    dispatchSelectedDate();
   });
 
   nextBtn.addEventListener('click', () => {
-    MODE === 'month'
-      ? selectedDate.setMonth(selectedDate.getMonth() + 1)
-      : selectedDate.setDate(selectedDate.getDate() + 7);
+    if (MODE === 'month') {
+      selectedDate.setMonth(selectedDate.getMonth() + 1);
+    } else {
+      selectedDate.setDate(selectedDate.getDate() + 7);
+    }
 
     render();
-    dispatch();
+    dispatchSelectedDate();
   });
 
   // =====================================================
-  // DISPATCH
+  // DISPATCH EVENT
   // =====================================================
-  function dispatch() {
+  function dispatchSelectedDate() {
     document.dispatchEvent(
       new CustomEvent('calendar:dateSelected', {
         detail: {
@@ -185,6 +199,6 @@ import { formatDateISO } from './dateUtils.js';
   // INIT
   // =====================================================
   render();
-  dispatch();
+  dispatchSelectedDate();
 
 })();
