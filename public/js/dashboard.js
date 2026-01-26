@@ -1,5 +1,5 @@
 // =====================================================
-// DASHBOARD.JS — LULLABY (REFATORADO FINAL)
+// DASHBOARD.JS — LULLABY (FINAL DEFINITIVO)
 // =====================================================
 
 import { carregarHeader } from './layout/header.js';
@@ -40,7 +40,7 @@ const EVENT_CONFIG = {
 };
 
 // =====================================================
-// 🧠 HELPERS
+// 🧱 DOM
 // =====================================================
 function el(id) {
   return document.getElementById(id);
@@ -53,31 +53,11 @@ function formatHora(date) {
   });
 }
 
-function normalizarEvento(evento) {
-  const tipo = (evento.tipo || '').toUpperCase();
-  const cfg = EVENT_CONFIG[tipo] || {
-    label: tipo,
-    class: 'default',
-    icon: 'calendar'
-  };
-
-  return {
-    ...evento,
-    tipo,
-    label: cfg.label,
-    className: cfg.class,
-    icon: cfg.icon
-  };
-}
-
 // =====================================================
-// 🧱 MONTA DOM BASE DO DASHBOARD
+// 🧱 MONTA LAYOUT
 // =====================================================
 function montarLayoutDashboard() {
-  const content = el('app-content');
-  if (!content) return;
-
-  content.innerHTML = `
+  el('app-content').innerHTML = `
     <section class="calendar-card">
       <div class="calendar-header">
         <button id="prevWeek">‹</button>
@@ -88,72 +68,29 @@ function montarLayoutDashboard() {
     </section>
 
     <section id="agendaBox">
-      <h2>
-        <i class="iconoir-clock"></i>
-        Agenda do Dia
-      </h2>
+      <h2><i class="iconoir-clock"></i> Agenda do Dia</h2>
       <section id="agenda" class="agenda"></section>
     </section>
 
     <section id="summaryBox">
-      <h2>
-        <i class="iconoir-clipboard"></i>
-        Resumo do Dia
-      </h2>
+      <h2><i class="iconoir-clipboard"></i> Resumo do Dia</h2>
       <section class="summary"></section>
     </section>
   `;
 }
 
 // =====================================================
-// 🧾 CARD EVENTO
+// 📅 INICIALIZA CALENDÁRIO (IMPORT DINÂMICO)
 // =====================================================
-function criarEventoCard(evento) {
-  const ev = normalizarEvento(evento);
-
-  const card = document.createElement('article');
-  card.className = `agenda-card ${ev.className}`;
-
-  card.innerHTML = `
-    <div class="agenda-icon">
-      <i class="iconoir-${ev.icon}"></i>
-    </div>
-    <div class="agenda-content">
-      <h4>${ev.label}</h4>
-      <span class="agenda-time">${formatHora(ev.data_hora)}</span>
-      <p>${ev.descricao || ''}</p>
-    </div>
-  `;
-
-  return card;
+async function initCalendario() {
+  await import('./calendario.js');
 }
 
 // =====================================================
-// 📅 AGENDA
+// 📊 RESUMO
 // =====================================================
-function renderAgenda(eventos = []) {
-  const container = el('agenda');
-  if (!container) return;
-
-  container.innerHTML = '';
-
-  if (!eventos.length) {
-    container.innerHTML = '<p>📭 Nenhum evento para este dia</p>';
-    return;
-  }
-
-  eventos.forEach(e => {
-    container.appendChild(criarEventoCard(e));
-  });
-}
-
-// =====================================================
-// 📊 RESUMO DO DIA
-// =====================================================
-function atualizarResumoDoDia(eventos = []) {
+function atualizarResumo(eventos) {
   const container = document.querySelector('.summary');
-  if (!container) return;
-
   container.innerHTML = '';
 
   const contagem = {};
@@ -161,9 +98,7 @@ function atualizarResumoDoDia(eventos = []) {
   let fim = null;
 
   eventos.forEach(e => {
-    const tipo = (e.tipo || '').toUpperCase();
-    contagem[tipo] = (contagem[tipo] || 0) + 1;
-
+    contagem[e.tipo] = (contagem[e.tipo] || 0) + 1;
     const h = new Date(e.data_hora);
     if (!inicio || h < inicio) inicio = h;
     if (!fim || h > fim) fim = h;
@@ -172,26 +107,22 @@ function atualizarResumoDoDia(eventos = []) {
   Object.entries(EVENT_CONFIG).forEach(([tipo, cfg]) => {
     const card = document.createElement('div');
     card.className = 'card';
-
     card.innerHTML = `
       <i class="iconoir-${cfg.icon}"></i>
       <strong>${contagem[tipo] || 0}</strong>
       <span>${cfg.label}</span>
     `;
-
     container.appendChild(card);
   });
 
   if (inicio && fim) {
     const horario = document.createElement('div');
     horario.className = 'card';
-
     horario.innerHTML = `
       <i class="iconoir-clock"></i>
       <strong>${formatHora(inicio)} - ${formatHora(fim)}</strong>
       <span>Horário</span>
     `;
-
     container.appendChild(horario);
   }
 }
@@ -204,38 +135,15 @@ async function initDashboard() {
 
   await carregarHeader(user);
   await carregarFooter();
-
   montarLayoutDashboard();
+  await initCalendario();
 
   const hoje = new Date().toISOString().split('T')[0];
   const eventos = await buscarEventosPorData(hoje);
 
-  atualizarResumoDoDia(eventos);
-
-  if (user.perfil !== 'ADMIN') {
-    renderAgenda(eventos);
-  } else {
-    el('agendaBox')?.remove();
-  }
+  atualizarResumo(eventos);
 
   console.groupEnd();
 }
 
-// =====================================================
-// 🔄 EVENTO GLOBAL (CRIAR EVENTO)
-// =====================================================
-document.addEventListener('evento:criado', e => {
-  const dataISO = e.detail.data_hora.split('T')[0];
-
-  buscarEventosPorData(dataISO).then(eventos => {
-    atualizarResumoDoDia(eventos);
-    if (user.perfil !== 'ADMIN') {
-      renderAgenda(eventos);
-    }
-  });
-});
-
-// =====================================================
-// ▶️ START
-// =====================================================
 document.addEventListener('DOMContentLoaded', initDashboard);
