@@ -39,10 +39,7 @@ body {
 ===================================================== */
 .header {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-
+  inset: 0 0 auto 0;
   height: var(--header-height);
   z-index: 1000;
 
@@ -62,7 +59,6 @@ body {
   gap: 12px;
 }
 
-/* ✅ LOGO CORRIGIDO */
 .logo img {
   width: 40px;
   height: 40px;
@@ -99,6 +95,7 @@ body {
   border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
+  transition: background .2s ease;
 }
 
 .menu button:hover {
@@ -153,12 +150,12 @@ body {
 }
 
 /* =====================================================
- CALENDÁRIO
+ CALENDÁRIO (BASE)
 ===================================================== */
 .calendar-card {
   background: var(--bg-card);
-  border-radius: 18px;
-  padding: 16px;
+  border-radius: 20px;
+  padding: 20px;
   box-shadow: var(--shadow-soft);
 }
 
@@ -166,41 +163,63 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.calendar-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: capitalize;
 }
 
 .calendar-header button {
-  background: none;
-  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  background: #fff;
   font-size: 20px;
   cursor: pointer;
+  transition: background .2s ease;
 }
 
-.calendar-days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+.calendar-header button:hover {
+  background: var(--primary-soft);
 }
 
 /* =====================================================
- CALENDÁRIO — SEMANAL (RESPONSÁVEL / EDUCADOR)
+ CALENDÁRIO — SEMANAL (RESP / EDUC)
 ===================================================== */
-
 .calendar-days {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.calendar-days::-webkit-scrollbar {
+  height: 6px;
+}
+
+.calendar-days::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 10px;
 }
 
 .calendar-day-card {
   min-width: 120px;
   padding: 14px;
-  border-radius: 16px;
+  border-radius: 18px;
   border: 1px solid var(--border-soft);
   background: #fff;
   text-align: center;
   cursor: pointer;
   transition: all .2s ease;
+}
+
+.calendar-day-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,.05);
 }
 
 .calendar-day-card .weekday {
@@ -211,19 +230,41 @@ body {
 
 .calendar-day-card .day-number {
   display: block;
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
+  margin-top: 6px;
+  color: var(--text);
 }
 
 .calendar-day-card.active {
   background: var(--primary);
+  border-color: var(--primary);
   color: #fff;
 }
 
-.calendar-day-card.active .weekday {
+.calendar-day-card.active .weekday,
+.calendar-day-card.active .day-number {
   color: #fff;
 }
 
+/* =====================================================
+ CALENDÁRIO — MENSAL (ADMIN)
+===================================================== */
+.calendar-days .calendar-day {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  background: #fff;
+  cursor: pointer;
+  transition: background .2s ease;
+}
+
+.calendar-days .calendar-day.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
 
 /* =====================================================
  AGENDA
@@ -238,7 +279,7 @@ body {
   display: flex;
   gap: 14px;
   padding: 14px;
-  border-radius: 16px;
+  border-radius: 18px;
   background: var(--bg-card);
   box-shadow: var(--shadow-soft);
   align-items: center;
@@ -279,7 +320,7 @@ body {
 
 .summary .card {
   background: var(--bg-card);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 14px;
   text-align: center;
   box-shadow: var(--shadow-soft);
