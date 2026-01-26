@@ -1,59 +1,99 @@
 const bcrypt = require('bcryptjs');
 const pool = require('../config/db');
 
-// =========================
-// CREATE - Criar usuário
-// =========================
+// ======================================================
+// ➕ Criar usuário
+// POST /usuarios
+// ADMIN
+// ======================================================
 async function criarUsuario(req, res) {
+  const { nome, cpf, email, senha, perfil } = req.body;
+  const { escola_id, perfil: perfilLogado } = req.user;
+
+  if (perfilLogado !== 'ADMIN') {
+    return res.status(403).json({ error: 'Sem permissão para criar usuários' });
+  }
+
+  if (!nome || !cpf || !email || !senha || !perfil) {
+    return res.status(400).json({ error: 'Dados obrigatórios faltando' });
+  }
+
   try {
-    const { nome, email, senha, perfil } = req.body;
+    const senhaCriptografada = await bcrypt.hash(senha, 10);
 
-    if (!nome || !email || !senha || !perfil) {
-      return res.status(400).json({ error: 'Dados obrigatórios faltando' });
-    }
-
-    const senhaHash = await bcrypt.hash(senha, 10);
-
-    const userResult = await pool.query(
-      `INSERT INTO usuarios (nome, email, senha)
-       VALUES ($1, $2, $3)
-       RETURNING id, nome, email`,
-      [nome, email, senhaHash]
-    );
-
-    const usuarioId = userResult.rows[0].id;
-
-    await pool.query(
-      `INSERT INTO usuarios_perfis (usuario_id, perfil_id)
-       VALUES ($1, (SELECT id FROM perfis WHERE nome = $2))`,
-      [usuarioId, perfil]
+    const { rows } = await pool.query(
+      `
+      INSERT INTO usuarios (
+        escola_id,
+        nome,
+        cpf,
+        email,
+        senha,
+        perfil_id
+      )
+      VALUES (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        (SELECT id FROM perfis WHERE nome = $6)
+      )
+      RETURNING id, nome, email, cpf
+      `,
+      [escola_id, nome, cpf, email, senhaCriptografada, perfil]
     );
 
     return res.status(201).json({
       message: 'Usuário criado com sucesso',
-      user: userResult.rows[0],
+      user: rows[0],
       perfil
     });
 
   } catch (err) {
     console.error('Erro criarUsuario:', err);
+
+    if (err.code === '23505') {
+      return res.status(409).json({
+        error: 'Email ou CPF já cadastrado'
+      });
+    }
+
     return res.status(500).json({ error: 'Erro ao criar usuário' });
   }
 }
 
-// =========================
-// READ - Listar usuários
-// =========================
+// ======================================================
+// 📋 Listar usuários da escola
+// GET /usuarios
+// ADMIN
+// ======================================================
 async function listarUsuarios(req, res) {
-  try {
-    const result = await pool.query(`
-      SELECT u.id, u.nome, u.email, p.nome AS perfil
-      FROM usuarios u
-      JOIN usuarios_perfis up ON up.usuario_id = u.id
-      JOIN perfis p ON p.id = up.perfil_id
-    `);
+  const { escola_id, perfil } = req.user;
 
-    return res.json(result.rows);
+  if (perfil !== 'ADMIN') {
+    return res.status(403).json({ error: 'Sem permissão' });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT
+        u.id,
+        u.nome,
+        u.email,
+        u.cpf,
+        p.nome AS perfil,
+        u.ativo
+      FROM usuarios u
+      JOIN perfis p ON p.id = u.perfil_id
+      WHERE u.escola_id = $1
+      ORDER BY u.nome
+      `,
+      [escola_id]
+    );
+
+    return res.json(rows);
 
   } catch (err) {
     console.error('Erro listarUsuarios:', err);
@@ -61,26 +101,42 @@ async function listarUsuarios(req, res) {
   }
 }
 
-// =========================
-// READ - Buscar usuário por ID
-// =========================
+// ======================================================
+// 🔍 Buscar usuário por ID
+// GET /usuarios/:id
+// ADMIN
+// ======================================================
 async function buscarUsuarioPorId(req, res) {
+  const { id } = req.params;
+  const { escola_id, perfil } = req.user;
+
+  if (perfil !== 'ADMIN') {
+    return res.status(403).json({ error: 'Sem permissão' });
+  }
+
   try {
-    const { id } = req.params;
-
-    const result = await pool.query(`
-      SELECT u.id, u.nome, u.email, p.nome AS perfil
+    const { rows } = await pool.query(
+      `
+      SELECT
+        u.id,
+        u.nome,
+        u.email,
+        u.cpf,
+        p.nome AS perfil,
+        u.ativo
       FROM usuarios u
-      JOIN usuarios_perfis up ON up.usuario_id = u.id
-      JOIN perfis p ON p.id = up.perfil_id
+      JOIN perfis p ON p.id = u.perfil_id
       WHERE u.id = $1
-    `, [id]);
+        AND u.escola_id = $2
+      `,
+      [id, escola_id]
+    );
 
-    if (result.rowCount === 0) {
+    if (!rows.length) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
-    return res.json(result.rows[0]);
+    return res.json(rows[0]);
 
   } catch (err) {
     console.error('Erro buscarUsuarioPorId:', err);
@@ -88,57 +144,100 @@ async function buscarUsuarioPorId(req, res) {
   }
 }
 
-// =========================
-// UPDATE - Atualizar usuário
-// =========================
+// ======================================================
+// ✏️ Atualizar usuário
+// PUT /usuarios/:id
+// ADMIN
+// ======================================================
 async function atualizarUsuario(req, res) {
+  const { id } = req.params;
+  const { nome, email, senha, perfil: novoPerfil, ativo } = req.body;
+  const { escola_id, perfil } = req.user;
+
+  if (perfil !== 'ADMIN') {
+    return res.status(403).json({ error: 'Sem permissão' });
+  }
+
   try {
-    const { id } = req.params;
-    const { nome, email, senha, perfil } = req.body;
-
     if (senha) {
-      const senhaHash = await bcrypt.hash(senha, 10);
+      const senhaCriptografada = await bcrypt.hash(senha, 10);
       await pool.query(
-        'UPDATE usuarios SET senha = $1 WHERE id = $2',
-        [senhaHash, id]
+        `
+        UPDATE usuarios
+        SET senha = $1
+        WHERE id = $2 AND escola_id = $3
+        `,
+        [senhaCriptografada, id, escola_id]
       );
     }
 
-    if (nome || email) {
-      await pool.query(
-        'UPDATE usuarios SET nome = $1, email = $2 WHERE id = $3',
-        [nome, email, id]
-      );
-    }
-
-    if (perfil) {
-      await pool.query(
-        `UPDATE usuarios_perfis
-         SET perfil_id = (SELECT id FROM perfis WHERE nome = $1)
-         WHERE usuario_id = $2`,
-        [perfil, id]
-      );
-    }
+    await pool.query(
+      `
+      UPDATE usuarios
+      SET
+        nome = COALESCE($1, nome),
+        email = COALESCE($2, email),
+        ativo = COALESCE($3, ativo),
+        perfil_id = COALESCE(
+          (SELECT id FROM perfis WHERE nome = $4),
+          perfil_id
+        )
+      WHERE id = $5
+        AND escola_id = $6
+      `,
+      [
+        nome || null,
+        email || null,
+        ativo ?? null,
+        novoPerfil || null,
+        id,
+        escola_id
+      ]
+    );
 
     return res.json({ message: 'Usuário atualizado com sucesso' });
 
   } catch (err) {
     console.error('Erro atualizarUsuario:', err);
+
+    if (err.code === '23505') {
+      return res.status(409).json({
+        error: 'Email ou CPF já cadastrado'
+      });
+    }
+
     return res.status(500).json({ error: 'Erro ao atualizar usuário' });
   }
 }
 
-// =========================
-// DELETE - Remover usuário
-// =========================
+// ======================================================
+// ❌ Desativar usuário (soft delete)
+// DELETE /usuarios/:id
+// ADMIN
+// ======================================================
 async function deletarUsuario(req, res) {
+  const { id } = req.params;
+  const { escola_id, perfil } = req.user;
+
+  if (perfil !== 'ADMIN') {
+    return res.status(403).json({ error: 'Sem permissão' });
+  }
+
   try {
-    const { id } = req.params;
+    const { rowCount } = await pool.query(
+      `
+      UPDATE usuarios
+      SET ativo = false
+      WHERE id = $1 AND escola_id = $2
+      `,
+      [id, escola_id]
+    );
 
-    await pool.query('DELETE FROM usuarios_perfis WHERE usuario_id = $1', [id]);
-    await pool.query('DELETE FROM usuarios WHERE id = $1', [id]);
+    if (!rowCount) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
 
-    return res.json({ message: 'Usuário removido com sucesso' });
+    return res.json({ message: 'Usuário desativado com sucesso' });
 
   } catch (err) {
     console.error('Erro deletarUsuario:', err);
@@ -146,9 +245,9 @@ async function deletarUsuario(req, res) {
   }
 }
 
-// =========================
-// EXPORTS
-// =========================
+// ======================================================
+// 📦 Exports
+// ======================================================
 module.exports = {
   criarUsuario,
   listarUsuarios,

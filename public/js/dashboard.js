@@ -19,7 +19,7 @@ const TIPOS_EVENTO = {
   },
   ALIMENTACAO: {
     label: 'Refeições',
-    icon: 'fork-spoon',
+    icon: 'pizza-slice',
     class: 'food'
   },
   SONO: {
