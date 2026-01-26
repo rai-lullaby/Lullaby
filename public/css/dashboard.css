@@ -8,20 +8,18 @@
 }
 
 :root {
-  /* Backgrounds */
   --bg-page: #fefdfb;
   --bg-card: #ffffff;
 
-  /* Core */
   --primary: #ff8a5b;
+  --primary-soft: #ffe3d6;
+
   --text: #4a3b32;
   --muted: #9b8f88;
 
-  /* Borders + shadows */
   --border-soft: #eee8e1;
   --shadow-soft: 0 8px 20px rgba(0,0,0,.04);
 
-  /* Activity colors */
   --food: #ffe3d6;
   --sleep: #ece9ff;
   --play: #e6f7f2;
@@ -45,15 +43,13 @@ body {
 ===================================================== */
 .header {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
+  inset: 0 0 auto 0;
   height: 64px;
   z-index: 1000;
 
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
 
   padding: 12px 16px;
   background: var(--bg-card);
@@ -70,7 +66,6 @@ body {
 .logo img {
   width: 44px;
   height: 44px;
-  object-fit: contain;
 }
 
 .school-name {
@@ -94,10 +89,9 @@ body {
 .menu button {
   background: none;
   border: none;
-  font-size: 14px;
-  cursor: pointer;
   padding: 6px 10px;
   border-radius: 10px;
+  cursor: pointer;
 }
 
 .menu button:hover {
@@ -136,18 +130,12 @@ body {
   border: none;
   padding: 8px 16px;
   border-radius: 999px;
-  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 }
 
-.btn-logout:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(255,138,91,.35);
-}
-
 /* =====================================================
- CONTAINER / SECTIONS
+ CONTAINER / SECTION
 ===================================================== */
 .container {
   max-width: 1100px;
@@ -165,6 +153,39 @@ section {
 }
 
 /* =====================================================
+ BOTÕES DE AÇÃO (NOVO EVENTO)
+===================================================== */
+.event-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--border-soft);
+  padding: 10px 16px;
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* =====================================================
  CALENDÁRIO
 ===================================================== */
 .calendar-card {
@@ -176,15 +197,6 @@ section {
   display: flex;
   justify-content: space-between;
   margin-bottom: 14px;
-}
-
-.calendar-nav button {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid var(--border-soft);
-  background: var(--bg-card);
-  cursor: pointer;
 }
 
 .calendar-days {
@@ -201,30 +213,15 @@ section {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-}
-
-.calendar-day.today {
-  border: 1.5px dashed var(--primary);
 }
 
 .calendar-day.active {
   background: var(--primary);
   color: white;
-  font-weight: 600;
-}
-
-.calendar-day.has-event::after {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: currentColor;
-  border-radius: 50%;
-  margin-top: 4px;
 }
 
 /* =====================================================
- AGENDA — ESTILO APP (PROTÓTIPO)
+ AGENDA
 ===================================================== */
 .agenda {
   display: flex;
@@ -234,9 +231,7 @@ section {
 
 .agenda h3 {
   font-size: 16px;
-  font-weight: 600;
   color: var(--primary);
-  margin: 16px 0 4px;
 }
 
 .agenda-card {
@@ -244,7 +239,6 @@ section {
   gap: 14px;
   padding: 16px;
   border-radius: 18px;
-  background: var(--bg-card);
   box-shadow: var(--shadow-soft);
   position: relative;
 }
@@ -264,64 +258,143 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-}
-
-.agenda-icon i {
-  stroke-width: 2.2;
-}
-
-.agenda-content h4 {
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.agenda-time {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.agenda-content p {
-  margin-top: 6px;
-  font-size: 14px;
 }
 
 /* =====================================================
  CORES POR TIPO
 ===================================================== */
-.agenda-card.food {
-  color: #ff8a5b;
-  background: var(--food);
-}
-
-.agenda-card.sleep {
-  color: #7b6cff;
-  background: var(--sleep);
-}
-
-.agenda-card.play {
-  color: #2bbf9b;
-  background: var(--play);
-}
-
-.agenda-card.hygiene {
-  color: #4aa3df;
-  background: var(--hygiene);
-}
-
-.agenda-card.learn {
-  color: #f4b400;
-  background: var(--learn);
-}
+.agenda-card.food { background: var(--food); color: #ff8a5b; }
+.agenda-card.sleep { background: var(--sleep); color: #7b6cff; }
+.agenda-card.play { background: var(--play); color: #2bbf9b; }
+.agenda-card.hygiene { background: var(--hygiene); color: #4aa3df; }
+.agenda-card.learn { background: var(--learn); color: #f4b400; }
 
 /* =====================================================
  SUMMARY
 ===================================================== */
 .summary {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 16px;
 }
+
+.summary .card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 14px;
+  text-align: center;
+}
+
+/* =====================================================
+ MODAL
+===================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-backdrop.hidden {
+  display: none;
+}
+
+.modal {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-page);
+  border-radius: 18px;
+  padding: 20px;
+  animation: fadeUp .25s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal input,
+.modal select,
+.modal textarea {
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border-soft);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* =====================================================
+ MODAL — FULLSCREEN NO MOBILE
+===================================================== */
+@media (max-width: 480px) {
+  .modal-backdrop {
+    align-items: flex-end; /* efeito slide-up */
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    border-radius: 0;
+    padding: 20px 16px;
+    animation: slideUp .25s ease;
+  }
+
+  .modal-header {
+    position: sticky;
+    top: 0;
+    background: var(--bg-page);
+    padding-bottom: 12px;
+    z-index: 1;
+  }
+
+  .modal form {
+    overflow-y: auto;
+    padding-bottom: 24px;
+  }
+
+  .modal-footer {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-page);
+    padding-top: 12px;
+  }
+}
+
+/* =====================================================
+ ANIMAÇÃO SLIDE-UP (MOBILE)
+===================================================== */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 
 /* =====================================================
  FOOTER
@@ -339,7 +412,7 @@ section {
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -350,9 +423,13 @@ section {
 /* =====================================================
  RESPONSIVO
 ===================================================== */
-@media (max-width: 768px) {
-  .summary {
-    grid-template-columns: 1fr 1fr;
+@media (min-width: 768px) {
+  .menu {
+    display: flex;
+  }
+
+  .container {
+    padding: 24px;
   }
 }
 
@@ -366,12 +443,3 @@ section {
   }
 }
 
-@media (min-width: 768px) {
-  .menu {
-    display: flex;
-  }
-
-  .container {
-    padding: 24px;
-  }
-}

@@ -35,16 +35,16 @@
   </div>
 
   <nav class="menu" aria-label="Menu principal">
-    <button type="button" id="btnAgenda">Agenda</button>
-    <button type="button" id="btnCriancas">Crianças</button>
-    <button type="button" id="btnRecados">Recados</button>
-    <button type="button" id="btnGaleria">Galeria</button>
+    <button type="button">Agenda</button>
+    <button type="button">Crianças</button>
+    <button type="button">Recados</button>
+    <button type="button">Galeria</button>
   </nav>
 
   <div class="header-right">
     <button class="notification" aria-label="Notificações">
       <i class="iconoir-bell"></i>
-      <span class="badge" aria-hidden="true">3</span>
+      <span class="badge">3</span>
     </button>
 
     <button
@@ -65,7 +65,7 @@
 <main class="container">
 
   <!-- =========================
-   VISÃO GERAL (ADMIN)
+   VISÃO GERAL
   ========================= -->
   <section aria-labelledby="visao-geral-title">
     <h2 id="visao-geral-title">Visão Geral</h2>
@@ -89,56 +89,19 @@
   </section>
 
   <!-- =========================
-   AGENDAR EVENTO
+   AÇÕES — NOVO EVENTO
   ========================= -->
-  <section class="accordion" aria-labelledby="agenda-form-title">
+  <section>
+    <div class="event-actions">
+      <button class="btn-primary" id="btnNovoEvento">
+        <i class="iconoir-plus"></i>
+        Novo Evento
+      </button>
 
-    <button
-      class="accordion-header"
-      id="toggleAgenda"
-      type="button"
-      aria-expanded="false"
-    >
-      <i class="iconoir-calendar"></i>
-      <span id="agenda-form-title">Agendar evento para a turma</span>
-      <span class="arrow">⌄</span>
-    </button>
-
-    <div class="accordion-content" id="agendaContent">
-      <form id="formAgendaTurma">
-
-        <label for="educadorId">Educador</label>
-        <select id="educadorId">
-          <option value="">Selecione o educador</option>
-        </select>
-
-        <label for="tipoEvento">Tipo do evento</label>
-        <select id="tipoEvento" required>
-          <option value="">Selecione</option>
-          <option value="ENTRADA">Entrada</option>
-          <option value="SAIDA">Saída</option>
-          <option value="ALIMENTACAO">Alimentação</option>
-          <option value="SONO">Sono</option>
-          <option value="BRINCADEIRA">Brincadeira</option>
-          <option value="HIGIENE">Higiene</option>
-          <option value="APRENDIZADO">Aprendizado</option>
-        </select>
-
-        <label for="descricao">Descrição</label>
-        <textarea
-          id="descricao"
-          placeholder="Ex: Atividade com pintura..."
-          required
-        ></textarea>
-
-        <label for="dataHora">Data e hora</label>
-        <input type="datetime-local" id="dataHora" required />
-
-        <button type="submit" class="btn-primary">
-          Salvar evento
-        </button>
-
-      </form>
+      <button class="btn-outline" id="btnEventoTurma">
+        <i class="iconoir-group"></i>
+        Evento p/ Turma
+      </button>
     </div>
   </section>
 
@@ -149,21 +112,13 @@
 
     <div class="calendar-header">
       <div class="calendar-nav">
-        <button
-          id="prevWeek"
-          type="button"
-          aria-label="Semana anterior"
-        >‹</button>
+        <button id="prevWeek" type="button" aria-label="Semana anterior">‹</button>
       </div>
 
       <h2 id="calendarTitle">Mês / Ano</h2>
 
       <div class="calendar-nav">
-        <button
-          id="nextWeek"
-          type="button"
-          aria-label="Próxima semana"
-        >›</button>
+        <button id="nextWeek" type="button" aria-label="Próxima semana">›</button>
       </div>
     </div>
 
@@ -179,16 +134,71 @@
   </section>
 
   <!-- =========================
-   RESUMO DO DIA (DINÂMICO)
+   RESUMO DO DIA
   ========================= -->
   <section aria-labelledby="summary-title">
     <h2 id="summary-title" class="summary-title">📋 Resumo do Dia</h2>
-
-    <!-- cards são gerados 100% pelo dashboard.js -->
     <section class="summary"></section>
   </section>
 
 </main>
+
+<!-- =====================================================
+ MODAL — NOVO EVENTO / EVENTO TURMA
+===================================================== -->
+<div class="modal-backdrop hidden" id="modalBackdrop" aria-hidden="true">
+
+  <div class="modal" role="dialog" aria-modal="true">
+
+    <header class="modal-header">
+      <h3 id="modalTitle">Novo Evento</h3>
+      <button class="modal-close" id="closeModal" aria-label="Fechar">
+        <i class="iconoir-xmark"></i>
+      </button>
+    </header>
+
+    <form id="formEventoModal">
+
+      <label for="modalTipoEvento">Tipo de Evento</label>
+      <select id="modalTipoEvento" required>
+        <option value="">Selecione o tipo</option>
+        <option value="ENTRADA">Entrada</option>
+        <option value="SAIDA">Saída</option>
+        <option value="ALIMENTACAO">Alimentação</option>
+        <option value="SONO">Sono</option>
+        <option value="BRINCADEIRA">Brincadeira</option>
+        <option value="HIGIENE">Higiene</option>
+        <option value="APRENDIZADO">Aprendizado</option>
+      </select>
+
+      <!-- CAMPO DINÂMICO: CRIANÇA OU TURMA -->
+      <div id="campoDinamico"></div>
+
+      <label for="modalInicio">Data/Hora Início</label>
+      <input type="datetime-local" id="modalInicio" required />
+
+      <label for="modalFim">Data/Hora Fim (opcional)</label>
+      <input type="datetime-local" id="modalFim" />
+
+      <label for="modalDescricao">Observação</label>
+      <textarea
+        id="modalDescricao"
+        placeholder="Descreva o evento..."
+      ></textarea>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-outline" id="cancelModal">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary">
+          Adicionar
+        </button>
+      </footer>
+
+    </form>
+
+  </div>
+</div>
 
 <!-- =====================================================
  FOOTER
@@ -204,6 +214,7 @@
 <script type="module" src="/js/dashboard.js"></script>
 <script type="module" src="/js/calendario.js"></script>
 <script type="module" src="/js/agendaTurma.js"></script>
+<script type="module" src="/js/modalEvento.js"></script>
 
 </body>
 </html>
