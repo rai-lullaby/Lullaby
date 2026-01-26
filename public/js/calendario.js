@@ -1,25 +1,25 @@
 import { formatDateISO } from './dateUtils.js';
 
 // =====================================================
-// 📅 CALENDÁRIO — MENSAL (ADMIN) | SEMANAL (OUTROS)
+// 📅 CALENDÁRIO — SELETOR DE DATA (FUNCIONAL)
 // =====================================================
 (function () {
 
   // =====================================================
   // DOM
   // =====================================================
-  const calendarTitle = document.getElementById('calendarTitle');
-  const calendarDays = document.getElementById('calendarDays');
+  const titleEl = document.getElementById('calendarTitle');
+  const daysEl = document.getElementById('calendarDays');
   const prevBtn = document.getElementById('prevWeek');
   const nextBtn = document.getElementById('nextWeek');
 
-  if (!calendarTitle || !calendarDays || !prevBtn || !nextBtn) {
-    console.warn('📅 Calendário não encontrado');
+  if (!titleEl || !daysEl || !prevBtn || !nextBtn) {
+    console.warn('📅 Calendário não inicializado (DOM ausente)');
     return;
   }
 
   // =====================================================
-  // USER / MODE
+  // PERFIL / MODO
   // =====================================================
   const user = JSON.parse(localStorage.getItem('user'));
   const MODE = user?.perfil === 'ADMIN' ? 'month' : 'week';
@@ -29,8 +29,7 @@ import { formatDateISO } from './dateUtils.js';
   // =====================================================
   // STATE
   // =====================================================
-  let currentDate = new Date();
-  let datesWithEvents = new Set();
+  let selectedDate = new Date();
 
   // =====================================================
   // HELPERS
@@ -46,8 +45,11 @@ import { formatDateISO } from './dateUtils.js';
     return new Date(date.getFullYear(), date.getMonth(), 1);
   }
 
-  function endOfMonth(date) {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  function formatTitle(date) {
+    return date.toLocaleDateString('pt-BR', {
+      month: 'long',
+      year: 'numeric'
+    });
   }
 
   function isSameDay(a, b) {
@@ -58,124 +60,93 @@ import { formatDateISO } from './dateUtils.js';
     );
   }
 
-  function formatMonthTitle(date) {
-    return date.toLocaleDateString('pt-BR', {
-      month: 'long',
-      year: 'numeric'
-    });
+  // =====================================================
+  // RENDER
+  // =====================================================
+  function render() {
+    daysEl.innerHTML = '';
+    titleEl.textContent = formatTitle(selectedDate);
+
+    MODE === 'month'
+      ? renderMonth()
+      : renderWeek();
   }
 
-  function formatWeekDay(date) {
-    return date.toLocaleDateString('pt-BR', { weekday: 'short' });
-  }
-
-  // =====================================================
-  // RENDER — SEMANA
-  // =====================================================
   function renderWeek() {
-    calendarDays.innerHTML = '';
-
-    const weekStart = startOfWeek(currentDate);
-    calendarTitle.textContent = formatMonthTitle(currentDate);
+    const start = startOfWeek(selectedDate);
 
     for (let i = 0; i < 7; i++) {
-      const day = new Date(weekStart);
-      day.setDate(weekStart.getDate() + i);
-      renderDay(day);
+      const day = new Date(start);
+      day.setDate(start.getDate() + i);
+      daysEl.appendChild(createDayButton(day));
     }
   }
 
-  // =====================================================
-  // RENDER — MÊS (ADMIN)
-  // =====================================================
   function renderMonth() {
-    calendarDays.innerHTML = '';
-
-    const start = startOfMonth(currentDate);
-    const end = endOfMonth(currentDate);
-    calendarTitle.textContent = formatMonthTitle(currentDate);
-
-    const gridStart = startOfWeek(start);
+    const start = startOfWeek(startOfMonth(selectedDate));
 
     for (let i = 0; i < 42; i++) {
-      const day = new Date(gridStart);
-      day.setDate(gridStart.getDate() + i);
-
-      const muted = day.getMonth() !== currentDate.getMonth();
-      renderDay(day, muted);
+      const day = new Date(start);
+      day.setDate(start.getDate() + i);
+      daysEl.appendChild(createDayButton(day, day.getMonth() !== selectedDate.getMonth()));
     }
   }
 
   // =====================================================
-  // RENDER DAY
+  // DAY BUTTON
   // =====================================================
-  function renderDay(day, muted = false) {
-    const dayEl = document.createElement('div');
-    dayEl.className = 'calendar-day';
-    dayEl.dataset.date = formatDateISO(day);
+  function createDayButton(day, muted = false) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'calendar-day';
+    btn.dataset.date = formatDateISO(day);
 
-    dayEl.innerHTML = `
-      <span class="week-day">${formatWeekDay(day)}</span>
-      <span class="day-number">${day.getDate()}</span>
+    btn.innerHTML = `
+      <span class="week-day">${day.toLocaleDateString('pt-BR', { weekday: 'short' })}</span>
+      <strong>${day.getDate()}</strong>
     `;
 
-    if (muted) dayEl.classList.add('muted');
-    if (isSameDay(day, new Date())) dayEl.classList.add('today');
-    if (isSameDay(day, currentDate)) dayEl.classList.add('active');
+    if (muted) btn.classList.add('muted');
+    if (isSameDay(day, new Date())) btn.classList.add('today');
+    if (isSameDay(day, selectedDate)) btn.classList.add('active');
 
-    if (datesWithEvents.has(dayEl.dataset.date)) {
-      dayEl.classList.add('has-event');
-    }
-
-    dayEl.addEventListener('click', () => {
-      currentDate = new Date(day);
+    btn.addEventListener('click', () => {
+      selectedDate = new Date(day);
       render();
-      dispatchDate();
+      dispatchSelectedDate();
     });
 
-    calendarDays.appendChild(dayEl);
+    return btn;
   }
 
   // =====================================================
   // NAVIGAÇÃO
   // =====================================================
   prevBtn.addEventListener('click', () => {
-    if (MODE === 'month') {
-      currentDate.setMonth(currentDate.getMonth() - 1);
-    } else {
-      currentDate.setDate(currentDate.getDate() - 7);
-    }
+    MODE === 'month'
+      ? selectedDate.setMonth(selectedDate.getMonth() - 1)
+      : selectedDate.setDate(selectedDate.getDate() - 7);
     render();
-    dispatchDate();
+    dispatchSelectedDate();
   });
 
   nextBtn.addEventListener('click', () => {
-    if (MODE === 'month') {
-      currentDate.setMonth(currentDate.getMonth() + 1);
-    } else {
-      currentDate.setDate(currentDate.getDate() + 7);
-    }
+    MODE === 'month'
+      ? selectedDate.setMonth(selectedDate.getMonth() + 1)
+      : selectedDate.setDate(selectedDate.getDate() + 7);
     render();
-    dispatchDate();
+    dispatchSelectedDate();
   });
 
   // =====================================================
-  // EVENTOS EXTERNOS (DASHBOARD)
+  // DISPATCH
   // =====================================================
-  document.addEventListener('calendar:markEvents', e => {
-    datesWithEvents = new Set(e.detail.dates || []);
-    render();
-  });
-
-  // =====================================================
-  // DISPATCH DATA SELECIONADA
-  // =====================================================
-  function dispatchDate() {
+  function dispatchSelectedDate() {
     document.dispatchEvent(
       new CustomEvent('calendar:dateSelected', {
         detail: {
-          date: formatDateISO(currentDate),
-          dateObj: currentDate
+          date: formatDateISO(selectedDate),
+          dateObj: selectedDate
         }
       })
     );
@@ -184,11 +155,7 @@ import { formatDateISO } from './dateUtils.js';
   // =====================================================
   // INIT
   // =====================================================
-  function render() {
-    MODE === 'month' ? renderMonth() : renderWeek();
-  }
-
   render();
-  dispatchDate();
+  dispatchSelectedDate();
 
 })();
