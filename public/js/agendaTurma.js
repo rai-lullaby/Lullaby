@@ -1,6 +1,5 @@
 // =====================================================
-// AGENDA DA TURMA — LULLABY
-// Responsabilidade: criar evento para turma
+// AGENDA TURMA — LULLABY (ESTÁVEL)
 // =====================================================
 
 document.addEventListener('DOMContentLoaded', initAgendaTurma);
@@ -11,18 +10,24 @@ document.addEventListener('DOMContentLoaded', initAgendaTurma);
 function initAgendaTurma() {
   console.group('🧩 initAgendaTurma');
 
-  inicializarAccordion();
-  inicializarFormulario();
-
   const user = getUser();
   if (!user) {
-    console.warn('⚠️ Usuário não encontrado no storage');
+    console.warn('Usuário não encontrado no storage');
     console.groupEnd();
     return;
   }
 
-  // ADMIN pode escolher educador
-  if (user.perfil === 'ADMIN') {
+  // Inicializa apenas se existir no DOM
+  if (exists('toggleAgenda') && exists('agendaContent')) {
+    inicializarAccordion();
+  }
+
+  if (exists('formAgendaTurma')) {
+    inicializarFormulario();
+  }
+
+  // Apenas ADMIN pode carregar educadores
+  if (user.perfil === 'ADMIN' && exists('educadorId')) {
     carregarEducadores();
   }
 
@@ -33,9 +38,11 @@ function initAgendaTurma() {
 // HELPERS
 // =====================================================
 function el(id) {
-  const element = document.getElementById(id);
-  if (!element) console.warn(`⚠️ Elemento #${id} não encontrado`);
-  return element;
+  return document.getElementById(id);
+}
+
+function exists(id) {
+  return !!document.getElementById(id);
 }
 
 function getUser() {
@@ -51,7 +58,7 @@ function getToken() {
 }
 
 // =====================================================
-// ACCORDION (UI apenas)
+// ACCORDION
 // =====================================================
 function inicializarAccordion() {
   const toggle = el('toggleAgenda');
@@ -62,10 +69,7 @@ function inicializarAccordion() {
 
   toggle.addEventListener('click', () => {
     const aberto = content.classList.toggle('open');
-
-    content.style.maxHeight = aberto
-      ? `${content.scrollHeight}px`
-      : null;
+    content.style.maxHeight = aberto ? `${content.scrollHeight}px` : null;
 
     if (arrow) {
       arrow.style.transform = aberto ? 'rotate(180deg)' : 'rotate(0)';
@@ -74,45 +78,37 @@ function inicializarAccordion() {
 }
 
 // =====================================================
-// EDUCADORES (somente ADMIN)
+// EDUCADORES (ADMIN)
 // =====================================================
 async function carregarEducadores() {
   const select = el('educadorId');
   const token = getToken();
-
   if (!select || !token) return;
 
-  console.group('👩‍🏫 Carregar educadores');
+  console.log('👩‍🏫 Carregando educadores');
 
   try {
     const res = await fetch('/api/usuarios?perfil=EDUCADOR', {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    if (!res.ok) {
-      console.warn('⚠️ Não foi possível carregar educadores');
-      console.groupEnd();
-      return;
-    }
+    if (!res.ok) throw new Error('Erro ao buscar educadores');
 
     const educadores = await res.json();
 
-    select.innerHTML = '<option value="">Selecione o educador</option>';
+    select.innerHTML =
+      '<option value="">Selecione o educador</option>';
 
     educadores.forEach(({ id, nome }) => {
-      const option = document.createElement('option');
-      option.value = id;
-      option.textContent = nome;
-      select.appendChild(option);
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = nome;
+      select.appendChild(opt);
     });
 
-    console.log('✅ Educadores carregados:', educadores.length);
-
   } catch (err) {
-    console.error('❌ Erro ao carregar educadores:', err);
+    console.error('Erro ao carregar educadores:', err);
   }
-
-  console.groupEnd();
 }
 
 // =====================================================
@@ -122,23 +118,14 @@ function inicializarFormulario() {
   const form = el('formAgendaTurma');
   if (!form) return;
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', async e => {
     e.preventDefault();
 
-    console.group('📝 Submit evento turma');
-
     const payload = montarPayload();
-    if (!payload) {
-      console.groupEnd();
-      return;
-    }
+    if (!payload) return;
 
-    const sucesso = await salvarEvento(payload);
-    if (sucesso) {
-      form.reset();
-    }
-
-    console.groupEnd();
+    const ok = await salvarEvento(payload);
+    if (ok) form.reset();
   });
 }
 
@@ -156,12 +143,18 @@ function montarPayload() {
     return null;
   }
 
-  return {
+  const payload = {
     tipo,
     descricao,
-    data_hora: dataHora,
-    educador_id: educadorId ? Number(educadorId) : null
+    data_hora: dataHora
   };
+
+  if (educadorId) {
+    payload.educador_id = Number(educadorId);
+  }
+
+  console.log('📦 Payload evento:', payload);
+  return payload;
 }
 
 // =====================================================
@@ -174,9 +167,6 @@ async function salvarEvento(payload) {
     return false;
   }
 
-  console.group('📡 POST /api/eventos/turma');
-  console.log('Payload:', payload);
-
   try {
     const res = await fetch('/api/eventos/turma', {
       method: 'POST',
@@ -187,30 +177,23 @@ async function salvarEvento(payload) {
       body: JSON.stringify(payload)
     });
 
-    console.log('Status:', res.status);
+    if (!res.ok) throw new Error('Erro ao salvar evento');
 
-    if (!res.ok) {
-      alert('Erro ao salvar evento');
-      console.groupEnd();
-      return false;
-    }
+    const eventoCriado = await res.json();
+    console.log('✅ Evento criado:', eventoCriado);
 
-    alert('Evento criado com sucesso 🎉');
-
-    // 🔔 avisa o dashboard para atualizar agenda
+    // 🔄 Atualiza dashboard automaticamente
     document.dispatchEvent(
       new CustomEvent('calendar:dateSelected', {
         detail: { date: payload.data_hora }
       })
     );
 
-    console.groupEnd();
     return true;
 
   } catch (err) {
-    console.error('❌ Erro ao salvar evento:', err);
-    alert('Erro inesperado');
-    console.groupEnd();
+    console.error('Erro ao salvar evento:', err);
+    alert('Erro ao salvar evento');
     return false;
   }
 }
