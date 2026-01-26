@@ -4,47 +4,6 @@
 import { formatDateISO } from './dateUtils.js';
 
 // =====================================================
-// CONFIGURAÇÃO GLOBAL
-// =====================================================
-const TIPOS_EVENTO = {
-  ENTRADA: {
-    label: 'Entradas',
-    icon: 'log-in',
-    class: 'play'
-  },
-  SAIDA: {
-    label: 'Saídas',
-    icon: 'log-out',
-    class: 'play'
-  },
-  ALIMENTACAO: {
-    label: 'Refeições',
-    icon: 'pizza-slice',
-    class: 'food'
-  },
-  SONO: {
-    label: 'Sonecas',
-    icon: 'moon-sat',
-    class: 'sleep'
-  },
-  BRINCADEIRA: {
-    label: 'Brincadeiras',
-    icon: 'gamepad',
-    class: 'play'
-  },
-  HIGIENE: {
-    label: 'Higiene',
-    icon: 'droplet',
-    class: 'hygiene'
-  },
-  APRENDIZADO: {
-    label: 'Aprendizado',
-    icon: 'graduation-cap',
-    class: 'learn'
-  }
-};
-
-// =====================================================
 // HELPERS
 // =====================================================
 function el(id) {

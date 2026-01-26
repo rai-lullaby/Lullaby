@@ -64,8 +64,11 @@
 ===================================================== -->
 <main class="container">
 
-  <!-- VISÃO GERAL -->
-  <h2>Visão Geral</h2>
+  <!-- =========================
+   VISÃO GERAL (ADMIN)
+  ========================= -->
+  <section aria-labelledby="visao-geral-title">
+    <h2 id="visao-geral-title">Visão Geral</h2>
 
     <div class="stats">
       <div class="stat">
@@ -85,12 +88,19 @@
     </div>
   </section>
 
-  <!-- AGENDAR EVENTO -->
-  <section class="accordion">
+  <!-- =========================
+   AGENDAR EVENTO
+  ========================= -->
+  <section class="accordion" aria-labelledby="agenda-form-title">
 
-    <button class="accordion-header" id="toggleAgenda" type="button">
+    <button
+      class="accordion-header"
+      id="toggleAgenda"
+      type="button"
+      aria-expanded="false"
+    >
       <i class="iconoir-calendar"></i>
-      Agendar evento para a turma
+      <span id="agenda-form-title">Agendar evento para a turma</span>
       <span class="arrow">⌄</span>
     </button>
 
@@ -129,33 +139,22 @@
     <div class="calendar-days" id="calendarDays"></div>
   </section>
 
-  <!-- AGENDA DO DIA -->
-  <h2 class="agenda-title">⏰ Agenda do Dia</h2>
-  <section class="agenda" id="agenda"></section>
+  <!-- =========================
+   AGENDA DO DIA
+  ========================= -->
+  <section aria-labelledby="agenda-title">
+    <h2 id="agenda-title" class="agenda-title">⏰ Agenda do Dia</h2>
+    <section class="agenda" id="agenda"></section>
+  </section>
 
-  <!-- RESUMO DO DIA -->
-  <h2 class="summary-title">📋 Resumo do Dia</h2>
+  <!-- =========================
+   RESUMO DO DIA (DINÂMICO)
+  ========================= -->
+  <section aria-labelledby="summary-title">
+    <h2 id="summary-title" class="summary-title">📋 Resumo do Dia</h2>
 
-  <section class="summary">
-    <div class="card food">
-      <strong id="resumoRefeicoes">0</strong>
-      <span>Refeições</span>
-    </div>
-
-    <div class="card sleep">
-      <strong id="resumoSono">0</strong>
-      <span>Sonecas</span>
-    </div>
-
-    <div class="card play">
-      <strong id="resumoBrincadeiras">0</strong>
-      <span>Brincadeiras</span>
-    </div>
-
-    <div class="card time">
-      <strong id="resumoHorario">—</strong>
-      <span>Horário</span>
-    </div>
+    <!-- cards são gerados 100% pelo dashboard.js -->
+    <section class="summary"></section>
   </section>
 
 </main>
