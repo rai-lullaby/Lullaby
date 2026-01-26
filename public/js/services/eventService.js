@@ -1,48 +1,62 @@
 // =====================================================
-// EVENT SERVICE — API LAYER
+// EVENT SERVICE — LULLABY
+// Centraliza chamadas da API de eventos
 // =====================================================
 
-function getToken() {
-  return localStorage.getItem('token');
-}
+const BASE_HEADERS = () => ({
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${localStorage.getItem('token')}`
+});
 
-async function request(url, options = {}) {
-  const token = getToken();
+// =====================================================
+// 🔍 Buscar eventos por data (AGENDA)
+// GET /api/eventos?data=YYYY-MM-DD
+// =====================================================
+export async function buscarEventosPorData(dataISO) {
+  console.group('📡 API EVENTOS');
+  console.log('URL:', `/api/eventos?data=${dataISO}`);
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...options.headers
-    }
+  const res = await fetch(`/api/eventos?data=${dataISO}`, {
+    headers: BASE_HEADERS()
   });
 
-  const data = await res.json().catch(() => null);
-
-  console.group('🔌 API EVENTOS');
-  console.log('URL:', url);
   console.log('Status:', res.status);
-  console.log('Payload:', data);
-  console.groupEnd();
 
   if (!res.ok) {
-    throw new Error(data?.error || 'Erro na API');
+    console.groupEnd();
+    throw new Error('Erro ao buscar eventos');
   }
 
-  return data;
+  const payload = await res.json();
+  console.log('Payload:', payload);
+  console.groupEnd();
+
+  return payload;
 }
 
 // =====================================================
-// API PÚBLICA
+// ➕ Criar evento para turma
+// POST /api/eventos/turma
 // =====================================================
-export async function getEventosPorData(dataISO) {
-  return request(`/api/eventos?data=${dataISO}`);
-}
-
 export async function criarEventoTurma(payload) {
-  return request('/api/eventos/turma', {
+  console.group('📡 API CRIAR EVENTO');
+
+  const res = await fetch('/api/eventos/turma', {
     method: 'POST',
+    headers: BASE_HEADERS(),
     body: JSON.stringify(payload)
   });
+
+  console.log('Status:', res.status);
+
+  if (!res.ok) {
+    console.groupEnd();
+    throw new Error('Erro ao criar evento');
+  }
+
+  const evento = await res.json();
+  console.log('Evento criado:', evento);
+  console.groupEnd();
+
+  return evento;
 }
