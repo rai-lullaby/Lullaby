@@ -1,126 +1,13 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Lullaby | Dashboard Administrativo</title>
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="/css/dashboard.css" />
-
-  <!-- ICONOIR -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/iconoir@7.10.1/css/iconoir.css"
-  />
-</head>
-
 <body>
 
-<!-- =====================================================
- HEADER
-===================================================== -->
-<header class="header">
+  <!-- HEADER FIXO -->
+  <div id="app-header"></div>
 
-  <div class="header-left">
-    <a href="/dashboard.html" class="logo">
-      <img src="/img/logo.png" alt="Lullaby" />
-    </a>
+  <!-- CONTEÚDO DINÂMICO -->
+  <main class="container" id="app-content"></main>
 
-    <div class="school-info">
-      <span id="nomeCreche">Creche</span>
-      <span class="class-name">Admin</span>
-    </div>
-  </div>
+  <!-- FOOTER -->
+  <div id="app-footer"></div>
 
-  <nav class="menu">
-    <button>Visão Geral</button>
-    <button>Crianças</button>
-    <button>Relatórios</button>
-  </nav>
-
-  <div class="header-right">
-    <button class="notification">
-      <i class="iconoir-bell"></i>
-      <span class="badge">3</span>
-    </button>
-
-    <button id="logoutBtn" class="btn-logout">Sair</button>
-  </div>
-
-</header>
-
-<!-- =====================================================
- CONTEÚDO
-===================================================== -->
-<main class="container">
-
-  <!-- =========================
-   VISÃO GERAL
-  ========================= -->
-  <section>
-    <h2>Visão Geral</h2>
-
-    <div class="stats">
-      <div class="stat">
-        <strong id="totalUsuarios">0</strong>
-        <span>Usuários</span>
-      </div>
-
-      <div class="stat">
-        <strong id="totalCriancas">0</strong>
-        <span>Crianças</span>
-      </div>
-
-      <div class="stat">
-        <strong id="totalEventos">0</strong>
-        <span>Eventos</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================
-   CALENDÁRIO (FILTRO)
-  ========================= -->
-  <section class="calendar-card">
-    <div class="calendar-header">
-      <button id="prevWeek">‹</button>
-      <h2 id="calendarTitle">Mês / Ano</h2>
-      <button id="nextWeek">›</button>
-    </div>
-
-    <div id="calendarDays" class="calendar-days"></div>
-  </section>
-
-  <!-- =========================
-   RESUMO DO DIA (GLOBAL)
-  ========================= -->
-  <section id="summaryBox">
-    <h2>
-      <i class="iconoir-clipboard"></i>
-      Resumo do Dia
-    </h2>
-
-    <section id="summary" class="summary"></section>
-  </section>
-
-</main>
-
-<!-- =====================================================
- FOOTER
-===================================================== -->
-<footer class="footer">
-  🌙 Lullaby © 2025 — Cuidando com amor<br />
-  v<span id="appVersion">...</span>
-</footer>
-
-<!-- =====================================================
- SCRIPTS
-===================================================== -->
-<script type="module" src="/js/dateUtils.js"></script>
-<script type="module" src="/js/dashboard.js"></script>
-<script type="module" src="/js/calendario.js"></script>
-
+  <script type="module" src="/js/dashboard.js"></script>
 </body>
-</html>

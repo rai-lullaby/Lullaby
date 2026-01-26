@@ -1,62 +1,131 @@
 // =====================================================
 // EVENT SERVICE — LULLABY
-// Centraliza chamadas da API de eventos
+// Camada única de comunicação com API de eventos
 // =====================================================
 
-const BASE_HEADERS = () => ({
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${localStorage.getItem('token')}`
-});
+const API_BASE = '/api';
 
 // =====================================================
-// 🔍 Buscar eventos por data (AGENDA)
-// GET /api/eventos?data=YYYY-MM-DD
+// 🔐 AUTH
 // =====================================================
-export async function buscarEventosPorData(dataISO) {
-  console.group('📡 API EVENTOS');
-  console.log('URL:', `/api/eventos?data=${dataISO}`);
+function getToken() {
+  return localStorage.getItem('token');
+}
 
-  const res = await fetch(`/api/eventos?data=${dataISO}`, {
-    headers: BASE_HEADERS()
-  });
+function getHeaders() {
+  const token = getToken();
 
-  console.log('Status:', res.status);
-
-  if (!res.ok) {
-    console.groupEnd();
-    throw new Error('Erro ao buscar eventos');
-  }
-
-  const payload = await res.json();
-  console.log('Payload:', payload);
-  console.groupEnd();
-
-  return payload;
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`
+  };
 }
 
 // =====================================================
-// ➕ Criar evento para turma
+// 📅 BUSCAR EVENTOS POR DATA (DASHBOARD / CRIANÇA)
+// GET /api/eventos?data=YYYY-MM-DD
+// =====================================================
+export async function buscarEventosPorData(dataISO) {
+  console.group('🔌 API → buscarEventosPorData');
+  console.log('📆 Data:', dataISO);
+
+  try {
+    const res = await fetch(
+      `${API_BASE}/eventos?data=${dataISO}`,
+      { headers: getHeaders() }
+    );
+
+    console.log('📡 Status:', res.status);
+
+    if (!res.ok) {
+      console.warn('⚠️ Erro ao buscar eventos');
+      return [];
+    }
+
+    const eventos = await res.json();
+
+    console.log('📦 Eventos recebidos:', eventos);
+    console.groupEnd();
+
+    return eventos;
+
+  } catch (err) {
+    console.error('❌ Falha na API de eventos:', err);
+    console.groupEnd();
+    return [];
+  }
+}
+
+// =====================================================
+// ➕ CRIAR EVENTO PARA TURMA
 // POST /api/eventos/turma
 // =====================================================
 export async function criarEventoTurma(payload) {
-  console.group('📡 API CRIAR EVENTO');
+  console.group('🔌 API → criarEventoTurma');
+  console.log('📤 Payload enviado:', payload);
 
-  const res = await fetch('/api/eventos/turma', {
-    method: 'POST',
-    headers: BASE_HEADERS(),
-    body: JSON.stringify(payload)
-  });
+  try {
+    const res = await fetch(
+      `${API_BASE}/eventos/turma`,
+      {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(payload)
+      }
+    );
 
-  console.log('Status:', res.status);
+    console.log('📡 Status:', res.status);
 
-  if (!res.ok) {
+    if (!res.ok) {
+      const erro = await res.json().catch(() => ({}));
+      console.error('❌ Erro ao criar evento:', erro);
+      console.groupEnd();
+      return null;
+    }
+
+    const eventoCriado = await res.json();
+
+    console.log('✅ Evento criado:', eventoCriado);
     console.groupEnd();
-    throw new Error('Erro ao criar evento');
+
+    return eventoCriado;
+
+  } catch (err) {
+    console.error('❌ Falha ao criar evento:', err);
+    console.groupEnd();
+    return null;
   }
+}
 
-  const evento = await res.json();
-  console.log('Evento criado:', evento);
-  console.groupEnd();
+// =====================================================
+// ✏️ ATUALIZAR EVENTO (FUTURO)
+// PUT /api/eventos/:id
+// =====================================================
+export async function atualizarEvento(id, payload) {
+  console.group('🔌 API → atualizarEvento');
+  console.log('🆔 Evento:', id, '📤 Payload:', payload);
 
-  return evento;
+  try {
+    const res = await fetch(
+      `${API_BASE}/eventos/${id}`,
+      {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(payload)
+      }
+    );
+
+    if (!res.ok) return null;
+
+    const eventoAtualizado = await res.json();
+    console.log('✅ Evento atualizado:', eventoAtualizado);
+    console.groupEnd();
+
+    return eventoAtualizado;
+
+  } catch (err) {
+    console.error('❌ Falha ao atualizar evento:', err);
+    console.groupEnd();
+    return null;
+  }
 }
