@@ -1,6 +1,6 @@
-/* =========================
- RESET + BASE
-========================= */
+/* =====================================================
+ RESET + VARIÁVEIS
+===================================================== */
 * {
   margin: 0;
   padding: 0;
@@ -9,7 +9,7 @@
 
 :root {
   /* Backgrounds */
-  --bg-page: #fefdfb;       
+  --bg-page: #fefdfb;
   --bg-card: #ffffff;
 
   /* Core */
@@ -29,26 +29,26 @@
   --learn: #fff3cd;
 }
 
+/* =====================================================
+ BASE
+===================================================== */
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background: var(--bg-page);
   color: var(--text);
   line-height: 1.4;
-
-  /* espaço para header fixo */
   padding-top: 64px;
 }
 
-/* =========================
- HEADER (FIXO)
-========================= */
+/* =====================================================
+ HEADER
+===================================================== */
 .header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 64px;
-
   z-index: 1000;
 
   display: flex;
@@ -67,18 +67,10 @@ body {
   gap: 12px;
 }
 
-.logo {
-  font-size: 32px;
-}
-
 .logo img {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
-}
-
-.school-info h1 {
-  font-size: 18px;
 }
 
 .school-name {
@@ -91,9 +83,9 @@ body {
   color: var(--primary);
 }
 
-/* =========================
+/* =====================================================
  MENU
-========================= */
+===================================================== */
 .menu {
   display: none;
   gap: 10px;
@@ -106,16 +98,15 @@ body {
   cursor: pointer;
   padding: 6px 10px;
   border-radius: 10px;
-  transition: background .2s ease;
 }
 
 .menu button:hover {
   background: rgba(0,0,0,.05);
 }
 
-/* =========================
+/* =====================================================
  HEADER RIGHT
-========================= */
+===================================================== */
 .header-right {
   display: flex;
   align-items: center;
@@ -139,7 +130,6 @@ body {
   border-radius: 999px;
 }
 
-/* BOTÃO SAIR */
 .btn-logout {
   background: linear-gradient(135deg, var(--primary), #ff6b3d);
   color: #fff;
@@ -149,7 +139,6 @@ body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all .25s ease;
 }
 
 .btn-logout:hover {
@@ -157,22 +146,15 @@ body {
   box-shadow: 0 6px 14px rgba(255,138,91,.35);
 }
 
-.btn-logout:active {
-  transform: scale(.96);
-}
-
-/* =========================
- CONTAINER
-========================= */
+/* =====================================================
+ CONTAINER / SECTIONS
+===================================================== */
 .container {
   max-width: 1100px;
   margin: auto;
   padding: 16px;
 }
 
-/* =========================
- SECTION BASE
-========================= */
 section {
   background: var(--bg-card);
   border: 1px solid var(--border-soft);
@@ -182,34 +164,18 @@ section {
   box-shadow: var(--shadow-soft);
 }
 
-/* =========================
+/* =====================================================
  CALENDÁRIO
-========================= */
+===================================================== */
 .calendar-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-soft);
   border-radius: 20px;
-  padding: 16px;
-  box-shadow: var(--shadow-soft);
   animation: fadeUp .4s ease both;
-  margin-bottom: 20px;
 }
 
 .calendar-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
   margin-bottom: 14px;
-}
-
-.calendar-header h2 {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.calendar-nav {
-  display: flex;
-  gap: 6px;
 }
 
 .calendar-nav button {
@@ -218,16 +184,7 @@ section {
   border-radius: 10px;
   border: 1px solid var(--border-soft);
   background: var(--bg-card);
-  box-shadow: var(--shadow-soft);
-  font-size: 18px;
   cursor: pointer;
-  transition: transform .15s ease, background .2s ease;
-}
-
-.calendar-nav button:hover {
-  background: var(--primary);
-  color: white;
-  transform: scale(1.05);
 }
 
 .calendar-days {
@@ -239,20 +196,12 @@ section {
 .calendar-day {
   height: 48px;
   border-radius: 14px;
-  background: var(--bg-card);
   border: 1px solid var(--border-soft);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all .2s ease;
-}
-
-.calendar-day:hover {
-  background: rgba(0,0,0,.03);
-  box-shadow: var(--shadow-soft);
-  transform: translateY(-2px);
 }
 
 .calendar-day.today {
@@ -263,38 +212,20 @@ section {
   background: var(--primary);
   color: white;
   font-weight: 600;
-  box-shadow: 0 6px 14px rgba(255,138,91,.35);
-}
-
-.calendar-day .week-day {
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.calendar-day.active .week-day {
-  color: rgba(255,255,255,.85);
-}
-
-.calendar-day .day-number {
-  font-size: 15px;
 }
 
 .calendar-day.has-event::after {
   content: '';
   width: 6px;
   height: 6px;
-  background: var(--primary);
+  background: currentColor;
   border-radius: 50%;
   margin-top: 4px;
 }
 
-.calendar-day.active.has-event::after {
-  background: white;
-}
-
-/* =========================
- AGENDA DO DIA
-========================= */
+/* =====================================================
+ AGENDA — ESTILO APP (PROTÓTIPO)
+===================================================== */
 .agenda {
   display: flex;
   flex-direction: column;
@@ -302,68 +233,99 @@ section {
 }
 
 .agenda h3 {
-  margin: 12px 0 8px;
   font-size: 16px;
+  font-weight: 600;
   color: var(--primary);
+  margin: 16px 0 4px;
 }
 
-.event {
-  padding: 12px;
-  border-radius: 12px;
+.agenda-card {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 18px;
   background: var(--bg-card);
-  border: 1px solid var(--border-soft);
   box-shadow: var(--shadow-soft);
+  position: relative;
 }
 
-.event h4 {
-  font-size: 14px;
-  margin-bottom: 4px;
+.agenda-card::before {
+  content: '';
+  width: 6px;
+  border-radius: 6px;
+  background: currentColor;
 }
 
-.event span {
-  font-size: 12px;
+.agenda-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.agenda-icon i {
+  stroke-width: 2.2;
+}
+
+.agenda-content h4 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.agenda-time {
+  font-size: 13px;
   color: var(--muted);
 }
 
-.event p {
-  font-size: 13px;
+.agenda-content p {
   margin-top: 6px;
+  font-size: 14px;
 }
 
-/* cores por tipo */
-.event.food { background: var(--food); }
-.event.sleep { background: var(--sleep); }
-.event.play { background: var(--play); }
-.event.hygiene { background: var(--hygiene); }
-.event.learn { background: var(--learn); }
+/* =====================================================
+ CORES POR TIPO
+===================================================== */
+.agenda-card.food {
+  color: #ff8a5b;
+  background: var(--food);
+}
 
+.agenda-card.sleep {
+  color: #7b6cff;
+  background: var(--sleep);
+}
 
-/* =========================
+.agenda-card.play {
+  color: #2bbf9b;
+  background: var(--play);
+}
+
+.agenda-card.hygiene {
+  color: #4aa3df;
+  background: var(--hygiene);
+}
+
+.agenda-card.learn {
+  color: #f4b400;
+  background: var(--learn);
+}
+
+/* =====================================================
  SUMMARY
-========================= */
+===================================================== */
 .summary {
   display: grid;
-  grid-template-columns: auto 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 }
 
-.summary h2 {
-  font-size: 20px;
-}
-
-@media (max-width: 768px) {
-  .summary {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .summary h2 {
-    grid-column: 1 / -1;
-  }
-}
-
-/* =========================
+/* =====================================================
  FOOTER
-========================= */
+===================================================== */
 .footer {
   text-align: center;
   padding: 24px;
@@ -371,9 +333,9 @@ section {
   color: var(--muted);
 }
 
-/* =========================
+/* =====================================================
  ANIMAÇÕES
-========================= */
+===================================================== */
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -385,28 +347,25 @@ section {
   }
 }
 
-/* =========================
- MOBILE
-========================= */
-@media (max-width: 480px) {
-  .header {
-    height: 56px;
-    padding: 10px 14px;
+/* =====================================================
+ RESPONSIVO
+===================================================== */
+@media (max-width: 768px) {
+  .summary {
+    grid-template-columns: 1fr 1fr;
   }
+}
 
+@media (max-width: 480px) {
   body {
     padding-top: 56px;
   }
 
-  .btn-logout {
-    font-size: 13px;
-    padding: 6px 14px;
+  .header {
+    height: 56px;
   }
 }
 
-/* =========================
- DESKTOP
-========================= */
 @media (min-width: 768px) {
   .menu {
     display: flex;

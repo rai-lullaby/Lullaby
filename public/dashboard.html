@@ -8,6 +8,12 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="/css/dashboard.css" />
+
+  <!-- ICONOIR -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/iconoir@7.10.1/css/iconoir.css"
+  />
 </head>
 
 <body>
@@ -17,7 +23,6 @@
 ===================================================== -->
 <header class="header" role="banner">
 
-  <!-- ESQUERDA -->
   <div class="header-left">
     <a href="/dashboard.html" class="logo" aria-label="Lullaby">
       <img src="/img/logo.png" alt="Lullaby" />
@@ -29,24 +34,22 @@
     </div>
   </div>
 
-  <!-- MENU (desktop) -->
   <nav class="menu" aria-label="Menu principal">
-    <button type="button" id="btnAgenda">📅 <span>Agenda</span></button>
-    <button type="button" id="btnCriancas">🧒 <span>Crianças</span></button>
-    <button type="button" id="btnRecados">📝 <span>Recados</span></button>
-    <button type="button" id="btnGaleria">📷 <span>Galeria</span></button>
+    <button type="button" id="btnAgenda">Agenda</button>
+    <button type="button" id="btnCriancas">Crianças</button>
+    <button type="button" id="btnRecados">Recados</button>
+    <button type="button" id="btnGaleria">Galeria</button>
   </nav>
 
-  <!-- DIREITA -->
   <div class="header-right">
     <button class="notification" aria-label="Notificações">
-      🔔 <span class="badge" aria-hidden="true">3</span>
+      <i class="iconoir-bell"></i>
+      <span class="badge" aria-hidden="true">3</span>
     </button>
 
-    <!-- ID PADRONIZADO -->
     <button
       type="button"
-      id="logoutBtn"  //não alterar este ID
+      id="logoutBtn"
       class="btn-logout"
       aria-label="Sair do sistema"
     >
@@ -60,159 +63,124 @@
  CONTEÚDO PRINCIPAL
 ===================================================== -->
 <main class="container">
-    <h2>Visão Geral</h2>
 
-    <div class="stats">
-      <div class="stat">
-        <strong id="totalUsuarios">0</strong>
-        <span>Usuários</span>
+  <!-- VISÃO GERAL -->
+  <h2>Visão Geral</h2>
+
+  <div class="stats">
+    <div class="stat">
+      <strong id="totalUsuarios">0</strong>
+      <span>Usuários</span>
+    </div>
+
+    <div class="stat">
+      <strong id="totalCriancas">0</strong>
+      <span>Crianças</span>
+    </div>
+
+    <div class="stat">
+      <strong id="totalEventos">0</strong>
+      <span>Eventos</span>
+    </div>
+  </div>
+
+  <!-- AGENDAR EVENTO -->
+  <section class="accordion">
+
+    <button class="accordion-header" id="toggleAgenda" type="button">
+      <i class="iconoir-calendar"></i>
+      Agendar evento para a turma
+      <span class="arrow">⌄</span>
+    </button>
+
+    <div class="accordion-content" id="agendaContent">
+      <form id="formAgendaTurma">
+
+        <label for="educadorId">Educador</label>
+        <select id="educadorId">
+          <option value="">Selecione o educador</option>
+        </select>
+
+        <label for="tipoEvento">Tipo do evento</label>
+        <select id="tipoEvento" required>
+          <option value="">Selecione</option>
+          <option value="ENTRADA">Entrada</option>
+          <option value="SAIDA">Saída</option>
+          <option value="ALIMENTACAO">Alimentação</option>
+          <option value="SONO">Sono</option>
+          <option value="BRINCADEIRA">Brincadeira</option>
+          <option value="HIGIENE">Higiene</option>
+          <option value="APRENDIZADO">Aprendizado</option>
+        </select>
+
+        <label for="descricao">Descrição</label>
+        <textarea
+          id="descricao"
+          placeholder="Ex: Atividade com pintura..."
+          required
+        ></textarea>
+
+        <label for="dataHora">Data e hora</label>
+        <input type="datetime-local" id="dataHora" required />
+
+        <button type="submit" class="btn-primary">
+          Salvar evento
+        </button>
+
+      </form>
+    </div>
+
+  </section>
+
+  <!-- CALENDÁRIO -->
+  <section class="calendar-card">
+
+    <div class="calendar-header">
+      <div class="calendar-nav">
+        <button id="prevWeek" type="button" aria-label="Semana anterior">‹</button>
       </div>
 
-      <div class="stat">
-        <strong id="totalCriancas">0</strong>
-        <span>Crianças</span>
-      </div>
+      <h2 id="calendarTitle">Mês / Ano</h2>
 
-      <div class="stat">
-        <strong id="totalEventos">0</strong>
-        <span>Eventos</span>
+      <div class="calendar-nav">
+        <button id="nextWeek" type="button" aria-label="Próxima semana">›</button>
       </div>
     </div>
 
-    <!-- =========================
-     ACCORDION – AGENDAR EVENTO
-    ========================= -->
-    <section class="accordion">
-
-      <button class="accordion-header" id="toggleAgenda" type="button">
-        📅 Agendar evento para a turma
-        <span class="arrow">⌄</span>
-      </button>
-
-      <div class="accordion-content" id="agendaContent">
-        <form id="formAgendaTurma">
-
-          <label for="educadorId">Educador</label>
-          <select id="educadorId" required>
-            <option value="">Selecione o educador</option>
-          </select>
-
-          <label for="tipoEvento">Tipo do evento</label>
-          <select id="tipoEvento" required>
-            <option value="">Selecione</option>
-            <option value="ENTRADA">Entrada</option>
-            <option value="SAIDA">Saída</option>
-            <option value="ALIMENTACAO">Alimentação</option>
-            <option value="SONO">Sono</option>
-            <option value="ATIVIDADE">Atividade</option>
-            <option value="BRINCADEIRA">Brincadeira</option>
-            <option value="COMPORTAMENTO">Comportamento</option>
-          </select>
-
-          <label for="descricao">Descrição</label>
-          <textarea
-            id="descricao"
-            placeholder="Ex: Atividade com pintura..."
-            required
-          ></textarea>
-
-          <label for="dataHora">Data e hora</label>
-          <input type="datetime-local" id="dataHora" required />
-
-          <button type="submit" class="btn-primary">
-            Salvar evento
-          </button>
-
-        </form>
-      </div>
-
-    </section>
-        <!-- CALENDÁRIO -->
-    <section class="calendar-card">
-
-      <div class="calendar-header">
-        <div class="calendar-nav">
-          <button id="prevWeek" type="button" aria-label="Semana anterior">‹</button>
-        </div>
-
-        <h2 id="calendarTitle">Mês / Ano</h2>
-
-        <div class="calendar-nav">
-          <button id="nextWeek" type="button" aria-label="Próxima semana">›</button>
-        </div>
-      </div>
-
-      <div class="calendar-days" id="calendarDays"></div>
-    </section>
-    
-    <section class="agenda" id="agenda"></section>
-
-
-    <!-- RESUMO -->
-    <h2 class="summary-title">📋 Resumo do Dia</h2>
-    <section class="summary">
-
-      <div class="card food">
-        🍽️
-        <strong id="resumoRefeicoes">0</strong>
-        <span>Refeições</span>
-      </div>
-
-      <div class="card sleep">
-        🌙
-        <strong id="resumoSono">0</strong>
-        <span>Sonecas</span>
-      </div>
-
-      <div class="card play">
-        🎮
-        <strong id="resumoBrincadeiras">0</strong>
-        <span>Brincadeiras</span>
-      </div>
-
-      <div class="card time">
-        ⏰
-        <strong id="resumoHorario">—</strong>
-        <span>Horário</span>
-      </div>
-
-    </section>
-
-    <!-- AGENDA -->
-    <h2 class="agenda-title">⏰ Agenda do Dia</h2>
-    <section class="agenda"></section>
-
-
-
-<!-- =====================================================
- CONTEÚDO PRINCIPAL - Separado por perfil
-===================================================== -->
-<!--<main class="container">
-
-  <!-- =========================
-   ADMIN
-  ========================= -->
-  <!--<section id="admin" hidden>
-
+    <div class="calendar-days" id="calendarDays"></div>
   </section>
 
-  <!-- =========================
-   EDUCADOR
-  ========================= -->
-  <!--<section id="educador" hidden>
+  <!-- AGENDA DO DIA -->
+  <h2 class="agenda-title">⏰ Agenda do Dia</h2>
+  <section class="agenda" id="agenda"></section>
 
-  </section>
+  <!-- RESUMO DO DIA -->
+  <h2 class="summary-title">📋 Resumo do Dia</h2>
 
-  <!-- =========================
-   RESPONSÁVEL
-  ========================= -->
-  <!--<section id="responsavel" hidden>
+  <section class="summary">
+    <div class="card food">
+      <strong id="resumoRefeicoes">0</strong>
+      <span>Refeições</span>
+    </div>
 
+    <div class="card sleep">
+      <strong id="resumoSono">0</strong>
+      <span>Sonecas</span>
+    </div>
+
+    <div class="card play">
+      <strong id="resumoBrincadeiras">0</strong>
+      <span>Brincadeiras</span>
+    </div>
+
+    <div class="card time">
+      <strong id="resumoHorario">—</strong>
+      <span>Horário</span>
+    </div>
   </section>
 
 </main>
 
-  
 <!-- =====================================================
  FOOTER
 ===================================================== -->
@@ -228,8 +196,5 @@
 <script type="module" src="/js/calendario.js"></script>
 <script type="module" src="/js/agendaTurma.js"></script>
 
-
 </body>
 </html>
-
-

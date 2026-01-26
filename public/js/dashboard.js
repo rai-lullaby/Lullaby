@@ -1,5 +1,5 @@
 // =====================================================
-// DASHBOARD.JS — LULLABY (REFATORADO)
+// DASHBOARD.JS — LULLABY 
 // =====================================================
 import { formatDateISO } from './dateUtils.js';
 
@@ -46,7 +46,6 @@ function protegerPagina() {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
     const agora = Math.floor(Date.now() / 1000);
-
     if (payload.exp < agora) {
       logout();
       return false;
@@ -66,35 +65,26 @@ if (!protegerPagina()) {
 // =====================================================
 // HEADER — CRECHE + TURMA
 // =====================================================
-const nomeCrecheEl = el('nomeCreche');
-const nomeTurmaEl = el('nomeTurma');
+el('nomeCreche') &&
+  (el('nomeCreche').textContent =
+    user?.creche?.nome || 'Ambiente Tia Bia');
 
-if (nomeCrecheEl) {
-  nomeCrecheEl.textContent = user?.creche?.nome || 'Ambiente Tia Bia';
-}
+el('nomeTurma') &&
+  (el('nomeTurma').textContent =
+    user?.turma?.nome || 'Turma');
 
-if (nomeTurmaEl) {
-  nomeTurmaEl.textContent = user?.turma?.nome || 'Turma';
-}
-
-const logoutBtn = el('logoutBtn');
-logoutBtn && logoutBtn.addEventListener('click', logout);
+el('logoutBtn')?.addEventListener('click', logout);
 
 // =====================================================
 // CONTROLE POR PERFIL
-// =====================================================
-// =====================================================
-// CONTROLE POR PERFIL (REFATORADO)
 // =====================================================
 const perfilHandlers = {
   ADMIN() {
     carregarDashboardAdmin();
   },
-
   EDUCADOR() {
     mostrarSecao('educador');
   },
-
   RESPONSAVEL() {
     mostrarSecao('responsavel');
   }
@@ -102,13 +92,10 @@ const perfilHandlers = {
 
 function mostrarSecao(id) {
   const section = el(id);
-  if (!section) return;
-  section.hidden = false;
+  if (section) section.hidden = false;
 }
 
-// executa handler do perfil, se existir
 perfilHandlers[user.perfil]?.();
-
 
 // =====================================================
 // DASHBOARD ADMIN (mock)
@@ -130,9 +117,7 @@ async function carregarAgendaPorData(date) {
 
   try {
     const res = await fetch(`/api/eventos?data=${dataISO}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     if (!res.ok) throw new Error('Erro ao buscar eventos');
@@ -142,7 +127,6 @@ async function carregarAgendaPorData(date) {
     renderAgenda(eventos);
     atualizarResumoDoDia(eventos);
 
-    // 🔔 avisa calendário para marcar dias
     document.dispatchEvent(
       new CustomEvent('calendar:markEvents', {
         detail: {
@@ -185,49 +169,85 @@ function renderAgenda(eventos = []) {
 
 function criarPeriodo(titulo, eventos) {
   const bloco = document.createElement('div');
-
   const h3 = document.createElement('h3');
   h3.textContent = titulo;
   bloco.appendChild(h3);
 
   eventos.forEach(e => bloco.appendChild(criarEventoCard(e)));
-
   return bloco;
 }
 
+// =====================================================
+// CARD DE EVENTO — ICONOIR
+// =====================================================
 function criarEventoCard(evento) {
   const article = document.createElement('article');
-  article.className = `event ${mapTipo(evento.tipo)}`;
+
+  const tipoClass = mapTipo(evento.tipo);
+  const icon = mapIcon(evento.tipo);
 
   const hora = new Date(evento.hora).toLocaleTimeString('pt-BR', {
     hour: '2-digit',
     minute: '2-digit'
   });
 
+  article.className = `agenda-card ${tipoClass}`;
+
   article.innerHTML = `
-    <h4>${evento.tipo}</h4>
-    <span>${hora}</span>
-    <p>${evento.descricao || ''}</p>
+    <div class="agenda-icon">
+      <i class="iconoir-${icon}"></i>
+    </div>
+    <div class="agenda-content">
+      <h4>${formatTipoLabel(evento.tipo)}</h4>
+      <span class="agenda-time">${hora}</span>
+      <p>${evento.descricao || ''}</p>
+    </div>
   `;
 
   return article;
 }
 
+// =====================================================
+// MAPAS (TIPO → COR / ÍCONE / LABEL)
+// =====================================================
 function mapTipo(tipo) {
-  const map = {
+  return {
     ALIMENTACAO: 'food',
     SONO: 'sleep',
     BRINCADEIRA: 'play',
     HIGIENE: 'hygiene',
-    ATIVIDADE: 'play',
-    COMPORTAMENTO: 'behavior'
-  };
+    APRENDIZADO: 'learn',
+    ENTRADA: 'play',
+    SAIDA: 'play'
+  }[tipo] || 'play';
+}
 
-  return map[tipo] || 'play';
+function mapIcon(tipo) {
+  return {
+    ALIMENTACAO: 'fork-spoon',
+    SONO: 'moon-sat',
+    BRINCADEIRA: 'gamepad',
+    HIGIENE: 'droplet',
+    APRENDIZADO: 'graduation-cap',
+    ENTRADA: 'log-in',
+    SAIDA: 'log-out'
+  }[tipo] || 'calendar';
+}
+
+function formatTipoLabel(tipo) {
+  return {
+    ALIMENTACAO: 'Alimentação',
+    SONO: 'Soneca',
+    BRINCADEIRA: 'Brincadeiras',
+    HIGIENE: 'Higiene',
+    APRENDIZADO: 'Aprendizado',
+    ENTRADA: 'Entrada',
+    SAIDA: 'Saída'
+  }[tipo] || tipo;
 }
 
 // =====================================================
-// RESUMO DO DIA — AUTOMÁTICO
+// RESUMO DO DIA
 // =====================================================
 function atualizarResumoDoDia(eventos = []) {
   const resumo = {
@@ -241,7 +261,6 @@ function atualizarResumoDoDia(eventos = []) {
 
   eventos.forEach(e => {
     resumo[e.tipo] !== undefined && resumo[e.tipo]++;
-
     const h = new Date(e.hora);
     if (!inicio || h < inicio) inicio = h;
     if (!fim || h > fim) fim = h;
@@ -249,16 +268,15 @@ function atualizarResumoDoDia(eventos = []) {
 
   el('resumoRefeicoes') && (el('resumoRefeicoes').textContent = resumo.ALIMENTACAO);
   el('resumoSono') && (el('resumoSono').textContent = resumo.SONO);
-  el('resumoBrincadeiras') && (el('resumoBrincadeiras').textContent = resumo.BRINCADEIRA);
+  el('resumoBrincadeiras') &&
+    (el('resumoBrincadeiras').textContent = resumo.BRINCADEIRA);
 
   const horarioEl = el('resumoHorario');
-  if (horarioEl && inicio && fim) {
-    horarioEl.textContent =
-      `${inicio.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} - ` +
-      `${fim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-  } else if (horarioEl) {
-    horarioEl.textContent = '—';
-  }
+  horarioEl &&
+    (horarioEl.textContent =
+      inicio && fim
+        ? `${inicio.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} - ${fim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+        : '—');
 }
 
 // =====================================================
@@ -269,6 +287,6 @@ document.addEventListener('calendar:dateSelected', e => {
 });
 
 // =====================================================
-// INIT — carrega HOJE
+// INIT
 // =====================================================
 carregarAgendaPorData(new Date());
