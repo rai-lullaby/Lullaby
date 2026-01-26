@@ -267,6 +267,71 @@ body {
 }
 
 /* =====================================================
+ CALENDÁRIO — CONTROLE POR PERFIL
+===================================================== */
+
+/* =========================
+   RESPONSÁVEL / EDUCADOR
+========================= */
+.is-user .calendar-days {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+/* cards semanais */
+.is-user .calendar-day-card {
+  min-width: 120px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid var(--border-soft);
+  background: #fff;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.is-user .calendar-day-card.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* =========================
+   ADMIN — MENSAL
+========================= */
+.is-admin .calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  overflow: hidden;
+}
+
+/* célula mensal */
+.is-admin .calendar-day {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all .2s ease;
+}
+
+.is-admin .calendar-day:hover {
+  background: var(--primary-soft);
+}
+
+.is-admin .calendar-day.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+
+/* =====================================================
  AGENDA
 ===================================================== */
 .agenda {

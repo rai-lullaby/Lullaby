@@ -1,5 +1,5 @@
 // =====================================================
-// DASHBOARD.JS — LULLABY (REFATORADO CORRETO)
+// DASHBOARD.JS — LULLABY (FINAL ESTÁVEL)
 // =====================================================
 
 import { carregarHeader } from './layout/header.js';
@@ -24,22 +24,28 @@ if (!user || !token) {
   window.location.replace('/');
 }
 
+// 👉 classe no body para controle de layout (CSS)
+document.body.classList.add(
+  user.perfil === 'ADMIN' ? 'is-admin' : 'is-user'
+);
+
 // =====================================================
 // 🧱 HELPERS
 // =====================================================
-function el(id) {
-  return document.getElementById(id);
-}
+const $ = (id) => document.getElementById(id);
 
 // =====================================================
-// 🧱 MONTA LAYOUT
+// 🧱 LAYOUT
 // =====================================================
 function montarLayoutDashboard() {
-  el('app-content').innerHTML = `
+  const app = $('app-content');
+  if (!app) return;
+
+  app.innerHTML = `
     <section class="calendar-card">
       <div class="calendar-header">
         <button id="prevWeek" aria-label="Anterior">‹</button>
-        <h2 id="calendarTitle">Calendário</h2>
+        <h2 id="calendarTitle"></h2>
         <button id="nextWeek" aria-label="Próximo">›</button>
       </div>
       <div id="calendarDays" class="calendar-days"></div>
@@ -58,35 +64,24 @@ function montarLayoutDashboard() {
 }
 
 // =====================================================
-// 📅 INICIALIZA CALENDÁRIO
+// 📅 CALENDÁRIO
 // =====================================================
 async function initCalendario() {
-  // path absoluto (obrigatório no browser)
+  // ⚠️ importa SOMENTE após o layout existir
   await import('/js/calendario.js');
 }
-
-// =====================================================
-// 🔄 ESCUTA DATA SELECIONADA
-// =====================================================
-document.addEventListener('calendar:dateSelected', async (e) => {
-  const dataISO = e.detail.date;
-
-  const eventos = await buscarEventosPorData(dataISO);
-  renderAgenda(eventos);
-  atualizarResumo(eventos);
-});
 
 // =====================================================
 // 🧾 AGENDA DO DIA
 // =====================================================
 function renderAgenda(eventos = []) {
-  const container = el('agenda');
+  const container = $('agenda');
   if (!container) return;
 
   container.innerHTML = '';
 
   if (!eventos.length) {
-    container.innerHTML = '<p>📭 Nenhum evento para este dia</p>';
+    container.innerHTML = '<p class="muted">📭 Nenhum evento neste dia</p>';
     return;
   }
 
@@ -95,12 +90,16 @@ function renderAgenda(eventos = []) {
     card.className = 'agenda-card';
 
     card.innerHTML = `
-      <strong>${ev.tipo}</strong>
-      <span>${new Date(ev.data_hora).toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit'
-      })}</span>
-      <p>${ev.descricao || ''}</p>
+      <div class="agenda-content">
+        <strong>${ev.tipo}</strong>
+        <span class="agenda-time">
+          ${new Date(ev.data_hora).toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </span>
+        ${ev.descricao ? `<p>${ev.descricao}</p>` : ''}
+      </div>
     `;
 
     container.appendChild(card);
@@ -108,7 +107,7 @@ function renderAgenda(eventos = []) {
 }
 
 // =====================================================
-// 📊 RESUMO (placeholder simples)
+// 📊 RESUMO DO DIA
 // =====================================================
 function atualizarResumo(eventos = []) {
   const container = document.querySelector('.summary');
@@ -123,14 +122,30 @@ function atualizarResumo(eventos = []) {
 }
 
 // =====================================================
+// 🔄 ESCUTA DATA DO CALENDÁRIO
+// =====================================================
+document.addEventListener('calendar:dateSelected', async (e) => {
+  const dataISO = e.detail?.date;
+  if (!dataISO) return;
+
+  const eventos = await buscarEventosPorData(dataISO);
+  renderAgenda(eventos);
+  atualizarResumo(eventos);
+});
+
+// =====================================================
 // 🧠 INIT
 // =====================================================
 async function initDashboard() {
+  console.group('📊 Dashboard Init');
+
   await carregarHeader(user);
   await carregarFooter();
 
   montarLayoutDashboard();
   await initCalendario();
+
+  console.groupEnd();
 }
 
 document.addEventListener('DOMContentLoaded', initDashboard);
