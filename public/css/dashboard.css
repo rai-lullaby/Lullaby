@@ -18,16 +18,9 @@
   --muted: #9b8f88;
 
   --border-soft: #eee8e1;
-  --shadow-soft: 0 8px 20px rgba(0,0,0,.04);
+  --shadow-soft: 0 8px 20px rgba(0,0,0,.06);
 
-  --food: #ffe3d6;
-  --sleep: #ece9ff;
-  --play: #e6f7f2;
-  --hygiene: #e3f2fd;
-  --learn: #fff3cd;
-
-  --header-height-desktop: 64px;
-  --header-height-mobile: 56px;
+  --header-height: 64px;
 }
 
 /* =====================================================
@@ -38,11 +31,11 @@ body {
   background: var(--bg-page);
   color: var(--text);
   line-height: 1.4;
-  padding-top: var(--header-height-desktop);
+  padding-top: var(--header-height);
 }
 
 /* =====================================================
- HEADER FIXO
+ HEADER
 ===================================================== */
 .header {
   position: fixed;
@@ -50,17 +43,17 @@ body {
   left: 0;
   right: 0;
 
-  height: var(--header-height-desktop);
+  height: var(--header-height);
   z-index: 1000;
 
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 
-  padding: 12px 16px;
+  padding: 0 20px;
   background: var(--bg-card);
   border-bottom: 1px solid var(--border-soft);
-  box-shadow: 0 2px 10px rgba(0,0,0,.05);
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
 }
 
 .header-left {
@@ -69,39 +62,47 @@ body {
   gap: 12px;
 }
 
+/* ✅ LOGO CORRIGIDO */
 .logo img {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
-.school-name {
-  font-size: 14px;
-  color: var(--muted);
-}
-
-.class-name {
+.school-info {
+  display: flex;
+  flex-direction: column;
   font-size: 13px;
+}
+
+.school-info span:first-child {
+  font-weight: 600;
+}
+
+.school-info span:last-child {
   color: var(--primary);
+  font-size: 12px;
 }
 
 /* =====================================================
  MENU
 ===================================================== */
 .menu {
-  display: none;
+  display: flex;
   gap: 10px;
 }
 
 .menu button {
   background: none;
-  border: none;
-  padding: 6px 10px;
+  border: 1px solid var(--border-soft);
+  padding: 6px 12px;
   border-radius: 10px;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .menu button:hover {
-  background: rgba(0,0,0,.05);
+  background: var(--primary-soft);
 }
 
 /* =====================================================
@@ -110,7 +111,7 @@ body {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .notification {
@@ -131,12 +132,11 @@ body {
 }
 
 .btn-logout {
-  background: linear-gradient(135deg, var(--primary), #ff6b3d);
+  background: var(--primary);
   color: #fff;
   border: none;
-  padding: 8px 16px;
+  padding: 6px 14px;
   border-radius: 999px;
-  font-weight: 600;
   cursor: pointer;
 }
 
@@ -146,7 +146,40 @@ body {
 .container {
   max-width: 1100px;
   margin: auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* =====================================================
+ CALENDÁRIO
+===================================================== */
+.calendar-card {
+  background: var(--bg-card);
+  border-radius: 18px;
   padding: 16px;
+  box-shadow: var(--shadow-soft);
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.calendar-header button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
 }
 
 /* =====================================================
@@ -155,54 +188,45 @@ body {
 .agenda {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .agenda-card {
   display: flex;
   gap: 14px;
-  padding: 16px;
-  border-radius: 18px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--bg-card);
   box-shadow: var(--shadow-soft);
-  position: relative;
   align-items: center;
 }
 
-.agenda-card::before {
-  content: '';
-  width: 6px;
-  align-self: stretch;
-  border-radius: 6px;
-  background: currentColor;
-}
-
 .agenda-icon {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 12px;
-  background: rgba(255,255,255,.7);
+  background: var(--primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .agenda-icon i {
-  font-size: 22px;
+  font-size: 20px;
+  color: var(--primary);
+}
+
+.agenda-content h4 {
+  font-size: 15px;
+}
+
+.agenda-time {
+  font-size: 13px;
+  color: var(--muted);
 }
 
 /* =====================================================
- CORES POR TIPO
-===================================================== */
-.agenda-card.food { background: var(--food); color: #ff8a5b; }
-.agenda-card.sleep { background: var(--sleep); color: #7b6cff; }
-.agenda-card.play { background: var(--play); color: #2bbf9b; }
-.agenda-card.hygiene { background: var(--hygiene); color: #4aa3df; }
-.agenda-card.learn { background: var(--learn); color: #f4b400; }
-.agenda-card.message { background: #f1f3f5; color: #495057; }
-.agenda-card.alert { background: #fff3bf; color: #f08c00; }
-
-/* =====================================================
- SUMMARY
+ RESUMO
 ===================================================== */
 .summary {
   display: grid;
@@ -212,17 +236,21 @@ body {
 
 .summary .card {
   background: var(--bg-card);
-  border: 1px solid var(--border-soft);
   border-radius: 14px;
   padding: 14px;
   text-align: center;
+  box-shadow: var(--shadow-soft);
 }
 
 .summary .card i {
-  font-size: 22px;
-  display: block;
+  font-size: 20px;
   margin-bottom: 6px;
   color: var(--primary);
+}
+
+.summary .card strong {
+  display: block;
+  font-size: 18px;
 }
 
 /* =====================================================
@@ -230,7 +258,7 @@ body {
 ===================================================== */
 .footer {
   text-align: center;
-  padding: 24px;
+  padding: 20px;
   font-size: 13px;
   color: var(--muted);
 }
@@ -238,22 +266,12 @@ body {
 /* =====================================================
  RESPONSIVO
 ===================================================== */
-@media (min-width: 768px) {
+@media (max-width: 768px) {
   .menu {
-    display: flex;
+    display: none;
   }
 
   .container {
-    padding: 24px;
-  }
-}
-
-@media (max-width: 480px) {
-  body {
-    padding-top: var(--header-height-mobile);
-  }
-
-  .header {
-    height: var(--header-height-mobile);
+    padding: 16px;
   }
 }
