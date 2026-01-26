@@ -64,11 +64,8 @@
 ===================================================== -->
 <main class="container">
 
-  <!-- =========================
-   VISÃO GERAL
-  ========================= -->
-  <section aria-labelledby="visao-geral-title">
-    <h2 id="visao-geral-title">Visão Geral</h2>
+  <!-- VISÃO GERAL -->
+  <h2>Visão Geral</h2>
 
     <div class="stats">
       <div class="stat">
@@ -88,15 +85,14 @@
     </div>
   </section>
 
-  <!-- =========================
-   AÇÕES — NOVO EVENTO
-  ========================= -->
-  <section>
-    <div class="event-actions">
-      <button class="btn-primary" id="btnNovoEvento">
-        <i class="iconoir-plus"></i>
-        Novo Evento
-      </button>
+  <!-- AGENDAR EVENTO -->
+  <section class="accordion">
+
+    <button class="accordion-header" id="toggleAgenda" type="button">
+      <i class="iconoir-calendar"></i>
+      Agendar evento para a turma
+      <span class="arrow">⌄</span>
+    </button>
 
       <button class="btn-outline" id="btnEventoTurma">
         <i class="iconoir-group"></i>
@@ -112,33 +108,54 @@
 
     <div class="calendar-header">
       <div class="calendar-nav">
-        <button id="prevWeek" type="button" aria-label="Semana anterior">‹</button>
+        <button
+          id="prevWeek"
+          type="button"
+          aria-label="Semana anterior"
+        >‹</button>
       </div>
 
       <h2 id="calendarTitle">Mês / Ano</h2>
 
       <div class="calendar-nav">
-        <button id="nextWeek" type="button" aria-label="Próxima semana">›</button>
+        <button
+          id="nextWeek"
+          type="button"
+          aria-label="Próxima semana"
+        >›</button>
       </div>
     </div>
 
     <div class="calendar-days" id="calendarDays"></div>
   </section>
 
-  <!-- =========================
-   AGENDA DO DIA
-  ========================= -->
-  <section aria-labelledby="agenda-title">
-    <h2 id="agenda-title" class="agenda-title">⏰ Agenda do Dia</h2>
-    <section class="agenda" id="agenda"></section>
-  </section>
+  <!-- AGENDA DO DIA -->
+  <h2 class="agenda-title">⏰ Agenda do Dia</h2>
+  <section class="agenda" id="agenda"></section>
 
-  <!-- =========================
-   RESUMO DO DIA
-  ========================= -->
-  <section aria-labelledby="summary-title">
-    <h2 id="summary-title" class="summary-title">📋 Resumo do Dia</h2>
-    <section class="summary"></section>
+  <!-- RESUMO DO DIA -->
+  <h2 class="summary-title">📋 Resumo do Dia</h2>
+
+  <section class="summary">
+    <div class="card food">
+      <strong id="resumoRefeicoes">0</strong>
+      <span>Refeições</span>
+    </div>
+
+    <div class="card sleep">
+      <strong id="resumoSono">0</strong>
+      <span>Sonecas</span>
+    </div>
+
+    <div class="card play">
+      <strong id="resumoBrincadeiras">0</strong>
+      <span>Brincadeiras</span>
+    </div>
+
+    <div class="card time">
+      <strong id="resumoHorario">—</strong>
+      <span>Horário</span>
+    </div>
   </section>
 
 </main>
