@@ -4,6 +4,47 @@
 import { formatDateISO } from './dateUtils.js';
 
 // =====================================================
+// CONFIGURAÇÃO GLOBAL
+// =====================================================
+const TIPOS_EVENTO = {
+  ENTRADA: {
+    label: 'Entradas',
+    icon: 'log-in',
+    class: 'play'
+  },
+  SAIDA: {
+    label: 'Saídas',
+    icon: 'log-out',
+    class: 'play'
+  },
+  ALIMENTACAO: {
+    label: 'Refeições',
+    icon: 'fork-spoon',
+    class: 'food'
+  },
+  SONO: {
+    label: 'Sonecas',
+    icon: 'moon-sat',
+    class: 'sleep'
+  },
+  BRINCADEIRA: {
+    label: 'Brincadeiras',
+    icon: 'gamepad',
+    class: 'play'
+  },
+  HIGIENE: {
+    label: 'Higiene',
+    icon: 'droplet',
+    class: 'hygiene'
+  },
+  APRENDIZADO: {
+    label: 'Aprendizado',
+    icon: 'graduation-cap',
+    class: 'learn'
+  }
+};
+
+// =====================================================
 // HELPERS
 // =====================================================
 function el(id) {
@@ -26,9 +67,6 @@ function safeJSONParse(value) {
 const token = localStorage.getItem('token');
 const user = safeJSONParse(localStorage.getItem('user'));
 
-console.log('📦 Token carregado:', !!token);
-console.log('👤 User:', user);
-
 // =====================================================
 // 🔒 AUTENTICAÇÃO
 // =====================================================
@@ -45,8 +83,7 @@ function protegerPagina() {
 
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
-    const agora = Math.floor(Date.now() / 1000);
-    if (payload.exp < agora) {
+    if (payload.exp < Math.floor(Date.now() / 1000)) {
       logout();
       return false;
     }
@@ -82,18 +119,9 @@ const perfilHandlers = {
   ADMIN() {
     carregarDashboardAdmin();
   },
-  EDUCADOR() {
-    mostrarSecao('educador');
-  },
-  RESPONSAVEL() {
-    mostrarSecao('responsavel');
-  }
+  EDUCADOR() {},
+  RESPONSAVEL() {}
 };
-
-function mostrarSecao(id) {
-  const section = el(id);
-  if (section) section.hidden = false;
-}
 
 perfilHandlers[user.perfil]?.();
 
@@ -112,8 +140,6 @@ function carregarDashboardAdmin() {
 async function carregarAgendaPorData(date) {
   const dataISO = formatDateISO(date);
   if (!dataISO) return;
-
-  console.log('📡 Buscando agenda:', dataISO);
 
   try {
     const res = await fetch(`/api/eventos?data=${dataISO}`, {
@@ -155,16 +181,21 @@ function renderAgenda(eventos = []) {
     return;
   }
 
-  const manha = [];
-  const tarde = [];
+  const periodos = {
+    Manhã: [],
+    Tarde: []
+  };
 
   eventos.forEach(e => {
-    const hora = new Date(e.hora).getHours();
-    hora < 12 ? manha.push(e) : tarde.push(e);
+    const hora = new Date(e.hora || e.data_hora).getHours();
+    hora < 12 ? periodos.Manhã.push(e) : periodos.Tarde.push(e);
   });
 
-  manha.length && container.appendChild(criarPeriodo('Manhã', manha));
-  tarde.length && container.appendChild(criarPeriodo('Tarde', tarde));
+  Object.entries(periodos).forEach(([titulo, lista]) => {
+    if (lista.length) {
+      container.appendChild(criarPeriodo(titulo, lista));
+    }
+  });
 }
 
 function criarPeriodo(titulo, eventos) {
@@ -178,27 +209,25 @@ function criarPeriodo(titulo, eventos) {
 }
 
 // =====================================================
-// CARD DE EVENTO — ICONOIR
+// CARD DE EVENTO
 // =====================================================
 function criarEventoCard(evento) {
+  const config = TIPOS_EVENTO[evento.tipo] || {};
   const article = document.createElement('article');
 
-  const tipoClass = mapTipo(evento.tipo);
-  const icon = mapIcon(evento.tipo);
+  const hora = new Date(evento.hora || evento.data_hora).toLocaleTimeString(
+    'pt-BR',
+    { hour: '2-digit', minute: '2-digit' }
+  );
 
-  const hora = new Date(evento.hora).toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-
-  article.className = `agenda-card ${tipoClass}`;
+  article.className = `agenda-card ${config.class || 'play'}`;
 
   article.innerHTML = `
     <div class="agenda-icon">
-      <i class="iconoir-${icon}"></i>
+      <i class="iconoir-${config.icon || 'calendar'}"></i>
     </div>
     <div class="agenda-content">
-      <h4>${formatTipoLabel(evento.tipo)}</h4>
+      <h4>${config.label || evento.tipo}</h4>
       <span class="agenda-time">${hora}</span>
       <p>${evento.descricao || ''}</p>
     </div>
@@ -208,75 +237,62 @@ function criarEventoCard(evento) {
 }
 
 // =====================================================
-// MAPAS (TIPO → COR / ÍCONE / LABEL)
-// =====================================================
-function mapTipo(tipo) {
-  return {
-    ALIMENTACAO: 'food',
-    SONO: 'sleep',
-    BRINCADEIRA: 'play',
-    HIGIENE: 'hygiene',
-    APRENDIZADO: 'learn',
-    ENTRADA: 'play',
-    SAIDA: 'play'
-  }[tipo] || 'play';
-}
-
-function mapIcon(tipo) {
-  return {
-    ALIMENTACAO: 'fork-spoon',
-    SONO: 'moon-sat',
-    BRINCADEIRA: 'gamepad',
-    HIGIENE: 'droplet',
-    APRENDIZADO: 'graduation-cap',
-    ENTRADA: 'log-in',
-    SAIDA: 'log-out'
-  }[tipo] || 'calendar';
-}
-
-function formatTipoLabel(tipo) {
-  return {
-    ALIMENTACAO: 'Alimentação',
-    SONO: 'Soneca',
-    BRINCADEIRA: 'Brincadeiras',
-    HIGIENE: 'Higiene',
-    APRENDIZADO: 'Aprendizado',
-    ENTRADA: 'Entrada',
-    SAIDA: 'Saída'
-  }[tipo] || tipo;
-}
-
-// =====================================================
-// RESUMO DO DIA
+// RESUMO DO DIA — DINÂMICO
 // =====================================================
 function atualizarResumoDoDia(eventos = []) {
-  const resumo = {
-    ALIMENTACAO: 0,
-    SONO: 0,
-    BRINCADEIRA: 0
-  };
+  const container = document.querySelector('.summary');
+  if (!container) return;
 
+  container.innerHTML = '';
+
+  const contagem = {};
   let inicio = null;
   let fim = null;
 
   eventos.forEach(e => {
-    resumo[e.tipo] !== undefined && resumo[e.tipo]++;
-    const h = new Date(e.hora);
+    contagem[e.tipo] = (contagem[e.tipo] || 0) + 1;
+
+    const h = new Date(e.hora || e.data_hora);
     if (!inicio || h < inicio) inicio = h;
     if (!fim || h > fim) fim = h;
   });
 
-  el('resumoRefeicoes') && (el('resumoRefeicoes').textContent = resumo.ALIMENTACAO);
-  el('resumoSono') && (el('resumoSono').textContent = resumo.SONO);
-  el('resumoBrincadeiras') &&
-    (el('resumoBrincadeiras').textContent = resumo.BRINCADEIRA);
+  Object.entries(TIPOS_EVENTO).forEach(([tipo, config]) => {
+    const total = contagem[tipo] || 0;
 
-  const horarioEl = el('resumoHorario');
-  horarioEl &&
-    (horarioEl.textContent =
+    const card = document.createElement('div');
+    card.className = `card ${config.class}`;
+
+    card.innerHTML = `
+      <i class="iconoir-${config.icon}"></i>
+      <strong>${total}</strong>
+      <span>${config.label}</span>
+    `;
+
+    container.appendChild(card);
+  });
+
+  // Horário
+  const cardHorario = document.createElement('div');
+  cardHorario.className = 'card time';
+
+  cardHorario.innerHTML = `
+    <i class="iconoir-clock"></i>
+    <strong>${
       inicio && fim
-        ? `${inicio.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} - ${fim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
-        : '—');
+        ? `${inicio.toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+          })} - ${fim.toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+          })}`
+        : '—'
+    }</strong>
+    <span>Horário</span>
+  `;
+
+  container.appendChild(cardHorario);
 }
 
 // =====================================================
