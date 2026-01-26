@@ -1,179 +1,90 @@
 // =====================================================
-// DASHBOARD.JS — LULLABY (ESTÁVEL)
+// DASHBOARD.JS — LULLABY (FINAL)
 // =====================================================
-
 import { formatDateISO } from './dateUtils.js';
 import { buscarEventosPorData } from './services/eventService.js';
 
 console.group('📊 Dashboard Init');
 
 // =====================================================
-// 📌 CONFIG EVENTOS (FRONTEND)
+// CONFIG
 // =====================================================
-const TIPOS_EVENTO = {
-  ENTRADA: { label: 'Entrada', icon: 'log-in', class: 'entry' },
-  SAIDA: { label: 'Saída', icon: 'log-out', class: 'exit' },
-  ALIMENTACAO: { label: 'Alimentação', icon: 'pizza-slice', class: 'food' },
-  SONECA: { label: 'Soneca', icon: 'bed', class: 'sleep' },
-  ATIVIDADE: { label: 'Atividade', icon: 'palette', class: 'activity' },
-  RECADO: { label: 'Recado', icon: 'chat-bubble', class: 'message' },
-  OCORRENCIA: { label: 'Ocorrência', icon: 'warning-triangle', class: 'alert' }
-};
-
-// =====================================================
-// 🔧 HELPERS
-// =====================================================
-const el = id => document.getElementById(id);
-
-const getUser = () => {
-  try {
-    return JSON.parse(localStorage.getItem('user'));
-  } catch {
-    return null;
-  }
-};
-
-const getToken = () => localStorage.getItem('token');
-
-// =====================================================
-// 🔐 AUTENTICAÇÃO
-// =====================================================
-const token = getToken();
-const user = getUser();
+const token = localStorage.getItem('token');
+const user = JSON.parse(localStorage.getItem('user') || 'null');
 
 console.log('🔑 Token OK:', !!token);
 console.log('👤 User:', user);
 
 if (!token || !user) {
-  console.error('❌ Sessão inválida');
+  localStorage.clear();
   window.location.replace('/');
+  throw new Error('Sessão inválida');
 }
 
 // =====================================================
-// 🧾 HEADER
+// TIPOS DE EVENTO (FRONT)
 // =====================================================
-if (el('nomeCreche')) el('nomeCreche').textContent = user?.escola?.nome || 'Creche';
-if (el('nomeTurma')) el('nomeTurma').textContent = user?.turma?.nome || 'Turma';
+const TIPOS_EVENTO = {
+  ENTRADA: { label: 'Entrada', icon: 'log-in' },
+  SAIDA: { label: 'Saída', icon: 'log-out' },
+  ALIMENTACAO: { label: 'Alimentação', icon: 'pizza-slice' },
+  SONECA: { label: 'Soneca', icon: 'bed' },
+  ATIVIDADE: { label: 'Atividade', icon: 'palette' },
+  RECADO: { label: 'Recado', icon: 'chat-bubble' },
+  OCORRENCIA: { label: 'Ocorrência', icon: 'warning-triangle' }
+};
 
-el('logoutBtn')?.addEventListener('click', () => {
+// =====================================================
+// HEADER
+// =====================================================
+const nomeCreche = document.getElementById('nomeCreche');
+const nomeTurma = document.getElementById('nomeTurma');
+
+if (nomeCreche) nomeCreche.textContent = user.escola?.nome || 'Creche';
+if (nomeTurma) nomeTurma.textContent = 'Turma';
+
+document.getElementById('logoutBtn')?.addEventListener('click', () => {
   localStorage.clear();
   window.location.replace('/');
 });
 
 // =====================================================
-// 📊 DASHBOARD ADMIN (PLACEHOLDER)
+// INIT
 // =====================================================
-if (user.perfil === 'ADMIN') {
-  el('totalUsuarios') && (el('totalUsuarios').textContent = '0');
-  el('totalCriancas') && (el('totalCriancas').textContent = '0');
-  el('totalEventos') && (el('totalEventos').textContent = '0');
-}
+initDashboard();
+console.groupEnd();
 
-// =====================================================
-// 📅 AGENDA
-// =====================================================
-async function carregarAgenda(date) {
-  const dataISO = formatDateISO(date);
-  if (!dataISO) return;
+async function initDashboard() {
+  const hoje = new Date();
+  const dataISO = formatDateISO(hoje);
 
-  console.group(`📅 Agenda ${dataISO}`);
+  console.group(`📅 Dashboard ${dataISO}`);
 
-  try {
-    const eventos = await buscarEventosPorData(dataISO);
+  const eventos = await buscarEventosPorData(dataISO);
 
-    console.log('📦 Eventos recebidos:', eventos.length);
+  console.log('📦 Eventos recebidos:', eventos.length);
 
+  // 🔥 SEMPRE atualizar resumo
+  atualizarResumoDoDia(eventos);
+
+  // 🚫 ADMIN NÃO vê agenda
+  if (user.perfil !== 'ADMIN') {
     renderAgenda(eventos);
-    atualizarResumoDoDia(eventos);
-
-    document.dispatchEvent(
-      new CustomEvent('calendar:markEvents', {
-        detail: {
-          dates: [...new Set(eventos.map(e =>
-            formatDateISO(e.data_hora)
-          ))]
-        }
-      })
-    );
-
-  } catch (err) {
-    console.error('❌ Erro ao carregar agenda:', err);
-    renderAgenda([]);
-    atualizarResumoDoDia([]);
+  } else {
+    ocultarAgenda();
   }
 
   console.groupEnd();
 }
 
 // =====================================================
-// 🗂️ RENDER AGENDA
-// =====================================================
-function renderAgenda(eventos = []) {
-  const container = el('agenda');
-  if (!container) return;
-
-  container.innerHTML = '';
-
-  if (!eventos.length) {
-    container.innerHTML = '<p>📭 Nenhum evento para este dia</p>';
-    return;
-  }
-
-  const periodos = { Manhã: [], Tarde: [] };
-
-  eventos.forEach(e => {
-    const hora = new Date(e.data_hora).getHours();
-    hora < 12 ? periodos.Manhã.push(e) : periodos.Tarde.push(e);
-  });
-
-  Object.entries(periodos).forEach(([titulo, lista]) => {
-    if (!lista.length) return;
-
-    const bloco = document.createElement('div');
-    bloco.innerHTML = `<h3>${titulo}</h3>`;
-
-    lista.forEach(ev => bloco.appendChild(criarEventoCard(ev)));
-    container.appendChild(bloco);
-  });
-}
-
-// =====================================================
-// 🧾 CARD EVENTO
-// =====================================================
-function criarEventoCard(evento) {
-  const config = TIPOS_EVENTO[evento.tipo] || {};
-  const hora = new Date(evento.data_hora).toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-
-  const article = document.createElement('article');
-  article.className = `agenda-card ${config.class || 'default'}`;
-  article.dataset.eventoId = evento.id;
-
-  article.innerHTML = `
-    <div class="agenda-icon">
-      <i class="iconoir-${config.icon || 'calendar'}"></i>
-    </div>
-    <div class="agenda-content">
-      <h4>${config.label || evento.tipo}</h4>
-      <span class="agenda-time">${hora}</span>
-      <p>${evento.descricao || ''}</p>
-    </div>
-  `;
-
-  return article;
-}
-
-// =====================================================
-// 📊 RESUMO DO DIA (ADMIN = TODAS AS CRIANÇAS)
+// RESUMO DO DIA (ADMIN GLOBAL)
 // =====================================================
 function atualizarResumoDoDia(eventos = []) {
+  console.group('📊 Resumo do Dia');
+
   const container = document.querySelector('.summary');
   if (!container) return;
-
-  console.group('📊 Resumo do Dia');
-  console.log('Eventos analisados:', eventos.length);
 
   container.innerHTML = '';
 
@@ -181,60 +92,95 @@ function atualizarResumoDoDia(eventos = []) {
   let inicio = null;
   let fim = null;
 
-  eventos.forEach(e => {
-    if (!e.tipo) return;
+  eventos.forEach(ev => {
+    contagem[ev.tipo] = (contagem[ev.tipo] || 0) + 1;
 
-    contagem[e.tipo] = (contagem[e.tipo] || 0) + 1;
-
-    const data = new Date(e.data_hora);
-    if (!inicio || data < inicio) inicio = data;
-    if (!fim || data > fim) fim = data;
+    const h = new Date(ev.data_hora);
+    if (!inicio || h < inicio) inicio = h;
+    if (!fim || h > fim) fim = h;
   });
 
+  console.log('Eventos analisados:', eventos.length);
   console.log('Contagem final:', contagem);
 
-  Object.entries(TIPOS_EVENTO).forEach(([tipo, config]) => {
+  Object.entries(TIPOS_EVENTO).forEach(([tipo, cfg]) => {
     const total = contagem[tipo] || 0;
 
     const card = document.createElement('div');
-    card.className = `card ${config.class}`;
+    card.className = 'card';
 
     card.innerHTML = `
-      <i class="iconoir-${config.icon}"></i>
+      <i class="iconoir-${cfg.icon}"></i>
       <strong>${total}</strong>
-      <span>${config.label}</span>
+      <span>${cfg.label}</span>
     `;
 
     container.appendChild(card);
   });
 
-  const cardHorario = document.createElement('div');
-  cardHorario.className = 'card time';
+  // Horário
+  const horario = document.createElement('div');
+  horario.className = 'card time';
 
-  cardHorario.innerHTML = `
+  horario.innerHTML = `
     <i class="iconoir-clock"></i>
-    <strong>${
-      inicio && fim
+    <strong>
+      ${inicio && fim
         ? `${inicio.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} -
            ${fim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
-        : '—'
-    }</strong>
+        : '—'}
+    </strong>
     <span>Horário</span>
   `;
 
-  container.appendChild(cardHorario);
+  container.appendChild(horario);
+
   console.groupEnd();
 }
 
 // =====================================================
-// 📆 CALENDÁRIO
+// AGENDA (NÃO ADMIN)
 // =====================================================
-document.addEventListener('calendar:dateSelected', e => {
-  carregarAgenda(e.detail.date || e.detail.dateObj);
-});
+function renderAgenda(eventos = []) {
+  const agenda = document.getElementById('agenda');
+  if (!agenda) return;
+
+  agenda.innerHTML = '';
+
+  if (!eventos.length) {
+    agenda.innerHTML = '<p>📭 Nenhum evento para este dia</p>';
+    return;
+  }
+
+  eventos.forEach(ev => {
+    const cfg = TIPOS_EVENTO[ev.tipo] || {};
+    const hora = new Date(ev.data_hora).toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const card = document.createElement('article');
+    card.className = 'agenda-card';
+
+    card.innerHTML = `
+      <div class="agenda-icon">
+        <i class="iconoir-${cfg.icon || 'calendar'}"></i>
+      </div>
+      <div class="agenda-content">
+        <h4>${cfg.label || ev.tipo}</h4>
+        <span>${hora}</span>
+        <p>${ev.descricao || ''}</p>
+      </div>
+    `;
+
+    agenda.appendChild(card);
+  });
+}
 
 // =====================================================
-// ▶️ INIT ÚNICO
+// OCULTAR AGENDA (ADMIN)
 // =====================================================
-carregarAgenda(new Date());
-console.groupEnd();
+function ocultarAgenda() {
+  const agendaBox = document.getElementById('agendaBox');
+  if (agendaBox) agendaBox.style.display = 'none';
+}
