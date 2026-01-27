@@ -94,7 +94,6 @@ body {
   padding: 6px 12px;
   border-radius: 10px;
   cursor: pointer;
-  font-size: 14px;
 }
 
 .menu button:hover {
@@ -114,7 +113,7 @@ body {
 }
 
 /* =====================================================
- CALENDÁRIO — BASE
+ CALENDÁRIO
 ===================================================== */
 .calendar-card {
   background: var(--bg-card);
@@ -145,17 +144,8 @@ body {
   cursor: pointer;
 }
 
-.calendar-header button::before {
-  font-family: "iconoir";
-  font-size: 20px;
-  color: var(--text);
-}
-
-#prevWeek::before { content: "‹"; }
-#nextWeek::before { content: "›"; }
-
 /* =====================================================
- CALENDÁRIO — SEMANAL (RESP / EDUC)
+ CALENDÁRIO — SEMANAL
 ===================================================== */
 .is-user .calendar-days {
   display: grid;
@@ -175,26 +165,13 @@ body {
   cursor: pointer;
 }
 
-.calendar-day-card .weekday {
-  font-size: 13px;
-  color: var(--muted);
-  text-transform: lowercase;
-}
-
-.calendar-day-card .day-number {
-  display: block;
-  font-size: 26px;
-  font-weight: 700;
-  margin-top: 6px;
-}
-
 .calendar-day-card.active {
   background: var(--primary);
   color: #fff;
 }
 
 /* =====================================================
- CALENDÁRIO — MENSAL (ADMIN)
+ CALENDÁRIO — MENSAL
 ===================================================== */
 .is-admin .calendar-days {
   display: grid;
@@ -207,7 +184,6 @@ body {
   border-radius: 12px;
   border: 1px solid var(--border-soft);
   background: #fff;
-  font-weight: 600;
   cursor: pointer;
 }
 
@@ -217,7 +193,7 @@ body {
 }
 
 /* =====================================================
- AGENDA — BASE
+ AGENDA
 ===================================================== */
 .agenda {
   display: flex;
@@ -244,106 +220,84 @@ body {
   border-radius: 6px;
 }
 
-/* ícone */
+/* ÍCONE ICONOIR — COMPATÍVEL */
 .agenda-card::after {
-  font-family: "iconoir";
-  font-size: 22px;
+  content: '';
   position: absolute;
   right: 18px;
   top: 18px;
+  width: 26px;
+  height: 26px;
   opacity: .35;
-}
 
-.agenda-title {
-  font-size: 14px;
-  letter-spacing: .4px;
-  text-transform: uppercase;
-}
+  background-color: currentColor;
 
-.agenda-time {
-  font-size: 13px;
-  color: var(--muted);
-}
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
 
-.agenda-desc {
-  margin-top: 6px;
-  font-size: 14px;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
 }
 
 /* =====================================================
- EVENTOS — CORES + ICONES (POR CLASSE)
+ EVENTOS — CORES + ÍCONES
 ===================================================== */
 
 /* ENTRADA */
 .agenda-entrada {
   background: #eaf6ff;
+  color: #4b8ec6;
 }
-.agenda-entrada::before {
-  background: #6cb6e6;
-}
+.agenda-entrada::before { background: #6cb6e6; }
 .agenda-entrada::after {
-  content: "log-in";
+  -webkit-mask-image: url("https://cdn.jsdelivr.net/npm/iconoir@7.10.1/icons/log-in.svg");
+  mask-image: url("https://cdn.jsdelivr.net/npm/iconoir@7.10.1/icons/log-in.svg");
 }
 
 /* ATIVIDADE */
 .agenda-atividade {
   background: #fff4dc;
+  color: #d49a1e;
 }
-.agenda-atividade::before {
-  background: #f5b942;
-}
+.agenda-atividade::before { background: #f5b942; }
 .agenda-atividade::after {
-  content: "palette";
+  -webkit-mask-image: url("https://cdn.jsdelivr.net/npm/iconoir@7.10.1/icons/palette.svg");
+  mask-image: url("https://cdn.jsdelivr.net/npm/iconoir@7.10.1/icons/palette.svg");
 }
 
 /* BRINCADEIRA */
 .agenda-brincadeira {
   background: #e7f5ef;
+  color: #4fa382;
 }
-.agenda-brincadeira::before {
-  background: #7fc8a9;
-}
+.agenda-brincadeira::before { background: #7fc8a9; }
 .agenda-brincadeira::after {
-  content: "gamepad";
+  -webkit-mask-image: url("https://cdn.jsdelivr.net/npm/iconoir@7.10.1/icons/gamepad.svg");
+  mask-image: url("https://cdn.jsdelivr.net/npm/iconoir@7.10.1/icons/gamepad.svg");
 }
 
 /* HIGIENE */
 .agenda-higiene {
   background: #fde9e2;
+  color: #e0704f;
 }
-.agenda-higiene::before {
-  background: #f08c6a;
-}
+.agenda-higiene::before { background: #f08c6a; }
 .agenda-higiene::after {
-  content: "droplet";
+  -webkit-mask-image: url("https://cdn.jsdelivr.net/npm/iconoir@7.10.1/icons/droplet.svg");
+  mask-image: url("https://cdn.jsdelivr.net/npm/iconoir@7.10.1/icons/droplet.svg");
 }
 
 /* SONECA */
 .agenda-soneca {
   background: #eceaf8;
+  color: #7b6fd6;
 }
-.agenda-soneca::before {
-  background: #9b8de3;
-}
+.agenda-soneca::before { background: #9b8de3; }
 .agenda-soneca::after {
-  content: "bed";
-}
-
-/* =====================================================
- RESUMO
-===================================================== */
-.summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 16px;
-}
-
-.summary .card {
-  background: var(--bg-card);
-  border-radius: 16px;
-  padding: 14px;
-  text-align: center;
-  box-shadow: var(--shadow-soft);
+  -webkit-mask-image: url("https://cdn.jsdelivr.net/npm/iconoir@7.10.1/icons/bed.svg");
+  mask-image: url("https://cdn.jsdelivr.net/npm/iconoir@7.10.1/icons/bed.svg");
 }
 
 /* =====================================================
@@ -360,11 +314,6 @@ body {
  RESPONSIVO
 ===================================================== */
 @media (max-width: 768px) {
-  .menu {
-    display: none;
-  }
-
-  .container {
-    padding: 16px;
-  }
+  .menu { display: none; }
+  .container { padding: 16px; }
 }
