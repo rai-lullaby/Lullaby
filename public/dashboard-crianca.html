@@ -9,14 +9,14 @@
   <!-- CSS -->
   <link rel="stylesheet" href="/css/dashboard.css" />
 
-  <!-- ICONOIR -->
+  <!-- ICONOIR (somente para o CSS usar via ::before) -->
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/iconoir@7.10.1/css/iconoir.css"
   />
 </head>
 
-<body>
+<body class="is-user">
 
 <!-- =====================================================
  HEADER
@@ -34,19 +34,29 @@
     </div>
   </div>
 
-  <nav class="menu">
-    <button>Agenda</button>
-    <button>Crianças</button>
-    <button>Recados</button>
+  <nav class="menu" aria-label="Menu principal">
+    <button type="button">Agenda</button>
+    <button type="button">Crianças</button>
+    <button type="button">Recados</button>
   </nav>
 
   <div class="header-right">
-    <button class="notification">
-      <i class="iconoir-bell"></i>
+    <button
+      class="notification"
+      type="button"
+      aria-label="Notificações"
+    >
       <span class="badge">3</span>
     </button>
 
-    <button id="logoutBtn" class="btn-logout">Sair</button>
+    <button
+      id="logoutBtn"
+      class="btn-logout"
+      type="button"
+      aria-label="Sair"
+    >
+      Sair
+    </button>
   </div>
 
 </header>
@@ -60,12 +70,10 @@
    FILTROS
   ========================= -->
   <section class="filters">
-    <label>
-      Criança
-      <select id="filtroCrianca">
-        <option value="">Todas</option>
-      </select>
-    </label>
+    <label for="filtroCrianca">Criança</label>
+    <select id="filtroCrianca" name="filtroCrianca">
+      <option value="">Todas</option>
+    </select>
   </section>
 
   <!-- =========================
@@ -73,9 +81,19 @@
   ========================= -->
   <section class="calendar-card">
     <div class="calendar-header">
-      <button id="prevWeek">‹</button>
+      <button
+        id="prevWeek"
+        type="button"
+        aria-label="Semana anterior"
+      >‹</button>
+
       <h2 id="calendarTitle">Mês / Ano</h2>
-      <button id="nextWeek">›</button>
+
+      <button
+        id="nextWeek"
+        type="button"
+        aria-label="Próxima semana"
+      >›</button>
     </div>
 
     <div id="calendarDays" class="calendar-days"></div>
@@ -85,8 +103,7 @@
    AGENDA DO DIA
   ========================= -->
   <section id="agendaBox">
-    <h2>
-      <i class="iconoir-clock"></i>
+    <h2 class="section-title section-title--agenda">
       Agenda do Dia
     </h2>
 
@@ -94,68 +111,8 @@
   </section>
 
   <!-- =========================
-   RESUMO DO DIA (FILTRADO)
+   RESUMO DO DIA
   ========================= -->
   <section id="summaryBox">
-    <h2>
-      <i class="iconoir-clipboard"></i>
-      Resumo do Dia
-    </h2>
-
-    <section id="summary" class="summary"></section>
-  </section>
-
-</main>
-
-<!-- =====================================================
- MODAL EVENTO
-===================================================== -->
-<div id="modalBackdrop" class="modal-backdrop hidden">
-  <div class="modal">
-
-    <header class="modal-header">
-      <h3 id="modalTitle">Novo Evento</h3>
-      <button id="closeModal">
-        <i class="iconoir-xmark"></i>
-      </button>
-    </header>
-
-    <form id="formEventoModal">
-      <label>Tipo</label>
-      <select id="modalTipoEvento"></select>
-
-      <div id="campoDinamico"></div>
-
-      <label>Data / Hora</label>
-      <input type="datetime-local" id="modalInicio" required />
-
-      <label>Observação</label>
-      <textarea id="modalDescricao"></textarea>
-
-      <footer class="modal-footer">
-        <button type="button" id="cancelModal">Cancelar</button>
-        <button type="submit">Salvar</button>
-      </footer>
-    </form>
-
-  </div>
-</div>
-
-<!-- =====================================================
- FOOTER
-===================================================== -->
-<footer class="footer">
-  🌙 Lullaby © 2025 — Cuidando com amor
-</footer>
-
-<!-- =====================================================
- SCRIPTS
-===================================================== -->
-<script type="module" src="/js/dateUtils.js"></script>
-<script type="module" src="/js/dashboard.js"></script>
-<script type="module" src="/js/calendario.js"></script>
-<script type="module" src="/js/agendaTurma.js"></script>
-<script type="module" src="/js/modalEvento.js"></script>
-
-</body>
-</html>
+    <h2 class="section-title section-title--summary">
+      Resumo do
