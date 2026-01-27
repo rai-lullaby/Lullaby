@@ -24,7 +24,7 @@ if (!user || !token) {
   window.location.replace('/');
 }
 
-// 👉 classe no body para controle de layout (CSS)
+// classe no body para controle de layout (CSS)
 document.body.classList.add(
   user.perfil === 'ADMIN' ? 'is-admin' : 'is-user'
 );
@@ -67,31 +67,25 @@ function montarLayoutDashboard() {
 // 📅 CALENDÁRIO
 // =====================================================
 async function initCalendario() {
-  // ⚠️ importa SOMENTE após o layout existir
+  // importa SOMENTE após o layout existir
   await import('/js/calendario.js');
 }
 
 // =====================================================
-// 🔄 FILTRAR CALENDÁRIO E EVENTOS POR PERFIL
+// 🔄 FILTRO DE EVENTOS POR PERFIL
 // =====================================================
-
 function filtrarEventosPorPerfil(eventos = []) {
   if (!user) return [];
 
-  // ADMIN vê tudo
-  if (user.perfil === 'ADMIN') {
-    return eventos;
-  }
+  // ADMIN → tudo
+  if (user.perfil === 'ADMIN') return eventos;
 
-  // EDUCADOR (por enquanto vê tudo da turma)
-  if (user.perfil === 'EDUCADOR') {
-    return eventos;
-  }
+  // EDUCADOR → eventos da turma (por enquanto tudo)
+  if (user.perfil === 'EDUCADOR') return eventos;
 
-  // RESPONSÁVEL → só eventos das suas crianças
+  // RESPONSÁVEL → apenas eventos das próprias crianças
   if (user.perfil === 'RESPONSAVEL') {
     const idsCriancas = user.criancas || [];
-
     return eventos.filter(ev =>
       idsCriancas.includes(ev.crianca_id)
     );
@@ -99,7 +93,6 @@ function filtrarEventosPorPerfil(eventos = []) {
 
   return [];
 }
-
 
 // =====================================================
 // 🧾 AGENDA DO DIA
@@ -111,7 +104,8 @@ function renderAgenda(eventos = []) {
   container.innerHTML = '';
 
   if (!eventos.length) {
-    container.innerHTML = '<p class="muted">📭 Nenhum evento neste dia</p>';
+    container.innerHTML =
+      '<p class="muted">📭 Nenhum evento neste dia</p>';
     return;
   }
 
@@ -152,19 +146,18 @@ function atualizarResumo(eventos = []) {
 }
 
 // =====================================================
-// 🔄 ESCUTA DATA DO CALENDÁRIO
+// 🔄 ESCUTA DATA SELECIONADA NO CALENDÁRIO
 // =====================================================
 document.addEventListener('calendar:dateSelected', async (e) => {
   const dataISO = e.detail?.date;
   if (!dataISO) return;
 
   const eventos = await buscarEventosPorData(dataISO);
-  renderAgenda(eventos);
-  atualizarResumo(eventos);
+  const eventosFiltrados = filtrarEventosPorPerfil(eventos);
+
+  renderAgenda(eventosFiltrados);
+  atualizarResumo(eventosFiltrados);
 });
-
-
-
 
 // =====================================================
 // 🧠 INIT
