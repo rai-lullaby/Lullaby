@@ -150,7 +150,7 @@ body {
 }
 
 /* =====================================================
- CALENDÁRIO (BASE)
+ CALENDÁRIO — BASE
 ===================================================== */
 .calendar-card {
   background: var(--bg-card);
@@ -180,7 +180,6 @@ body {
   background: #fff;
   font-size: 20px;
   cursor: pointer;
-  transition: background .2s ease;
 }
 
 .calendar-header button:hover {
@@ -191,23 +190,17 @@ body {
  CALENDÁRIO — SEMANAL (RESP / EDUC)
 ===================================================== */
 .is-user .calendar-days {
-  display: flex;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(110px, 1fr);
   gap: 14px;
   overflow-x: auto;
-  padding-bottom: 6px;
-}
-
-.is-user .calendar-days::-webkit-scrollbar {
-  height: 6px;
-}
-
-.is-user .calendar-days::-webkit-scrollbar-thumb {
-  background: #e0e0e0;
-  border-radius: 10px;
+  padding-bottom: 8px;
+  scroll-snap-type: x mandatory;
 }
 
 .calendar-day-card {
-  min-width: 120px;
+  scroll-snap-align: start;
   padding: 14px;
   border-radius: 18px;
   border: 1px solid var(--border-soft);
@@ -219,7 +212,6 @@ body {
 
 .calendar-day-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,.05);
 }
 
 .calendar-day-card .weekday {
@@ -233,17 +225,15 @@ body {
   font-size: 26px;
   font-weight: 700;
   margin-top: 6px;
-  color: var(--text);
 }
 
 .calendar-day-card.active {
   background: var(--primary);
-  border-color: var(--primary);
   color: #fff;
+  border-color: var(--primary);
 }
 
-.calendar-day-card.active .weekday,
-.calendar-day-card.active .day-number {
+.calendar-day-card.active * {
   color: #fff;
 }
 
@@ -257,14 +247,12 @@ body {
 }
 
 .is-admin .calendar-day {
-  width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 12px;
   border: 1px solid var(--border-soft);
   background: #fff;
-  cursor: pointer;
   font-weight: 600;
-  transition: all .2s ease;
+  cursor: pointer;
 }
 
 .is-admin .calendar-day:hover {
@@ -278,7 +266,7 @@ body {
 }
 
 /* =====================================================
- AGENDA
+ AGENDA — BASE
 ===================================================== */
 .agenda {
   display: flex;
@@ -287,12 +275,33 @@ body {
 }
 
 .agenda-card {
-  display: flex;
-  gap: 16px;
-  padding: 16px;
+  position: relative;
+  padding: 16px 56px 16px 20px;
   border-radius: 20px;
   background: var(--bg-card);
   box-shadow: var(--shadow-soft);
+}
+
+/* faixa lateral */
+.agenda-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 6px;
+  border-radius: 6px;
+  background: var(--border-soft);
+}
+
+/* ícone iconoir */
+.agenda-card::after {
+  font-family: 'Iconoir';
+  font-size: 22px;
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  opacity: .35;
 }
 
 .agenda-content strong {
@@ -310,6 +319,65 @@ body {
 .agenda-content p {
   margin-top: 6px;
   font-size: 14px;
+}
+
+/* =====================================================
+ EVENTOS — CORES + ÍCONES (ICONOIR)
+===================================================== */
+
+/* ENTRADA */
+.agenda-card:has(strong:contains("ENTRADA")) {
+  background: #eaf6ff;
+}
+.agenda-card:has(strong:contains("ENTRADA"))::before {
+  background: #6cb6e6;
+}
+.agenda-card:has(strong:contains("ENTRADA"))::after {
+  content: '\e92b'; /* log-in */
+}
+
+/* ATIVIDADE */
+.agenda-card:has(strong:contains("ATIVIDADE")) {
+  background: #fff4dc;
+}
+.agenda-card:has(strong:contains("ATIVIDADE"))::before {
+  background: #f5b942;
+}
+.agenda-card:has(strong:contains("ATIVIDADE"))::after {
+  content: '\e8ff'; /* palette */
+}
+
+/* BRINCADEIRA */
+.agenda-card:has(strong:contains("BRINCADEIRA")) {
+  background: #e7f5ef;
+}
+.agenda-card:has(strong:contains("BRINCADEIRA"))::before {
+  background: #7fc8a9;
+}
+.agenda-card:has(strong:contains("BRINCADEIRA"))::after {
+  content: '\e8fb'; /* gamepad */
+}
+
+/* HIGIENE */
+.agenda-card:has(strong:contains("HIGIENE")) {
+  background: #fde9e2;
+}
+.agenda-card:has(strong:contains("HIGIENE"))::before {
+  background: #f08c6a;
+}
+.agenda-card:has(strong:contains("HIGIENE"))::after {
+  content: '\e8a4'; /* droplet */
+}
+
+/* SONECA */
+.agenda-card:has(strong:contains("SONECA")) {
+  background: #eceaf8;
+}
+.agenda-card:has(strong:contains("SONECA"))::before {
+  background: #9b8de3;
+}
+.agenda-card:has(strong:contains("SONECA"))::after {
+  content: '\e91f'; /* bed */
 }
 
 /* =====================================================
@@ -347,6 +415,16 @@ body {
 /* =====================================================
  RESPONSIVO
 ===================================================== */
+@media (max-width: 480px) {
+  .calendar-day-card {
+    padding: 12px;
+  }
+
+  .calendar-day-card .day-number {
+    font-size: 22px;
+  }
+}
+
 @media (max-width: 768px) {
   .menu {
     display: none;
